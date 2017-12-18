@@ -1,0 +1,19 @@
+{
+  "name": "songcheat-core",
+  "version": "1.0.0",
+  "description": "Base module for handling songcheat files. Exports classes that can be used both in Node and in browser.",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "keywords": [
+    "songcheat",
+    "music",
+    "song",
+    "scoresheet",
+    "notation",
+    "chords"
+  ],
+  "author": "Louis Antoine-Moussiaux",
+  "license": "ISC"
+}
