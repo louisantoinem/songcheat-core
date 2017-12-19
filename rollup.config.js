@@ -7,7 +7,7 @@ export default {
   {
     file: 'dist/songcheat-core.umd.js',
     format: 'umd',
-    name: 'songcheat-core'
+    name: 'songcheatCore'
   }
   ]
 }
