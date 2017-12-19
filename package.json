@@ -5,11 +5,11 @@
   "main": "dist/songcheat-core.umd.js",
   "module": "dist/songcheat-core.esm.js",
   "scripts": {
-    "clean": "rm -f dist/*.js && rm -f samples/*.json && rm -f samples/*.lyrics && rm -f samples/*.log",
+    "clean": "rm -f dist/*.js && rm -f samples/*.json && rm -f samples/*.lyrics && rm -f samples/*.log && npm run lint",
     "lint": "standard --fix src/*js *.js",
     "build": "rollup -c",
     "dev": "rollup -cw",
-    "rebuild": "npm run clean && npm run lint && npm run build && npm run cc",
+    "rebuild": "npm run clean && npm run build && npm run cc",
     "test": "node test",
     "cc": "node cc samples/*.txt dist/samples.js"
   },
