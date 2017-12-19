@@ -2,9 +2,15 @@
   "name": "songcheat-core",
   "version": "1.0.0",
   "description": "Base module for handling songcheat files. Exports classes that can be used both in Node and in browser.",
-  "main": "index.js",
+  "main": "dist/songcheat-core.umd.js",
+  "module": "dist/songcheat-core.esm.js",
   "scripts": {
-    "test": "gulp test"
+    "clean": "rm -f dist/*.js && rm -f samples/*.json && rm -f samples/*.lyrics && rm -f samples/*.log",
+    "lint": "standard --fix src/*js *.js",
+    "build": "rollup -c",
+    "dev": "rollup -cw",
+    "test": "node test",
+    "cc": "node cc samples/*.txt dist/samples.js"
   },
   "keywords": [
     "songcheat",
@@ -15,5 +21,9 @@
     "chords"
   ],
   "author": "Louis Antoine-Moussiaux",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "json-stringify-pretty-compact": "^1.0.4"
+  }
 }

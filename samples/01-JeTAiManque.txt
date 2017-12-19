@@ -1,0 +1,118 @@
+#################
+# SONG METADATA #
+#################
+
+ARTIST "Alain Bashung"
+TITLE "Je t'ai manqué"
+YEAR 2008
+DIFFICULTY 3
+VIDEO "https://www.youtube.com/watch?v=90HUdz87td4"
+TUTORIAL ""
+COMMENT "Chanson assez facile:
+- une seule ryhtmique (en shuffle)
+- uniquement des accords ouverts.
+
+Chanter en même temps demande tout de même un peu d'exercice."
+
+################
+# GUITAR SETUP #
+################
+
+TUNING standard
+CAPO 5
+
+##########################
+# KEY AND TIME SIGNATURE #
+##########################
+
+KEY G
+TIME 4/4 4 :q
+TEMPO 146
+SHUFFLE ":8"
+
+##########
+# CHORDS #
+##########
+
+CHORD Am    x02210 T02310/-
+CHORD E	    022100 023100/-
+CHORD C	    x32010 T32010/-
+CHORD G	    320003 210003/- "G with 3 fingers."
+CHORD Asus4	x02230 T02340/- "Same as Am but adding finger 4 on fret 3 of B string."
+CHORD Cadd9	x3203x T32040/- "Same as C but adding finger 4 on fret 3 of B string."
+
+###########
+# RHYTHMS #
+###########
+
+RHYTHM R1	":8 ()d ()u ()d ()u T() ()u ()d ()u"
+RHYTHM R2	":h ()dd :h (#)"
+
+#########
+# PARTS #
+#########
+
+BLOCK TAIL [R1*Am] [R1*Asus4:::::Am] [R1*C] [R1*Cadd9:::::C]
+
+PART "Chorus"   [R1*Am] [R1*E] % [R1*C:::::G] || TAIL
+PART "Verse"    [R1*Am] % [R1*C] [R1*G] || TAIL
+PART "Bridge"   [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || TAIL
+PART "Outro"    [R1*Am] [R1*E] % [R1*C:::::G] || [R2*Am]
+
+#############
+# STRUCTURE #
+#############
+
+LYRICS_UNIT ":h"
+
+STRUCTURE
+
+"Chorus" "|Je t'ai manqué ?||
+Pourquoi ?::8:Tu me|visais ?"
+
+"Verse" ":Tous nos échanges|coulaient de|source:
+Tous nos mé-|langes:cotés|en bourse."
+
+"Verse" ":Tout est brutal|botté en|touche.:
+Tout à|l'horizontal:nos envies nos|amours|nos héros:"
+
+"Chorus" "|Je t'ai manqué ?||
+Pourquoi ?::8:Tu me|visais ?"
+
+"Verse" " :Tout est extrême|limites et cônes|glacés.:
+Tout est idem|les vitrines:les|pôles opposés."
+
+"Verse" " :Dans les étoiles|ou sous la|douche.:
+Tout à|l'horizontal:nos envies nos|amours|nos héros:"
+
+"Chorus" "|Je t'ai manqué ?||
+Pourquoi ?::8:Tu me|visais ?"
+
+"Bridge" "|
+Et si l’on disait le|contraire|
+Ou si l’on ne|disait rien|
+Si l’on construisait|les phrases à l’envers|
+Ou si l’on|soulevait demain|
+Qui serait|l’adversaire ?|
+Entre nous qui serait|le plus malin ?|
+Et si l’on disait|le contraire|
+Ou si l’on ne|disait plus rien ?"
+
+"Chorus" "|Je t'ai manqué ?||
+Pourquoi ?::8:Tu me|visais ?"
+
+"Verse" " :Tout est brutal|botté en|touche.:
+Tout à|l'horizontal:nos envies nos|amours|nos héros:"
+
+"Bridge" "|
+Si l’on suivait|les voies ferroviaires|
+Qui aurait le|pied marin ?|
+Si l’on sifflait|les fonds de théière|
+Ou si l’on ne|sifflait plus !|
+Qui serait|l’adversaire ?|
+Entre nous qui serait|le plus malin ?|
+Et si l’on disait|le contraire|
+Ou si l’on ne|se disait plus rien ?"
+
+"Outro" "|Je t'ai manqué ?||
+Pourquoi ?::8:Tu me|visais ?"

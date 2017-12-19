@@ -1,0 +1,174 @@
+#################
+# SONG METADATA #
+#################
+
+ARTIST "Léo Ferré"
+TITLE "La mémoire et la mer"
+YEAR 1970
+DIFFICULTY 2
+VIDEO ""
+TUTORIAL ""
+COMMENT ""
+
+################
+# GUITAR SETUP #
+################
+
+TUNING standard
+CAPO 0
+
+##########################
+# KEY AND TIME SIGNATURE #
+##########################
+
+KEY C
+TIME 12/8 4 :qd
+TEMPO 85
+SHUFFLE ""
+
+##########
+# CHORDS #
+##########
+
+CHORD C01	  0xxCCE 000113/C "Barrer en 12 sur 3 cordes"
+CHORD C02   xxxCCC 000111/C "Enlever un doigt"
+CHORD C03   xxxBAC 000213/- "Barrer en 10 sur 2 cordes"
+CHORD C04   xxxBAA 000211/A "Enlever un doigt"
+CHORD C05   xxx98A 000213/- "Barrer en 8 sur 2 cordes"
+CHORD C06	  xxx988 000211/8 "Enlever un doigt"
+CHORD C07	  xxx778 000112/7 "Barrer en 7 sur 3 cordes"
+CHORD C08	  xxx777 000111/7 "Enlever un doigt"
+CHORD C09	  xxx557 000113/5 "Barrer en 5 sur 3 cordes"
+CHORD C10	  xxx555 000111/5 "Enlever un doigt"
+CHORD C11	  xxx435 000213/3 "Barrer en 3 sur 2 cordes"
+CHORD C12	  xxx433 000211/3 "Enlever un doigt"
+CHORD C13	  x0x213 000213/-
+CHORD C14	  2xx212 T00213/- "Fretter la corde E avc le pouce"
+CHORD C15	  0xx002 000003/- "Enlever tous les doigts sauf le 3ème"
+CHORD C16	  0xx000 000000/- "Tout à vide"
+CHORD C17	  0x425x 003140/- "On peut aussi jouer le corde e à vide au lieu de la corde B, ce qui permet de placer le doigt 2 sur la corde B pour C20A"
+CHORD C18   x5423x 043120/- "On peut ignorer le petit doigt (i.e. ne pas jouer la basse) ou la jouer sur la corde D à vide"
+CHORD C18b	xx421x 003210/- "Ca passe aussi si on reste sur C20A"
+CHORD C18c	xx420x 003200/- "Enlever un doigt, soit l'index si on vient de C20B soit le doigt 2 si on vient de C20A"
+
+###########
+# RHYTHMS #
+###########
+
+RHYTHM R1 ":8   (1)(2)(3)  (1)(2)(3)  (1)(2)(3)  (1)(2)(3)"
+RHYTHM R2	":8  (B1)(2)(3)  (1)(2)(3)  (1)(2)(3)  (1)(2)(3)"
+RHYTHM R3	":8  (B2)(3)(4)  (2)(3)(4)  (2)(3)(4)  (2)(3)(4)"
+
+#########
+# PARTS #
+#########
+
+PART "Intro" [R2*C01] %
+PART "Verse"
+
+[R1*C01] [R1*C02] [R1*C03] [R1*C04]
+[R1*C05] [R1*C06] [R1*C07] [R1*C08]
+[R1*C09] [R1*C10] [R1*C11] [R1*C12]
+
+[R2*C13] [R2*C14] [R2*C15] [R2*C16]
+[R3*C17] [R3*C18::::::C18b:::C18c]
+         [R2*0xx002:::::::::xxx003]
+         [R2*0xx002:::xxx000:::xxx003:::xxx007]
+
+#############
+# STRUCTURE #
+#############
+
+STRUCTURE
+
+"Intro" ""
+
+"Verse" "La marée je l'ai dans le cœur|
+Qui me remonte comme un signe|
+Je meurs de ma petite sœur|
+De mon enfant et de mon cygne|
+Un bateau ça dépend comment|
+On l'arrime au port de justesse|
+Il pleure de mon firmament|
+Des années-lumière et j'en laisse|
+Je suis le fantôme Jersey|
+Celui qui vient les soirs de frime|
+Te lancer la brume en baisers|
+Et te ramasser dans ses rimes|
+Comme le trémail de juillet|
+Où luisait le loup solitaire|
+Celui que je voyais briller |
+||
+Aux doigts du sable de la te-|-rre|"
+
+"Verse" "Rappelle-toi ce chien de mer|
+Que nous libérions sur parole|
+Et qui gueule dans le désert|
+Des goémons de nécropole|
+Je suis sûr que la vie est là|
+Avec ses poumons de flanelle|
+Quand il pleure de ces temps-là|
+Le froid tout gris qui nous appelle|
+Je me souviens des soirs là-bas|
+Et des sprints gagnés sur l'écume|
+Cette bave des chevaux ras|
+Au ras des rocs qui se consument|
+ô l'ange des plaisirs perdus|
+ô rumeurs d'une autre habitude|
+Mes désirs dès lors ne sont plus|
+||
+Qu'un chagrin de ma solitu-|-de|"
+
+"Verse" "Et le diable des soirs conquis|
+Avec ses pâleurs de rescousse|
+Et le squale des paradis|
+Dans le milieu mouillé de mousse|
+Reviens fille verte des fjords|
+Reviens violon des violonades|
+Dans le port fanfarent les cors|
+Pour le retour des camarades|
+ô parfum rare des salants|
+Dans le poivre feu des gerçures|
+Quand j'allais géométrisant|
+Mon âme au creux de ta blessure|
+Dans le désordre de ton cul|
+Poissé dans les draps d'aube fine|
+Je voyais un vitrail de plus|
+||
+Et toi fille verte mon|spleen|"
+
+"Verse" "Les coquillages figurants|
+Sous les sunlights cassés liquides|
+Jouent de la castagnette tant|
+Qu'on dirait l'Espagne livide|
+Dieu des granits ayez pitié|
+De leur vocation de parure|
+Quand le couteau vient s'immiscer|
+Dans leur castagnette figure|
+Et je voyais ce qu'on pressent|
+Quand on pressent l'entrevoyure|
+Entre les persiennes du sang|
+Et que les globules figurent|
+Une mathématique bleue|
+Dans cette mer jamais étale|
+D'où nous remonte peu à peu|
+||
+Cette mémoire des ét-|-oiles|"
+
+"Verse" "Cette rumeur qui vient de là|
+Sous l'arc copain où je m'aveugle|
+Ces mains qui me font du flafla|
+Ces mains ruminantes qui meuglent|
+Cette rumeur me suit longtemps|
+Comme un mendiant sous l'anathème|
+Comme l'ombre qui perd son temps|
+à dessiner mon théorème|
+Et sur mon maquillage roux|
+S'en vient battre comme une porte|
+Cette rumeur qui va debout|
+Dans la rue aux musiques mortes|
+C'est fini la mer c'est fini|
+Sur la plage le sable bêle|
+Comme des moutons d'infini|
+||
+Quand la mer bergère m'ap-|pelle|"

@@ -1,0 +1,78 @@
+#################
+# SONG METADATA #
+#################
+
+ARTIST "The Mamas and The Papas"
+TITLE "California Dreamin'"
+YEAR 1966
+DIFFICULTY 3
+VIDEO ""
+TUTORIAL ""
+COMMENT "Morceau composé de 3 phrases de 4 mesures qui tournent en boucle.
+
+Ces 3 phrases ont la même rythmique basée sur une rythmique « Ballade » (1 noire 2 croches 1 noire 2 croches) avec changement d'accord sur le 1er et le 3ème temps.
+
+On « avance d'un 1⁄2 temps » le début de la mesure suivante. La rythmique finale s'étend donc sur 2 mesures avec un changement d'accord avancé sur la dernière croche de la 1ère mesure. Cette rythmique à 2 mesures se répète 2 fois dans chaque phrase."
+
+################
+# GUITAR SETUP #
+################
+
+TUNING standard
+CAPO 4
+
+##########################
+# KEY AND TIME SIGNATURE #
+##########################
+
+KEY C
+TIME 4/4 4 :q
+TEMPO 110
+SHUFFLE ""
+
+##########
+# CHORDS #
+##########
+
+CHORD Am		  x02210 T02310/-
+CHORD G       320003 320004/- "G with 3 fingers. Finger 1 not used (kept for coming F)."
+CHORD F			  133211 134211/1
+CHORD E7sus4	020200 020300/- "Same as E but with finger 3 down one string."
+CHORD E7		  020100 020100/- "Same as E but without finger 3."
+CHORD C			  x32010 T32010/-
+
+###########
+# RHYTHMS #
+###########
+
+# 2 bars always together, accents on beats 1 and 3 (>, after d or u if any)
+RHYTHM R1	":q ()d> :8 ()d()u()d>()uT()()u :8 T()()u()d()u :q ()d :8 ()d()u"
+
+# testing rests (#) instead of tied notes
+RHYTHM R2	":q ()d> :8 ()d()u()d>()u(#)()u :8 (#)()u()d()u :q ()d :8 ()d()u"
+
+#########
+# PARTS #
+#########
+
+BLOCK A	[R1*Am:::G:::F:::::G]  [R1*E7sus4::::::E7:::::F]
+BLOCK B	[R1*C:::E7:::Am:::::F] [R1*E7sus4::::::E7]
+BLOCK C	[R2*Am:::G:::F:::::G]  [R2*E7sus4::::::E7]
+
+PART "Verse"	A || B || C || C
+
+#############
+# STRUCTURE #
+#############
+
+LYRICS_UNIT	":8"
+
+STRUCTURE
+"Verse" "brown:h:|
+:q:and:the:sky:q:is|gray:|
+:qd:I've:been__:q:for:a|walk:|
+:qd:on a:win-:q:ter:'s|day:|
+:qd:I'd:be:q:safe:and|warm:|
+:qd:if:I:q:was:in|L.A|
+:qd:Ca-:li-:q:for-:nia|drea-:q:ming|
+:qd:on:such:q:a win-:ter's|day|"

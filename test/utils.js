@@ -1,0 +1,20 @@
+let { Utils } = require('..')
+
+console.log('[TEST 1] A (2 lines) shorter than B (4 lines)')
+console.log(Utils.interlace('Text A Line 1\nText A Line 2', 'Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4'))
+console.log('\nWith separator line')
+console.log(Utils.interlace('Text A Line 1\nText A Line 2', 'Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', '---'))
+console.log('\nWith separator line and keep empty/missing lines')
+console.log(Utils.interlace('Text A Line 1\nText A Line 2', 'Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', '---', true))
+
+console.log('\n[TEST 2] B (4 lines) shorter than C (2 lines)')
+console.log(Utils.interlace('Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', 'Text C Line 1\nText C Line 2'))
+console.log('\nWith separator line')
+console.log(Utils.interlace('Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', 'Text C Line 1\nText C Line 2', '---'))
+console.log('\nWith separator line and keep empty/missing lines')
+console.log(Utils.interlace('Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', 'Text C Line 1\nText C Line 2', '---', true))
+
+console.log('\n[TEST 3] B (4 lines) shorter than C (3 lines) with one empty line C2')
+console.log(Utils.interlace('Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', 'Text C Line 1\n\nText C Line 3', '---'))
+console.log('\nWith keep empty/missing lines')
+console.log(Utils.interlace('Text B Line 1\nText B Line 2\nText B Line 3\nText B Line 4', 'Text C Line 1\n\nText C Line 3', '---', true))

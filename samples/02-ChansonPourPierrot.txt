@@ -1,0 +1,124 @@
+#################
+# SONG METADATA #
+#################
+
+ARTIST "Renaud"
+TITLE "Chanson pour Pierrot"
+YEAR 1979
+DIFFICULTY 2
+VIDEO "https://www.youtube.com/watch?v=fs5GrZC_LnM"
+TUTORIAL ""
+COMMENT "Chanson en arpèges assez facile:
+- ryhtmique unique en croches shuffle (à la Brassens)
+- uniquement des accords ouverts."
+
+################
+# GUITAR SETUP #
+################
+
+TUNING standard
+CAPO 2
+
+##########################
+# KEY AND TIME SIGNATURE #
+##########################
+
+KEY C
+TIME 2/4 2 :q
+TEMPO 76.5
+SHUFFLE ":8"
+
+##########
+# CHORDS #
+##########
+
+CHORD Em	022000 023000/-
+CHORD Am	x02210 T02310/-
+CHORD B7	x21202 P44404/-
+CHORD D	  xx0232 T00132/-
+CHORD C	  x32010 T32010/-
+
+###########
+# RHYTHMS #
+###########
+
+RHYTHM R1	":8 (B)p (3)i (12)ma (3)i"
+RHYTHM R2	":8 (B)p> :qd (#)"
+
+#########
+# PARTS #
+#########
+
+PART "Intro"	[R1*Em] [R1*C] || [R1*Em] [R1*C] || [R1*Em] [R1*Am] || [R1*Em] [R1*B7]
+PART "Verse"	[R1*Em] [R1*C] || [R1*Em] [R1*C] || [R1*Em] [R1*Am] || [R1*Em] [R1*Am] [R1*B7]
+PART "Chorus"	[R2*B7] || [R1*Em] [R1*Am] || [R1*D] [R2*D] [R1*Em]
+
+#############
+# STRUCTURE #
+#############
+
+LYRICS_UNIT	":8"
+
+STRUCTURE
+
+"Intro" ""
+
+"Verse" ":T'es pas né dans la|rue:t'es pas né dans le rui-|sseau:
+T'es pas un enfant per-|du:pas un enfant de|salaud:
+Vu qu't'es né qu'dans ma|tête:et qu'tu vis dans ma|peau:
+J'ai construit ta pla-|nète:au fond de mon cer-|veau__|"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
+
+"Verse" ":Depuis le temps que j'te|rêve:depuis le temps que j't'in-|vente:
+De pas te voir j'en|crève:mais j'te sens dans mon|ventre:
+Le jour où tu t'ra-|mènes:j'arrête de boire pro-|mis:
+Au moins toute une se-|maine:ce sera dur mais tant|pis__"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
+
+"Verse" ":Qu'tu sois fils de prin-|cesse:ou que tu sois fils de|rien:
+Tu s'ras fils de ten-|dresse:tu seras pas or-|phelin:
+Je connais pas ta|mère:mais je la cherche en|vain:
+Je connais qu'la mi-|sère d'être tout seul sur le|ch'min"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
+
+"Verse" ":Dans un coin de ma|tête:y a déjà ton trou-|sseau:
+Un jean une moby-|lette:une paire de san-|tiago:
+T'iras pas à l'é-|cole: j't'apprendrai des gros|mots:
+On jouera au foot-|ball:on ira au bis-|trot_"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
+
+"Verse" ":Tu te laveras pas les|pognes avant d'venir à|table:
+Et tu me traiteras d'i-|vrogne:quand je piquerai ton|cartable:
+Je t'apprendrai des chan-|sons:tu les trouveras dé-|biles:
+T'auras peut-être bien rai-|son mais je serai vexé quand|mê_me"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
+
+"Verse" ":Allez viens mon Pier-|rot:tu seras le chef de ma|bande:
+Je te refilerai mon cou|teau:je t'apprendrai la|truande:
+Allez viens mon co-|pain:je t'ai trouvé une ma-|man:
+Tous les trois ça sera|bien:allez viens je t'at-|tends_"
+
+"Chorus" ":Pierrot::mon|gosse:
+mon frangin mon po-|teau:
+mon copain tu m'tiens|chaud:
+|:::Pier-|rot___"
