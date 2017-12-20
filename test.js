@@ -1,7 +1,7 @@
 let { Utils } = require('.')
 
 // modules to test can be specified as command line options
-let modules = ['utils', 'chordpix']
+let modules = ['utils']
 let args = process.argv.slice(2)
 if (args.length > 0) modules = args
 

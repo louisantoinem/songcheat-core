@@ -3,12 +3,39 @@ const { promisify } = require('util')
 const fs = require('fs')
 const readFile = promisify(fs.readFile)
 const stringify = require('json-stringify-pretty-compact')
+const commandLineArgs = require('command-line-args')
+const getUsage = require('command-line-usage')
 
-let outputFile = process.argv.pop()
-let inputFiles = process.argv.slice(2)
+const optionDefinitions = [
+  { name: 'help', alias: 'h', type: Boolean, description: 'Print this usage guide.' },
+  { name: 'input', alias: 'i', type: String, multiple: true, typeLabel: '[underline]{file1} [underline]{file2} ...', defaultOption: true, description: 'The input songcheat text files to process (this is the default option).' },
+  { name: 'output', alias: 'o', type: String, typeLabel: '[underline]{file}', description: 'Optional output JSON file that will contain all parsed songcheats.' }
+]
 
-if (inputFiles.length === 0) {
-  console.warn('Usage: ' + process.argv[0] + ' ' + process.argv[1] + ' <file1> <file2> ... <samples output file>')
+const options = commandLineArgs(optionDefinitions)
+
+if (options['help'] || !options['input']) {
+  const sections = [
+    {
+      header: 'Songcheat parser and compiler',
+      content: [
+        'Takes one or several songcheat text files.',
+        '- Parser generates a .json file next to each input file',
+        '- Compiler generates .log and .lyrics files next to each input file'
+      ]
+    },
+    {
+      header: 'Synopsis',
+      content: [
+        '$ node cc.js [--output [underline]{file}] [--input] [underline]{file1} [underline]{file2} ...'
+      ]
+    },
+    {
+      header: 'Options',
+      optionList: optionDefinitions
+    }
+  ]
+  console.warn(getUsage(sections))
   process.exit(-1)
 }
 
@@ -26,7 +53,7 @@ let compiler = new Compiler(null, 1);
   const samples = []
 
   // for each file: load then compile
-  for (const file of inputFiles) {
+  for (const file of options['input']) {
     try {
       // reset log
       log = []
@@ -69,7 +96,9 @@ let compiler = new Compiler(null, 1);
     }
   }
 
-  // write samples for web prototype
-  fs.writeFileSync(outputFile, 'var samples = ' + stringify(samples))
-  console.info(outputFile + ' written successfully')
+  // write samples JSON to output file (or stdout)
+  if (options['output']) {
+    fs.writeFileSync(options['output'], stringify(samples))
+    console.info(options['output'] + ' written successfully')
+  } else console.info('No output file specified')
 })()

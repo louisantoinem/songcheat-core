@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "Base classes for handling songcheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.umd.js",
-  "module": "dist/songcheat-core.esm.js",
+  "module": "src/main.js",
   "scripts": {
-    "clean": "rm -f dist/*.js && rm -f samples/*.json && rm -f samples/*.lyrics && rm -f samples/*.log && npm run lint",
-    "lint": "standard --fix src/*js *.js",
-    "build": "rollup -c",
-    "dev": "rollup -cw",
-    "rebuild": "npm run clean && npm run build && npm run cc",
+    "clean": "rm -f dist/*.js*",
+    "lint": "standard --fix src/*js test/*.js *.js",
+    "build": "npm run clean && npm run lint && rollup -c",
+    "dev": "npm run build && rollup -cw",
     "test": "node test",
-    "cc": "node cc samples/*.txt dist/samples.js"
+    "uglify.umd": "node_modules/uglify-es/bin/uglifyjs dist/songcheat-core.umd.js --compress --mangle --source-map \"content='dist/songcheat-core.umd.js.map'\" -o dist/songcheat-core.umd.min.js",
+    "uglify.esm": "node_modules/uglify-es/bin/uglifyjs dist/songcheat-core.esm.js --compress --mangle --source-map \"content='dist/songcheat-core.esm.js.map'\" -o dist/songcheat-core.esm.min.js",
+    "uglify": "npm run uglify.umd && npm run uglify.esm",
+    "release": "npm run clean && npm run lint && rollup -c && npm run uglify"
   },
   "keywords": [
     "songcheat",
@@ -23,8 +25,15 @@
   ],
   "author": "Louis Antoine-Moussiaux",
   "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
+    "command-line-args": "^4.0.7",
+    "command-line-usage": "^4.0.2",
     "json-stringify-pretty-compact": "^1.0.4"
+  },
+  "devDependencies": {
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-json": "^2.3.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "uglify-es": "^3.2.2"
   }
 }

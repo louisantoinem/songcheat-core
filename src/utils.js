@@ -1,4 +1,8 @@
 export class Utils {
+  /**
+  * String helper functions
+  */
+
   static title (str) {
     return '\n' + this.spaces(str.length + 8, '*') + '\n*** ' + str + ' ***\n' + this.spaces(str.length + 8, '*') + '\n'
   }
@@ -13,10 +17,7 @@ export class Utils {
   }
 
   static spaces (length, char) {
-    if (isNaN(length)) throw new Error('NaN length passed to spaces')
-    if (!isFinite(length)) throw new Error('Infinite length passed to spaces')
-    if (length < 0) throw new Error('Negative length passed to spaces')
-
+    if (isNaN(length) || !isFinite(length) || length < 0) throw new Error('Length must a positive finite number')
     var s = ''
     for (var i = 0; i < length; i++) s += char || ' '
     return s
@@ -39,7 +40,7 @@ export class Utils {
   }
 
   /**
-   * Encodage GET parameters to add after ?
+   * Encode given parameters as a GET query string
    **/
 
   static encodeQueryData (data) {
