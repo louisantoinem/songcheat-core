@@ -5,7 +5,7 @@ import json from 'rollup-plugin-json'
 import pkg from './package.json'
 
 var BANNER = '/**\n' +
-  ' * SongCheat Core ' + pkg.version + ' built on ' + new Date().toISOString() + '.\n ' +
+  ' * SongCheat Core ' + pkg.version + ' built on ' + new Date().toString() + '.\n ' +
   ' * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>\n' +
   ' *\n' +
   ' * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core\n' +
