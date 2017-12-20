@@ -1,9 +1,13 @@
 /**
- * SongCheat Core 1.0.0 built on Wed Dec 20 2017 15:37:10 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Wed Dec 20 2017 18:30:00 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
  */
+
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
 
 class Utils {
   /**
@@ -492,6 +496,7 @@ class Compiler_ {
   compile (songcheat) {
     // default values for optional properties
     songcheat.mode = songcheat.mode || 'rt';
+    songcheat.lyricsMode = songcheat.lyricsMode || 's';
     songcheat.barsPerLine = songcheat.barsPerLine || 4;
     songcheat.signature.key = songcheat.signature.key || 'C';
     songcheat.lyricsUnit = songcheat.lyricsUnit || songcheat.signature.time.beatDuration;
@@ -1015,5 +1020,8 @@ class Compiler {
   }
 }
 
-export { Utils, Parser, ParserException, Compiler, CompilerException };
-//# sourceMappingURL=songcheat-core.esm.js.map
+exports.Utils = Utils;
+exports.Parser = Parser;
+exports.ParserException = ParserException;
+exports.Compiler = Compiler;
+exports.CompilerException = CompilerException;

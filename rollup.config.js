@@ -13,18 +13,11 @@ var BANNER = '/**\n' +
 
 export default {
   input: 'src/main.js',
-  sourcemap: true,
   banner: BANNER,
   output: [{
-    file: 'dist/songcheat-core.esm.js',
-    format: 'es'
-  },
-  {
-    file: 'dist/songcheat-core.umd.js',
-    format: 'umd'
-  }
-  ],
-  name: 'songcheatCore',
+    file: 'dist/songcheat-core.cjs.js',
+    format: 'cjs'
+  }],
   plugins: [
     resolve({}),
     commonjs({}),

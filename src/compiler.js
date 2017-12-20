@@ -27,6 +27,7 @@ class Compiler_ {
   compile (songcheat) {
     // default values for optional properties
     songcheat.mode = songcheat.mode || 'rt'
+    songcheat.lyricsMode = songcheat.lyricsMode || 's'
     songcheat.barsPerLine = songcheat.barsPerLine || 4
     songcheat.signature.key = songcheat.signature.key || 'C'
     songcheat.lyricsUnit = songcheat.lyricsUnit || songcheat.signature.time.beatDuration

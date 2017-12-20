@@ -2,7 +2,7 @@
   "name": "songcheat-core",
   "version": "1.0.0",
   "description": "Base classes for handling songcheat files. Can be used both in Node and in browser.",
-  "main": "dist/songcheat-core.umd.js",
+  "main": "dist/songcheat-core.cjs.js",
   "module": "src/main.js",
   "scripts": {
     "clean": "rm -f dist/*.js*",
@@ -10,10 +10,7 @@
     "build": "npm run clean && npm run lint && rollup -c",
     "dev": "npm run build && rollup -cw",
     "test": "node test",
-    "uglify.umd": "node_modules/uglify-es/bin/uglifyjs dist/songcheat-core.umd.js --compress --mangle --source-map \"content='dist/songcheat-core.umd.js.map'\" -o dist/songcheat-core.umd.min.js",
-    "uglify.esm": "node_modules/uglify-es/bin/uglifyjs dist/songcheat-core.esm.js --compress --mangle --source-map \"content='dist/songcheat-core.esm.js.map'\" -o dist/songcheat-core.esm.min.js",
-    "uglify": "npm run uglify.umd && npm run uglify.esm",
-    "release": "npm run clean && npm run lint && rollup -c && npm run uglify"
+    "release": "npm run build"
   },
   "keywords": [
     "songcheat",
@@ -33,7 +30,6 @@
   "devDependencies": {
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "uglify-es": "^3.2.2"
+    "rollup-plugin-node-resolve": "^3.0.0"
   }
 }
