@@ -15,9 +15,14 @@ var BANNER = '/**\n' +
 export default {
   input: 'src/main.js',
   banner: BANNER,
+  sourcemap: true,
   output: [{
     file: 'dist/songcheat-core.cjs.js',
     format: 'cjs'
+  },
+  {
+    file: 'dist/songcheat-core.esm.js',
+    format: 'es'
   }],
   plugins: [
     resolve({}),

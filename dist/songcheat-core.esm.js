@@ -5,10 +5,6 @@
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
  */
 
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -2376,9 +2372,5 @@ var Compiler = function () {
   return Compiler;
 }();
 
-exports.Utils = Utils;
-exports.Parser = Parser;
-exports.ParserException = ParserException;
-exports.Compiler = Compiler;
-exports.CompilerException = CompilerException;
-//# sourceMappingURL=songcheat-core.cjs.js.map
+export { Utils, Parser, ParserException, Compiler, CompilerException };
+//# sourceMappingURL=songcheat-core.esm.js.map

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Base classes for handling songcheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
-  "module": "src/main.js",
+  "module": "dist/songcheat-core.esm.js",
   "scripts": {
     "clean": "rm -f dist/*.js*",
     "lint": "standard --fix src/*js test/*.js *.js",
