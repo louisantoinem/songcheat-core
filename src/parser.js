@@ -24,7 +24,7 @@ class Parser_ {
 
     // split text into tokens
     let tokens = this.tokenize(text)
-    if (tokens.length === 0) return true
+    if (tokens.length === 0) return this.songcheat
 
     let tokenIndex = 0
     while (tokenIndex < tokens.length) {
@@ -48,6 +48,58 @@ class Parser_ {
     }
 
     return this.songcheat
+  }
+
+  getPrecedingKeyword (text, line) {
+    // reset
+    this.songcheat = {}
+    this.blocks = {}
+
+    let lastResult = null
+
+    // split text into tokens
+    let tokens = this.tokenize(text)
+    if (tokens.length === 0) return true
+
+    let tokenIndex = 0
+    while (tokenIndex < tokens.length) {
+      let token = tokens[tokenIndex]
+      let keyword = this.isKeyword(token)
+
+      if (token.line > line) return lastResult
+
+      // we must be on a keyword, otherwise it means that first token in text is not a keyword as expected
+      if (!keyword) throw new ParserException(token.line, 'expected keyword, found "' + token.value + '"')
+
+      // get all tokens until next keyword or end
+      let params = []
+      for (++tokenIndex; tokenIndex < tokens.length; ++tokenIndex) {
+        if (this.isKeyword(tokens[tokenIndex])) break
+        params.push(tokens[tokenIndex])
+      }
+
+      // use specific handler if any or default one
+      let handler = this['handle' + Utils.firstUpper(keyword)] || this.handleDefault
+      if (typeof handler === 'function') handler.call(this, token.line, keyword, params)
+      else throw new ParserException(token.line, 'non function handler found for keyword ' + keyword)
+
+      lastResult = { line: token.line, keyword: keyword, params: params, chordIndex: null, rhythmIndex: null, partIndex: null, unitIndex: null }
+
+      if (keyword === 'chord') lastResult.chordIndex = this.songcheat.chords.length - 1
+      else if (keyword === 'rhythm') lastResult.rhythmIndex = this.songcheat.rhythms.length - 1
+      else if (keyword === 'part') lastResult.partIndex = this.songcheat.parts.length - 1
+      else if (keyword === 'structure') {
+        // special case since there is no distinct UNIT keyword for each unit, but a single STRUCTURE keyword for all units
+        let paramIndex = 0
+        for (let param of params) {
+          if (param.line > line) break
+          lastResult.unitIndex = Math.floor(paramIndex / 2)
+          paramIndex++
+        }
+      }
+    }
+
+    return lastResult
   }
 
   isKeyword (token) {
@@ -109,7 +161,7 @@ class Parser_ {
   }
 
   handleChord (line, keyword, params) {
-    if (params.length < 2 || params.length > 4) throw new ParserException(line, keyword.toUpperCase() + ' expected between 2 and 4 values (name, tablature[, fretting="000000/-", comment=""]), but found ' + params.length)
+    if (params.length < 2 || params.length > 4) throw new ParserException(line, keyword.toUpperCase() + ' expected between 2 and 4 values (name, tablature[, fingering="000000/-", comment=""]), but found ' + params.length)
 
     let name = params[0].value
     let tablature = params[1].value
@@ -263,5 +315,9 @@ export class Parser {
 
   parse (songcheat) {
     return this.parser_.parse(songcheat)
+  }
+
+  getPrecedingKeyword (songcheat, line) {
+    return this.parser_.getPrecedingKeyword(songcheat, line)
   }
 }

@@ -61,6 +61,7 @@ let compiler = new Compiler(null, 1);
       // parse source and write JSON file
       const source = await readFile(file, 'utf8')
       let songcheat = parser.parse(source)
+      songcheat.source = source
       samples.push(songcheat)
       fs.writeFileSync(file.replace(/(\.[^.]*)$/, '$1') + '.json', stringify(songcheat))
       console.info('[' + file + '] JSON file written successfully')

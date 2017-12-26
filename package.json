@@ -8,7 +8,7 @@
     "clean": "rm -f dist/*.js*",
     "lint": "standard --fix src/*js test/*.js *.js",
     "build": "npm run clean && npm run lint && rollup -c",
-    "dev": "npm run build && rollup -cw",
+    "dev": "npm run lint && rollup -cw",
     "test": "node test",
     "release": "npm run build"
   },
@@ -28,6 +28,11 @@
     "json-stringify-pretty-compact": "^1.0.4"
   },
   "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-json": "^2.3.0",
     "rollup-plugin-node-resolve": "^3.0.0"

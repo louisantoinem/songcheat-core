@@ -29,8 +29,13 @@ class Compiler_ {
     songcheat.mode = songcheat.mode || 'rt'
     songcheat.lyricsMode = songcheat.lyricsMode || 's'
     songcheat.barsPerLine = songcheat.barsPerLine || 4
+    songcheat.signature = songcheat.signature || {}
     songcheat.signature.key = songcheat.signature.key || 'C'
+    songcheat.signature.time = songcheat.signature.time || { beatDuration: ':q', beatsPerBar: 4, symbol: '4/4' }
     songcheat.lyricsUnit = songcheat.lyricsUnit || songcheat.signature.time.beatDuration
+    songcheat.chords = songcheat.chords || []
+    songcheat.rhythms = songcheat.rhythms || []
+    songcheat.parts = songcheat.parts || []
 
     // deduce bar duration from signature
     songcheat.barDuration = songcheat.signature.time.beatsPerBar * Utils.duration(songcheat.signature.time.beatDuration)
@@ -39,8 +44,8 @@ class Compiler_ {
     this.resolveIds(songcheat)
 
     // default structure if not specified : one unit for each part
-    if (!songcheat.parts) {
-      songcheat.parts = []
+    if (!songcheat.structure) {
+      songcheat.structure = []
       for (let part of songcheat.parts) songcheat.structure.push({ 'part': part })
     }
 
@@ -100,48 +105,52 @@ class Compiler_ {
 
   resolveIds (songcheat) {
     let unitIndex = 0
-    for (let unit of songcheat.structure) {
-      if (!unit.part) throw new CompilerException('Part not defined for unit ' + (unitIndex + 1))
+    if (songcheat.structure) {
+      for (let unit of songcheat.structure) {
+        if (!unit.part) throw new CompilerException('Part not defined for unit ' + (unitIndex + 1))
 
       // resolve part id
-      let part = this.resolveId(songcheat.parts, unit.part)
-      if (!part) throw new CompilerException('Part ' + unit.part + ' not found')
-      unit.part = part
+        let part = this.resolveId(songcheat.parts, unit.part)
+        if (!part) throw new CompilerException('Part ' + unit.part + ' not found')
+        unit.part = part
 
-      unitIndex++
+        unitIndex++
+      }
     }
 
-    for (let part of songcheat.parts) {
-      if (!part.phrases) throw new CompilerException('Phrases not defined for part "' + part.name + '"')
-      if (!(part.phrases instanceof Array)) throw new CompilerException('Phrases defined for part "' + part.name + '" must be an Array, found: ' + (typeof songcheat.parts.phrases))
+    if (songcheat.parts) {
+      for (let part of songcheat.parts) {
+        if (!part.phrases) throw new CompilerException('Phrases not defined for part "' + part.name + '"')
+        if (!(part.phrases instanceof Array)) throw new CompilerException('Phrases defined for part "' + part.name + '" must be an Array, found: ' + (typeof songcheat.parts.phrases))
 
-      let phraseIndex = 0
-      for (let phrase of part.phrases) {
-        let barIndex = 0
-        for (let bar of phrase.bars) {
-          if (!bar.rhythm) throw new CompilerException('Rhythm not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
-          if (!bar.chords) throw new CompilerException('Chords not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
-          if (!(bar.chords instanceof Array)) throw new CompilerException('Chords defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' must be an Array, found: ' + (typeof bar.chords))
+        let phraseIndex = 0
+        for (let phrase of part.phrases) {
+          let barIndex = 0
+          for (let bar of phrase.bars) {
+            if (!bar.rhythm) throw new CompilerException('Rhythm not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
+            if (!bar.chords) throw new CompilerException('Chords not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
+            if (!(bar.chords instanceof Array)) throw new CompilerException('Chords defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' must be an Array, found: ' + (typeof bar.chords))
 
           // resolve rhythm id
-          let rhythm = this.resolveId(songcheat.rhythms, bar.rhythm)
-          if (!rhythm) throw new CompilerException('Rhythm ' + bar.rhythm + ' not found for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1))
-          bar.rhythm = rhythm
+            let rhythm = this.resolveId(songcheat.rhythms, bar.rhythm)
+            if (!rhythm) throw new CompilerException('Rhythm ' + bar.rhythm + ' not found for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1))
+            bar.rhythm = rhythm
 
           // resolved array of chord ids
-          let chords = []
-          for (let chordId of bar.chords) {
+            let chords = []
+            for (let chordId of bar.chords) {
             // resolve chord id
-            let chord = this.resolveId(songcheat.chords, chordId)
-            if (!chord) throw new CompilerException('Chord ' + chordId + ' not found for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1))
-            chords.push(chord)
+              let chord = this.resolveId(songcheat.chords, chordId)
+              if (!chord) throw new CompilerException('Chord ' + chordId + ' not found for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1))
+              chords.push(chord)
+            }
+
+            bar.chords = chords
+            barIndex++
           }
 
-          bar.chords = chords
-          barIndex++
+          phraseIndex++
         }
-
-        phraseIndex++
       }
     }
   }
