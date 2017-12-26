@@ -1,7 +1,7 @@
 export class Utils {
   /**
-  * Array helper functions
-  */
+   * Array helper functions
+   */
 
   static arraysEqual (a, b) {
     if (a === b) return true
@@ -14,8 +14,8 @@ export class Utils {
   }
 
   /**
-  * String helper functions
-  */
+   * String helper functions
+   */
 
   static title (str) {
     return '\n' + this.spaces(str.length + 8, '*') + '\n*** ' + str + ' ***\n' + this.spaces(str.length + 8, '*') + '\n'
@@ -34,6 +34,25 @@ export class Utils {
     if (isNaN(length) || !isFinite(length) || length < 0) throw new Error('Length must a positive finite number')
     var s = ''
     for (var i = 0; i < length; i++) s += char || ' '
+    return s
+  }
+
+  static replaceComposedChars (s) {
+    // fix composed UTF8 characters (not handled correctly by ACE when typing a newline after one of those)
+    // http://php.net/manual/fr/regexp.reference.unicode.php
+    // http://www.fileformat.info/info/unicode/category/Mn/list.htm
+
+    s = s.replace(/a\u0300/g, 'à')
+    s = s.replace(/e\u0300/g, 'è')
+    s = s.replace(/e\u0301/g, 'é')
+    s = s.replace(/e\u0302/g, 'ê')
+    s = s.replace(/i\u0302/g, 'î')
+    s = s.replace(/o\u0302/g, 'ô')
+    s = s.replace(/u\u0302/g, 'û')
+    s = s.replace(/a\u0302/g, 'â')
+    s = s.replace(/o\u0303/g, 'õ')
+    s = s.replace(/a\u0303/g, 'ã')
+
     return s
   }
 
