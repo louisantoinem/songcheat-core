@@ -1,5 +1,5 @@
 /**
- * SongCheat Core 1.0.0 built on Tue Dec 26 2017 02:52:13 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Tue Dec 26 2017 23:15:47 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
@@ -108,8 +108,8 @@ var Utils = function () {
     key: 'arraysEqual',
 
     /**
-    * Array helper functions
-    */
+     * Array helper functions
+     */
 
     value: function arraysEqual(a, b) {
       if (a === b) return true;
@@ -122,8 +122,8 @@ var Utils = function () {
     }
 
     /**
-    * String helper functions
-    */
+     * String helper functions
+     */
 
   }, {
     key: 'title',
@@ -151,6 +151,26 @@ var Utils = function () {
       for (var i = 0; i < length; i++) {
         s += char || ' ';
       }return s;
+    }
+  }, {
+    key: 'replaceComposedChars',
+    value: function replaceComposedChars(s) {
+      // fix composed UTF8 characters (not handled correctly by ACE when typing a newline after one of those)
+      // http://php.net/manual/fr/regexp.reference.unicode.php
+      // http://www.fileformat.info/info/unicode/category/Mn/list.htm
+
+      s = s.replace(/a\u0300/g, 'à');
+      s = s.replace(/e\u0300/g, 'è');
+      s = s.replace(/e\u0301/g, 'é');
+      s = s.replace(/e\u0302/g, 'ê');
+      s = s.replace(/i\u0302/g, 'î');
+      s = s.replace(/o\u0302/g, 'ô');
+      s = s.replace(/u\u0302/g, 'û');
+      s = s.replace(/a\u0302/g, 'â');
+      s = s.replace(/o\u0303/g, 'õ');
+      s = s.replace(/a\u0303/g, 'ã');
+
+      return s;
     }
 
     /**
@@ -806,7 +826,7 @@ var Parser_ = function () {
             var part = _step7.value;
 
             if (part.name === param.value) {
-              this.songcheat['structure'].push({ 'part': part.id, 'lyrics': params[pIndex + 1].value });
+              this.songcheat['structure'].push({ 'id': this.songcheat['structure'].length + 1, 'part': part.id, 'lyrics': params[pIndex + 1].value });
               found = true;
               break;
             }

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Base classes for handling SongCheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
+  "module.release": "dist/songcheat-core.esm.js",
   "module": "src/main.js",
   "scripts": {
     "clean": "rm -f dist/*.js*",
@@ -23,11 +24,7 @@
   "author": "Louis Antoine-Moussiaux",
   "license": "ISC",
   "dependencies": {
-    "@mohayonao/wave-tables": "git+https://github.com/mohayonao/wave-tables.git",
-    "command-line-args": "^4.0.7",
-    "command-line-usage": "^4.0.2",
-    "json-stringify-pretty-compact": "^1.0.4",
-    "readline": "^1.3.0"
+    "@mohayonao/wave-tables": "git+https://github.com/mohayonao/wave-tables.git"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -36,7 +33,6 @@
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "songcheat-samples": "file:../songcheat-samples"
+    "rollup-plugin-node-resolve": "^3.0.0"
   }
 }
