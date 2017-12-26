@@ -1,9 +1,9 @@
 {
   "name": "songcheat-core",
   "version": "1.0.0",
-  "description": "Base classes for handling songcheat files. Can be used both in Node and in browser.",
+  "description": "Base classes for handling SongCheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
-  "module": "dist/songcheat-core.esm.js",
+  "module": "src/main.js",
   "scripts": {
     "clean": "rm -f dist/*.js*",
     "lint": "standard --fix src/*js test/*.js *.js",
@@ -23,18 +23,20 @@
   "author": "Louis Antoine-Moussiaux",
   "license": "ISC",
   "dependencies": {
+    "@mohayonao/wave-tables": "git+https://github.com/mohayonao/wave-tables.git",
     "command-line-args": "^4.0.7",
     "command-line-usage": "^4.0.2",
-    "json-stringify-pretty-compact": "^1.0.4"
+    "json-stringify-pretty-compact": "^1.0.4",
+    "readline": "^1.3.0"
   },
   "devDependencies": {
-    "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "songcheat-samples": "file:../songcheat-samples"
   }
 }
