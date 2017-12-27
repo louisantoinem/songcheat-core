@@ -1,5 +1,5 @@
 /**
- * SongCheat Core 1.0.0 built on Wed Dec 27 2017 00:57:06 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Wed Dec 27 2017 02:34:04 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
@@ -387,7 +387,6 @@ var Parser_ = function () {
     classCallCheck(this, Parser_);
 
     this.songcheat = {};
-    this.blocks = {};
   }
 
   createClass(Parser_, [{
@@ -395,7 +394,6 @@ var Parser_ = function () {
     value: function parse(text) {
       // reset
       this.songcheat = {};
-      this.blocks = {};
 
       // split text into tokens
       var tokens = this.tokenize(text);
@@ -428,7 +426,6 @@ var Parser_ = function () {
     value: function getPrecedingKeyword(text, line) {
       // reset
       this.songcheat = {};
-      this.blocks = {};
 
       var lastResult = null;
 
@@ -497,7 +494,7 @@ var Parser_ = function () {
     key: 'isKeyword',
     value: function isKeyword(token) {
       var keyword = Utils.camelCase(token.value);
-      return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'block', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false;
+      return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false;
     }
   }, {
     key: 'tokenize',
@@ -637,10 +634,120 @@ var Parser_ = function () {
       this.songcheat['rhythms'].push({ 'id': this.songcheat['rhythms'].length + 1, 'name': params[0].value, 'score': params[1].value });
     }
   }, {
-    key: 'handleBlock',
-    value: function handleBlock(line, keyword, params) {
-      if (params.length < 2) throw new ParserException(line, keyword.toUpperCase() + ' expected at least 2 values (name and bar(s)), but found ' + params.length);
-      this.blocks[params[0].value] = params.slice(1);
+    key: 'readBar',
+    value: function readBar(param) {
+      var bar = { 'rhythm': null, 'chords': [] };
+      var str = param.value.substr(1, param.value.length - 2);
+      var parts = str.split(/\*|:/);
+
+      // find rhythm
+      var found = false;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = this.songcheat['rhythms'][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var rhythm = _step4.value;
+
+          if (rhythm.name === parts[0]) {
+            bar.rhythm = rhythm.id;
+            found = true;
+            break;
+          }
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+
+      if (!found) throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm');
+
+      // find chords
+      parts = parts.slice(1);
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
+
+      try {
+        for (var _iterator5 = parts[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var part = _step5.value;
+
+          // chord repeater
+          if (!part.trim()) {
+            if (bar.chords.length === 0) throw new ParserException(param.line, 'found chord repeater but there is no chord yet in bar');
+            bar.chords.push(JSON.parse(JSON.stringify(bar.chords[bar.chords.length - 1])));
+            continue;
+          }
+
+          // search for chord by its name
+          var _found = false;
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
+
+          try {
+            for (var _iterator6 = this.songcheat['chords'][Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var chord = _step6.value;
+
+              if (chord.name === part) {
+                bar.chords.push(chord.id);
+                _found = true;
+                break;
+              }
+            }
+
+            // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
+          } catch (err) {
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                _iterator6.return();
+              }
+            } finally {
+              if (_didIteratorError6) {
+                throw _iteratorError6;
+              }
+            }
+          }
+
+          if (!_found && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
+            // create inline chord with the name being the tablature itself, and no fingering nor comment
+            var _chord = this.handleChord(param.line, 'chord', [{ value: part, line: param.line }, { value: part.split('/')[0], line: param.line }, { value: '000000/' + (part.split('/')[1] || '-'), line: param.line }]);
+            bar.chords.push(_chord.id);
+            _found = true;
+          }
+
+          if (!_found) throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature');
+        }
+      } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
+          }
+        } finally {
+          if (_didIteratorError5) {
+            throw _iteratorError5;
+          }
+        }
+      }
+
+      return bar;
     }
   }, {
     key: 'handlePart',
@@ -674,129 +781,96 @@ var Parser_ = function () {
 
         // bar between []
         if (param.value.match(/^\[[^[\]]+\]$/)) {
-          var bar = { 'rhythm': null, 'chords': [] };
-          var str = param.value.substr(1, param.value.length - 2);
-          var parts = str.split(/\*|:/);
-
-          // find rhythm
-          var found = false;
-          var _iteratorNormalCompletion4 = true;
-          var _didIteratorError4 = false;
-          var _iteratorError4 = undefined;
-
-          try {
-            for (var _iterator4 = this.songcheat['rhythms'][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-              var rhythm = _step4.value;
-
-              if (rhythm.name === parts[0]) {
-                bar.rhythm = rhythm.id;
-                found = true;
-                break;
-              }
-            }
-          } catch (err) {
-            _didIteratorError4 = true;
-            _iteratorError4 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                _iterator4.return();
-              }
-            } finally {
-              if (_didIteratorError4) {
-                throw _iteratorError4;
-              }
-            }
-          }
-
-          if (!found) throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm');
-
-          // find chords
-          parts = parts.slice(1);
-          var _iteratorNormalCompletion5 = true;
-          var _didIteratorError5 = false;
-          var _iteratorError5 = undefined;
-
-          try {
-            for (var _iterator5 = parts[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-              var _part = _step5.value;
-
-              // chord repeater
-              if (!_part.trim()) {
-                if (bar.chords.length === 0) throw new ParserException(param.line, 'found chord repeater but there is no chord yet in bar');
-                bar.chords.push(JSON.parse(JSON.stringify(bar.chords[bar.chords.length - 1])));
-                continue;
-              }
-
-              // search for chord by its name
-              var _found = false;
-              var _iteratorNormalCompletion6 = true;
-              var _didIteratorError6 = false;
-              var _iteratorError6 = undefined;
-
-              try {
-                for (var _iterator6 = this.songcheat['chords'][Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                  var chord = _step6.value;
-
-                  if (chord.name === _part) {
-                    bar.chords.push(chord.id);
-                    _found = true;
-                    break;
-                  }
-                }
-
-                // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
-              } catch (err) {
-                _didIteratorError6 = true;
-                _iteratorError6 = err;
-              } finally {
-                try {
-                  if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                    _iterator6.return();
-                  }
-                } finally {
-                  if (_didIteratorError6) {
-                    throw _iteratorError6;
-                  }
-                }
-              }
-
-              if (!_found && _part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
-                // create inline chord with the name being the tablature itself, and no fingering nor comment
-                var _chord = this.handleChord(param.line, 'chord', [{ value: _part, line: param.line }, { value: _part.split('/')[0], line: param.line }, { value: '000000/' + (_part.split('/')[1] || '-'), line: param.line }]);
-                bar.chords.push(_chord.id);
-                _found = true;
-              }
-
-              if (!_found) throw new ParserException(param.line, _part + ' is not the name of an existing chord and is not a valid chord tablature');
-            }
-          } catch (err) {
-            _didIteratorError5 = true;
-            _iteratorError5 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                _iterator5.return();
-              }
-            } finally {
-              if (_didIteratorError5) {
-                throw _iteratorError5;
-              }
-            }
-          }
-
-          bars.push(bar);
+          bars.push(this.readBar(param));
           continue;
         }
 
-        // not a || phrase separator nor a [] bar: must be a block name
-        if (!this.blocks[param.value]) throw new ParserException(param.line, param.value + ' is not the name of an existing block');
+        // not a || phrase separator nor a [] bar: must be a part name
+        var found = false;
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
 
-        // insert block tokens in params at current position
-        var args = [pIndex, 1];
-        Array.prototype.push.apply(args, this.blocks[param.value]);
-        Array.prototype.splice.apply(params, args);
-        pIndex--;
+        try {
+          for (var _iterator7 = this.songcheat['parts'][Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var p = _step7.value;
+
+            if (p.name === param.value) {
+              // insert part at current position
+              var phraseIndex = 0;
+              var _iteratorNormalCompletion8 = true;
+              var _didIteratorError8 = false;
+              var _iteratorError8 = undefined;
+
+              try {
+                for (var _iterator8 = p.phrases[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                  var ph = _step8.value;
+
+                  if (phraseIndex > 0) {
+                    part.phrases.push({ 'bars': bars });
+                    bars = [];
+                  }
+                  var _iteratorNormalCompletion9 = true;
+                  var _didIteratorError9 = false;
+                  var _iteratorError9 = undefined;
+
+                  try {
+                    for (var _iterator9 = ph.bars[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                      var b = _step9.value;
+                      bars.push(b);
+                    }
+                  } catch (err) {
+                    _didIteratorError9 = true;
+                    _iteratorError9 = err;
+                  } finally {
+                    try {
+                      if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                        _iterator9.return();
+                      }
+                    } finally {
+                      if (_didIteratorError9) {
+                        throw _iteratorError9;
+                      }
+                    }
+                  }
+
+                  phraseIndex++;
+                }
+              } catch (err) {
+                _didIteratorError8 = true;
+                _iteratorError8 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                    _iterator8.return();
+                  }
+                } finally {
+                  if (_didIteratorError8) {
+                    throw _iteratorError8;
+                  }
+                }
+              }
+
+              found = true;
+              break;
+            }
+          }
+        } catch (err) {
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion7 && _iterator7.return) {
+              _iterator7.return();
+            }
+          } finally {
+            if (_didIteratorError7) {
+              throw _iteratorError7;
+            }
+          }
+        }
+
+        if (!found) throw new ParserException(param.line, param.value + ' is not the name of an existing part');
       }
 
       // end of last phrase
@@ -813,13 +887,13 @@ var Parser_ = function () {
         var param = params[pIndex];
 
         var found = false;
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
+        var _iteratorNormalCompletion10 = true;
+        var _didIteratorError10 = false;
+        var _iteratorError10 = undefined;
 
         try {
-          for (var _iterator7 = this.songcheat['parts'][Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var part = _step7.value;
+          for (var _iterator10 = this.songcheat['parts'][Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+            var part = _step10.value;
 
             if (part.name === param.value) {
               this.songcheat['structure'].push({ 'id': this.songcheat['structure'].length + 1, 'part': part.id, 'lyrics': params[pIndex + 1].value });
@@ -828,16 +902,16 @@ var Parser_ = function () {
             }
           }
         } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
+          _didIteratorError10 = true;
+          _iteratorError10 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-              _iterator7.return();
+            if (!_iteratorNormalCompletion10 && _iterator10.return) {
+              _iterator10.return();
             }
           } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
+            if (_didIteratorError10) {
+              throw _iteratorError10;
             }
           }
         }

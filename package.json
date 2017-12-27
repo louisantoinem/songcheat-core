@@ -3,15 +3,13 @@
   "version": "1.0.0",
   "description": "Base classes for handling SongCheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
-  "module.release": "dist/songcheat-core.esm.js",
-  "module": "src/main.js",
+  "module": "dist/songcheat-core.esm.js",
   "scripts": {
     "clean": "rm -f dist/*.js*",
     "lint": "standard --fix src/*js test/*.js *.js",
-    "build": "npm run clean && npm run lint && rollup -c",
-    "dev": "npm run lint && rollup -cw",
+    "start": "npm run clean && npm run lint && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
     "test": "node test",
-    "release": "npm run build"
+    "build": "npm run clean && npm run lint && rollup -c rollup.config.build.js"
   },
   "keywords": [
     "songcheat",
