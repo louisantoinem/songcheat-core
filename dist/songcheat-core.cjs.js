@@ -1,5 +1,5 @@
 /**
- * SongCheat Core 1.0.0 built on Wed Dec 27 2017 06:13:43 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Wed Dec 27 2017 06:55:28 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
