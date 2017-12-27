@@ -5,11 +5,11 @@
   "main": "dist/songcheat-core.cjs.js",
   "module": "dist/songcheat-core.esm.js",
   "scripts": {
-    "clean": "rm -f dist/*.js*",
+    "clean": "rm -f dist/*",
     "lint": "standard --fix src/*js test/*.js *.js",
-    "start": "npm run clean && npm run lint && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
+    "start": "npm run clean && npm run lint && node template/convert && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
     "test": "node test",
-    "build": "npm run clean && npm run lint && rollup -c rollup.config.build.js"
+    "build": "npm run clean && npm run lint && node template/convert && rollup -c rollup.config.build.js"
   },
   "keywords": [
     "songcheat",

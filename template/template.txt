@@ -1,0 +1,119 @@
+# Command keywords are case insensitive (displayed as uppercase below).
+# Values are case sensitive (they will be kept as entered).
+# Double quotes are used to delimit values containing spaces and/or newlines.
+
+#################
+# SONG METADATA #
+#################
+
+# Some mandatory basic information about the song
+# Difficulty: 0 = UNKNOWN 1 = VERY EASY, 2 = EASY, 3 = MODERATE, 4 = HARD, 5 = VERY HARD
+
+ARTIST "The Artist"
+TITLE "The Title"
+YEAR 2017
+DIFFICULTY 0
+
+# Some optional information about the song
+# Video and tutorial: Youtube, DailyMotion or Vimeo
+# Comment can be long and multiline
+
+VIDEO ""
+TUTORIAL ""
+COMMENT "This is a
+multi line comment"
+
+################
+# GUITAR SETUP #
+################
+
+# Optional: tuning defaults to "standard" and capo to "0"
+# Tuning: "standard", "dropd", "eb" or E/5,B/4,G/4,D/4,A/3,E/3
+# Capo: number >= 0
+
+TUNING standard
+CAPO 0
+
+##########################
+# KEY AND TIME SIGNATURE #
+##########################
+
+# Key: C (default), Am, F, Dm, Bb, Gm, Eb, Cm, Ab, Fm, Db, Bbm, Gb, Ebm, Cb,
+#      Abm, G, Em, D, Bm, A, F#m, E, C#m, B, G#m, F#, D#m, C#, A#m
+# Time: $Symbol $BeatsPerBar $BeatDuration E.g. 4/4 4 :q, 12/8 4 :qd
+#       For common time signatures, you can just give the symbol:
+#       C (default), 4/4, 12/8, C|, 2/2, 6/4, 2/4, 6/8, 3/4, 9/8
+# Tempo: number of Beats Per Minute (defaults to 80)
+# Shuffle: empty string if none (default), or :8 or :16 for shuffled 8th resp. 16th notes
+
+KEY C
+TIME 4/4 4 :q
+TEMPO 80
+SHUFFLE ""
+
+##########
+# CHORDS #
+##########
+
+# Chord: $Name $Tablature [ $Fingering/$Barre $Comment ]
+
+CHORD Am x02210 T02310/-
+CHORD E	 022100 023100/-
+CHORD C	 x32010 T32010/-
+CHORD G	 320003 210003/- "Classical G with 3 fingers."
+
+CHORD Asus4	x02230 T02340/- "Same as Am but adding finger 4 on fret 3 of B string."
+CHORD Cadd9	x3203x T32040/- "Same as C but adding finger 4 on fret 3 of B string."
+
+CHORD Em 022000 023000/-
+CHORD F	 133211 134211/1 "This is a barré chord"
+CHORD F# 244322 134211/2 "# displayed as a nice sharp sign"
+CHORD Ab 466544 134211/4 "b displayed as a nice flat sign"
+
+CHORD "A sus4" x02230 001240/- "You can have spaces in chord names but do not forget quotes then"
+
+###########
+# RHYTHMS #
+###########
+
+# Rhythm: $Name $Score
+# See user guide for syntax of $Score
+
+RHYTHM R1	":8 ()d ()u ()d ()u T() ()u ()d ()u"
+RHYTHM R2	":h ()dd :h (#)"
+
+#########
+# PARTS #
+#########
+
+PART TAIL [R1*Am] "[R1*A sus4:::::Am]" [R1*C] [R1*Cadd9:::::C]
+
+PART "Chorus"   [R1*Am] [R1*E] % [R1*C:::::G] || TAIL
+PART "Verse"    [R1*Am] % [R1*C] [R1*G] || TAIL
+PART "Bridge"   [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || [R1*Am] % [R1*G] % || TAIL
+PART "Outro"    [R1*Am] [R1*E] % [R1*C:::::G] || [R2*Am]
+
+#############
+# STRUCTURE #
+#############
+
+# Define structure of the song as well as lyrics for each unit.
+# Structure: $PartName [$Name] $Lyrics
+# $Name is optional: if not set, it will be the name of the part followed by a serial number
+#                    (e.g. "Verse 2" if this is the second time we use the part named "Verse").
+# See user guide for syntax of $Lyrics
+
+STRUCTURE
+
+"Chorus" "Hello|World::!"
+"Verse" "Hello|World::!"
+"Verse" "Hello|World::!"
+"Chorus" "Hello|World::!"
+"Verse" "Hello|World::!"
+"Verse" "Hello|World::!"
+"Chorus" "Hello|World::!"
+"Bridge" "Hello|World::!"
+"Chorus" "Hello|World::!"
+"Verse" "Hello|World::!"
+"Bridge" "Hello|World::!"
+"Outro" "Hello|World::!"
