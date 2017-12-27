@@ -1,5 +1,5 @@
 /**
- * SongCheat Core 1.0.0 built on Tue Dec 26 2017 23:15:47 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Wed Dec 27 2017 00:57:06 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
@@ -863,6 +863,7 @@ var Parser = function () {
   createClass(Parser, [{
     key: 'parse',
     value: function parse(songcheat) {
+      console.log('Parsing songcheat...');
       return this.parser_.parse(songcheat);
     }
   }, {
@@ -873,10 +874,6 @@ var Parser = function () {
   }]);
   return Parser;
 }();
-
-var MIN_LYRICS_BARLEN = 20; // minimum length of a bar lyrics (before reducing) - not really needed but produces a clearer view when maxConsecutiveSpaces set to 0 (and thus when displaying parts with partdisplay=full) since bars with no or little text will have the same length (unless there are really many chord changes...)
-var LYRICS_SUM_DURATIONS = false; // if true "::" is equivalent to ":h:" (assuming lyrics unit is :q)
-var KEEP_EMPTY_LINES = false;
 
 var CompilerException = function () {
   function CompilerException(message) {
@@ -898,7 +895,6 @@ var Compiler_ = function () {
   function Compiler_(DEBUG) {
     classCallCheck(this, Compiler_);
 
-    // DEBUG 1 forces showing . * | characters in unit text (even if showDots is passed false) as well as _ for groups that were automatically created when crossing a bar
     this.DEBUG = DEBUG;
   }
 
@@ -1679,6 +1675,64 @@ var Compiler_ = function () {
 
       return lastChord;
     }
+  }]);
+  return Compiler_;
+}();
+
+/**
+ * Public API
+ */
+
+var Compiler = function () {
+  function Compiler(DEBUG) {
+    classCallCheck(this, Compiler);
+
+    this.compiler_ = new Compiler_(DEBUG);
+  }
+
+  createClass(Compiler, [{
+    key: 'compile',
+    value: function compile(songcheat) {
+      console.log(Utils.title('COMPILE SONGCHEAT'));
+      return this.compiler_.compile(JSON.parse(JSON.stringify(songcheat)));
+    }
+  }]);
+  return Compiler;
+}();
+
+var MIN_LYRICS_BARLEN = 20; // minimum length of a bar lyrics (before reducing) - not really needed but produces a clearer view when maxConsecutiveSpaces set to 0 (and thus when displaying parts with partdisplay=full) since bars with no or little text will have the same length (unless there are really many chord changes...)
+var LYRICS_SUM_DURATIONS = false; // if true "::" is equivalent to ":h:" (assuming lyrics unit is :q)
+var KEEP_EMPTY_LINES = false;
+
+var LyricsException = function () {
+  function LyricsException(message) {
+    classCallCheck(this, LyricsException);
+
+    this.message = message;
+  }
+
+  createClass(LyricsException, [{
+    key: 'toString',
+    value: function toString() {
+      return 'Lyrics error: ' + this.message;
+    }
+  }]);
+  return LyricsException;
+}();
+
+var Lyrics_ = function () {
+  function Lyrics_(DEBUG) {
+    classCallCheck(this, Lyrics_);
+
+    // DEBUG 1 forces showing . * | characters in unit text (even if showDots is passed false) as well as _ for groups that were automatically created when crossing a bar
+    this.DEBUG = DEBUG;
+  }
+
+  createClass(Lyrics_, [{
+    key: 'log',
+    value: function log() {
+      if (this.DEBUG > 0) console.log.apply(console, arguments);
+    }
   }, {
     key: 'parseLyrics',
     value: function parseLyrics(unit, defaultCursorStep, barDuration) {
@@ -1690,13 +1744,13 @@ var Compiler_ = function () {
 
       // split lyrics into word groups, split occurs at cursor forward instructions (colons, durations and bars)
       unit.groups = [];
-      var _iteratorNormalCompletion25 = true;
-      var _didIteratorError25 = false;
-      var _iteratorError25 = undefined;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
 
       try {
-        for (var _iterator25 = unit.lyrics.split(/((?::(?:w|h|q|8|16|32)d?)?:|\|)/)[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-          var part = _step25.value;
+        for (var _iterator = unit.lyrics.split(/((?::(?:w|h|q|8|16|32)d?)?:|\|)/)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var part = _step.value;
           // nb: split with capture groups only works in decent browsers, e.g. IE10+
           var match = null;
           // move cursor forward by given or default step duration
@@ -1711,16 +1765,16 @@ var Compiler_ = function () {
 
         // simulate a final bar if last group still open (no duration), i.e. if lyrics do not end on a : or |
       } catch (err) {
-        _didIteratorError25 = true;
-        _iteratorError25 = err;
+        _didIteratorError = true;
+        _iteratorError = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion25 && _iterator25.return) {
-            _iterator25.return();
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
           }
         } finally {
-          if (_didIteratorError25) {
-            throw _iteratorError25;
+          if (_didIteratorError) {
+            throw _iteratorError;
           }
         }
       }
@@ -1733,13 +1787,13 @@ var Compiler_ = function () {
       if (missingDuration < 0) warnings.push('Lyrics contain ' + Math.floor(-missingDuration / barDuration) + ' bar(s)' + (-missingDuration % barDuration ? ' and ' + Utils.durationcodes(-missingDuration % barDuration) : '') + ' in excess');
       offset = this.registerGroup(unit, offset, missingDuration, barDuration);
 
-      var _iteratorNormalCompletion26 = true;
-      var _didIteratorError26 = false;
-      var _iteratorError26 = undefined;
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator26 = unit.groups[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-          var group = _step26.value;
+        for (var _iterator2 = unit.groups[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var group = _step2.value;
 
           // compute length of group (in chars), adding 1 so the group having max density is not collated with next group
           var groupLength = this.getGroupLength(group) + 1;
@@ -1759,83 +1813,83 @@ var Compiler_ = function () {
 
         // compute maximum density across all groups
       } catch (err) {
-        _didIteratorError26 = true;
-        _iteratorError26 = err;
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion26 && _iterator26.return) {
-            _iterator26.return();
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
           }
         } finally {
-          if (_didIteratorError26) {
-            throw _iteratorError26;
+          if (_didIteratorError2) {
+            throw _iteratorError2;
           }
         }
       }
 
       unit.pmax = 0;
-      var _iteratorNormalCompletion27 = true;
-      var _didIteratorError27 = false;
-      var _iteratorError27 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator27 = unit.groups[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
-          var _group = _step27.value;
+        for (var _iterator3 = unit.groups[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var _group = _step3.value;
           unit.pmax = Math.max(unit.pmax, _group.p);
         } // iterate on each phrase wise chord change and find the associated group
       } catch (err) {
-        _didIteratorError27 = true;
-        _iteratorError27 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion27 && _iterator27.return) {
-            _iterator27.return();
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
           }
         } finally {
-          if (_didIteratorError27) {
-            throw _iteratorError27;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
 
       offset = 0;
-      var _iteratorNormalCompletion28 = true;
-      var _didIteratorError28 = false;
-      var _iteratorError28 = undefined;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator28 = unit.part.phrases[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
-          var phrase = _step28.value;
-          var _iteratorNormalCompletion31 = true;
-          var _didIteratorError31 = false;
-          var _iteratorError31 = undefined;
+        for (var _iterator4 = unit.part.phrases[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var phrase = _step4.value;
+          var _iteratorNormalCompletion7 = true;
+          var _didIteratorError7 = false;
+          var _iteratorError7 = undefined;
 
           try {
-            for (var _iterator31 = phrase.chordChanges[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
-              var chordDuration = _step31.value;
+            for (var _iterator7 = phrase.chordChanges[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+              var chordDuration = _step7.value;
 
               // find closest group starting at or before chord offset
               var _group3 = null;
-              var _iteratorNormalCompletion32 = true;
-              var _didIteratorError32 = false;
-              var _iteratorError32 = undefined;
+              var _iteratorNormalCompletion8 = true;
+              var _didIteratorError8 = false;
+              var _iteratorError8 = undefined;
 
               try {
-                for (var _iterator32 = unit.groups[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
-                  var g = _step32.value;
+                for (var _iterator8 = unit.groups[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                  var g = _step8.value;
                   if (g.offset <= offset) _group3 = g;
                 }
               } catch (err) {
-                _didIteratorError32 = true;
-                _iteratorError32 = err;
+                _didIteratorError8 = true;
+                _iteratorError8 = err;
               } finally {
                 try {
-                  if (!_iteratorNormalCompletion32 && _iterator32.return) {
-                    _iterator32.return();
+                  if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                    _iterator8.return();
                   }
                 } finally {
-                  if (_didIteratorError32) {
-                    throw _iteratorError32;
+                  if (_didIteratorError8) {
+                    throw _iteratorError8;
                   }
                 }
               }
@@ -1848,16 +1902,16 @@ var Compiler_ = function () {
               offset += chordDuration.duration;
             }
           } catch (err) {
-            _didIteratorError31 = true;
-            _iteratorError31 = err;
+            _didIteratorError7 = true;
+            _iteratorError7 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion31 && _iterator31.return) {
-                _iterator31.return();
+              if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                _iterator7.return();
               }
             } finally {
-              if (_didIteratorError31) {
-                throw _iteratorError31;
+              if (_didIteratorError7) {
+                throw _iteratorError7;
               }
             }
           }
@@ -1865,68 +1919,68 @@ var Compiler_ = function () {
 
         // iterate on each bar wise chord change and find the associated group
       } catch (err) {
-        _didIteratorError28 = true;
-        _iteratorError28 = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion28 && _iterator28.return) {
-            _iterator28.return();
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
           }
         } finally {
-          if (_didIteratorError28) {
-            throw _iteratorError28;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
 
       offset = { 'rhythm': 0, 'bar': 0 };
-      var _iteratorNormalCompletion29 = true;
-      var _didIteratorError29 = false;
-      var _iteratorError29 = undefined;
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator29 = unit.part.phrases[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
-          var _phrase2 = _step29.value;
-          var _iteratorNormalCompletion33 = true;
-          var _didIteratorError33 = false;
-          var _iteratorError33 = undefined;
+        for (var _iterator5 = unit.part.phrases[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var _phrase = _step5.value;
+          var _iteratorNormalCompletion9 = true;
+          var _didIteratorError9 = false;
+          var _iteratorError9 = undefined;
 
           try {
-            for (var _iterator33 = _phrase2.bars[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
-              var bar = _step33.value;
-              var _arr2 = ['rhythm', 'bar'];
+            for (var _iterator9 = _phrase.bars[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+              var bar = _step9.value;
+              var _arr = ['rhythm', 'bar'];
 
-              for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-                var chordChangesMode = _arr2[_i2];var _iteratorNormalCompletion34 = true;
-                var _didIteratorError34 = false;
-                var _iteratorError34 = undefined;
+              for (var _i = 0; _i < _arr.length; _i++) {
+                var chordChangesMode = _arr[_i];var _iteratorNormalCompletion10 = true;
+                var _didIteratorError10 = false;
+                var _iteratorError10 = undefined;
 
                 try {
-                  for (var _iterator34 = bar.chordChanges[chordChangesMode][Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
-                    var _chordDuration = _step34.value;
+                  for (var _iterator10 = bar.chordChanges[chordChangesMode][Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                    var _chordDuration = _step10.value;
 
                     // find closest group starting at or before chord offset
                     var _group4 = null;
-                    var _iteratorNormalCompletion35 = true;
-                    var _didIteratorError35 = false;
-                    var _iteratorError35 = undefined;
+                    var _iteratorNormalCompletion11 = true;
+                    var _didIteratorError11 = false;
+                    var _iteratorError11 = undefined;
 
                     try {
-                      for (var _iterator35 = unit.groups[Symbol.iterator](), _step35; !(_iteratorNormalCompletion35 = (_step35 = _iterator35.next()).done); _iteratorNormalCompletion35 = true) {
-                        var _g = _step35.value;
+                      for (var _iterator11 = unit.groups[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                        var _g = _step11.value;
                         if (_g.offset <= offset[chordChangesMode]) _group4 = _g;
                       }
                     } catch (err) {
-                      _didIteratorError35 = true;
-                      _iteratorError35 = err;
+                      _didIteratorError11 = true;
+                      _iteratorError11 = err;
                     } finally {
                       try {
-                        if (!_iteratorNormalCompletion35 && _iterator35.return) {
-                          _iterator35.return();
+                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                          _iterator11.return();
                         }
                       } finally {
-                        if (_didIteratorError35) {
-                          throw _iteratorError35;
+                        if (_didIteratorError11) {
+                          throw _iteratorError11;
                         }
                       }
                     }
@@ -1939,32 +1993,32 @@ var Compiler_ = function () {
                     offset[chordChangesMode] += _chordDuration.duration;
                   }
                 } catch (err) {
-                  _didIteratorError34 = true;
-                  _iteratorError34 = err;
+                  _didIteratorError10 = true;
+                  _iteratorError10 = err;
                 } finally {
                   try {
-                    if (!_iteratorNormalCompletion34 && _iterator34.return) {
-                      _iterator34.return();
+                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                      _iterator10.return();
                     }
                   } finally {
-                    if (_didIteratorError34) {
-                      throw _iteratorError34;
+                    if (_didIteratorError10) {
+                      throw _iteratorError10;
                     }
                   }
                 }
               }
             }
           } catch (err) {
-            _didIteratorError33 = true;
-            _iteratorError33 = err;
+            _didIteratorError9 = true;
+            _iteratorError9 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion33 && _iterator33.return) {
-                _iterator33.return();
+              if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                _iterator9.return();
               }
             } finally {
-              if (_didIteratorError33) {
-                throw _iteratorError33;
+              if (_didIteratorError9) {
+                throw _iteratorError9;
               }
             }
           }
@@ -1972,16 +2026,16 @@ var Compiler_ = function () {
 
         // debug info
       } catch (err) {
-        _didIteratorError29 = true;
-        _iteratorError29 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion29 && _iterator29.return) {
-            _iterator29.return();
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
           }
         } finally {
-          if (_didIteratorError29) {
-            throw _iteratorError29;
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }
@@ -1989,13 +2043,13 @@ var Compiler_ = function () {
       var debugText = 'Groups of unit [' + unit.name + ']:\n';
       var barIndex = 0;
       var zeroDuration = false;
-      var _iteratorNormalCompletion30 = true;
-      var _didIteratorError30 = false;
-      var _iteratorError30 = undefined;
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
 
       try {
-        for (var _iterator30 = unit.groups[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
-          var _group2 = _step30.value;
+        for (var _iterator6 = unit.groups[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var _group2 = _step6.value;
 
           debugText += '\tBar ' + (barIndex + 1) + '\t[' + _group2.text.replace(/\n/g, '\\N') + ']:' + _group2.duration + ' (' + _group2.offset + ' - ' + (_group2.offset + _group2.duration) + ') L=' + this.getGroupLength(_group2) + " L'=" + _group2.plen + ' ρ=' + _group2.p.toFixed(2) + ' #Chord changes %bar= ' + _group2.chordChanges['bar'].length + ' %phrase= ' + _group2.chordChanges['phrase'].length;
           if (_group2.duration === 0) zeroDuration = true;
@@ -2006,16 +2060,16 @@ var Compiler_ = function () {
           debugText += '\n';
         }
       } catch (err) {
-        _didIteratorError30 = true;
-        _iteratorError30 = err;
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion30 && _iterator30.return) {
-            _iterator30.return();
+          if (!_iteratorNormalCompletion6 && _iterator6.return) {
+            _iterator6.return();
           }
         } finally {
-          if (_didIteratorError30) {
-            throw _iteratorError30;
+          if (_didIteratorError6) {
+            throw _iteratorError6;
           }
         }
       }
@@ -2035,13 +2089,13 @@ var Compiler_ = function () {
       // concatenate lyrics groups, giving them a number of positions proprtional to their duration
       var barIndex = 0;
       var groupIndex = 0;
-      var _iteratorNormalCompletion36 = true;
-      var _didIteratorError36 = false;
-      var _iteratorError36 = undefined;
+      var _iteratorNormalCompletion12 = true;
+      var _didIteratorError12 = false;
+      var _iteratorError12 = undefined;
 
       try {
-        for (var _iterator36 = unit.groups[Symbol.iterator](), _step36; !(_iteratorNormalCompletion36 = (_step36 = _iterator36.next()).done); _iteratorNormalCompletion36 = true) {
-          var group = _step36.value;
+        for (var _iterator12 = unit.groups[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+          var group = _step12.value;
 
           // where and on how many positions will this group be displayed
           group.position = [].concat(toConsumableArray(unitText.replace(/\n/g, ''))).length;
@@ -2084,16 +2138,16 @@ var Compiler_ = function () {
 
         // we weren't asked to add chords
       } catch (err) {
-        _didIteratorError36 = true;
-        _iteratorError36 = err;
+        _didIteratorError12 = true;
+        _iteratorError12 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion36 && _iterator36.return) {
-            _iterator36.return();
+          if (!_iteratorNormalCompletion12 && _iterator12.return) {
+            _iterator12.return();
           }
         } finally {
-          if (_didIteratorError36) {
-            throw _iteratorError36;
+          if (_didIteratorError12) {
+            throw _iteratorError12;
           }
         }
       }
@@ -2102,49 +2156,49 @@ var Compiler_ = function () {
 
       // build chord inserts, based on bar or phrase wise changes, each with the text and position where to insert
       var chordInserts = [];
-      var _iteratorNormalCompletion37 = true;
-      var _didIteratorError37 = false;
-      var _iteratorError37 = undefined;
+      var _iteratorNormalCompletion13 = true;
+      var _didIteratorError13 = false;
+      var _iteratorError13 = undefined;
 
       try {
-        for (var _iterator37 = unit.groups[Symbol.iterator](), _step37; !(_iteratorNormalCompletion37 = (_step37 = _iterator37.next()).done); _iteratorNormalCompletion37 = true) {
-          var _group5 = _step37.value;
+        for (var _iterator13 = unit.groups[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+          var _group5 = _step13.value;
 
           var lengthStillToPlaceOnThisGroup = 0;
           var lengthYetPlacedOnThisGroup = 0;
 
           // compute length of all chord inserts
-          var _iteratorNormalCompletion40 = true;
-          var _didIteratorError40 = false;
-          var _iteratorError40 = undefined;
+          var _iteratorNormalCompletion16 = true;
+          var _didIteratorError16 = false;
+          var _iteratorError16 = undefined;
 
           try {
-            for (var _iterator40 = _group5.chordChanges[chordChangesMode][Symbol.iterator](), _step40; !(_iteratorNormalCompletion40 = (_step40 = _iterator40.next()).done); _iteratorNormalCompletion40 = true) {
-              var chordChange = _step40.value;
+            for (var _iterator16 = _group5.chordChanges[chordChangesMode][Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+              var chordChange = _step16.value;
               lengthStillToPlaceOnThisGroup += chordChange.text.length;
             }
           } catch (err) {
-            _didIteratorError40 = true;
-            _iteratorError40 = err;
+            _didIteratorError16 = true;
+            _iteratorError16 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion40 && _iterator40.return) {
-                _iterator40.return();
+              if (!_iteratorNormalCompletion16 && _iterator16.return) {
+                _iterator16.return();
               }
             } finally {
-              if (_didIteratorError40) {
-                throw _iteratorError40;
+              if (_didIteratorError16) {
+                throw _iteratorError16;
               }
             }
           }
 
-          var _iteratorNormalCompletion41 = true;
-          var _didIteratorError41 = false;
-          var _iteratorError41 = undefined;
+          var _iteratorNormalCompletion17 = true;
+          var _didIteratorError17 = false;
+          var _iteratorError17 = undefined;
 
           try {
-            for (var _iterator41 = _group5.chordChanges[chordChangesMode][Symbol.iterator](), _step41; !(_iteratorNormalCompletion41 = (_step41 = _iterator41.next()).done); _iteratorNormalCompletion41 = true) {
-              var _chordChange = _step41.value;
+            for (var _iterator17 = _group5.chordChanges[chordChangesMode][Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+              var _chordChange = _step17.value;
 
               // position of the chord will be the position of the group + length corresponding to offset delta
               var positionDelta = Math.ceil((_chordChange.offset - _group5.offset) / _group5.duration * _group5.length);
@@ -2167,55 +2221,55 @@ var Compiler_ = function () {
               lengthStillToPlaceOnThisGroup -= _chordChange.text.length;
             }
           } catch (err) {
-            _didIteratorError41 = true;
-            _iteratorError41 = err;
+            _didIteratorError17 = true;
+            _iteratorError17 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion41 && _iterator41.return) {
-                _iterator41.return();
+              if (!_iteratorNormalCompletion17 && _iterator17.return) {
+                _iterator17.return();
               }
             } finally {
-              if (_didIteratorError41) {
-                throw _iteratorError41;
+              if (_didIteratorError17) {
+                throw _iteratorError17;
               }
             }
           }
         }
       } catch (err) {
-        _didIteratorError37 = true;
-        _iteratorError37 = err;
+        _didIteratorError13 = true;
+        _iteratorError13 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion37 && _iterator37.return) {
-            _iterator37.return();
+          if (!_iteratorNormalCompletion13 && _iterator13.return) {
+            _iterator13.return();
           }
         } finally {
-          if (_didIteratorError37) {
-            throw _iteratorError37;
+          if (_didIteratorError13) {
+            throw _iteratorError13;
           }
         }
       }
 
-      var _iteratorNormalCompletion38 = true;
-      var _didIteratorError38 = false;
-      var _iteratorError38 = undefined;
+      var _iteratorNormalCompletion14 = true;
+      var _didIteratorError14 = false;
+      var _iteratorError14 = undefined;
 
       try {
-        for (var _iterator38 = chordInserts[Symbol.iterator](), _step38; !(_iteratorNormalCompletion38 = (_step38 = _iterator38.next()).done); _iteratorNormalCompletion38 = true) {
-          var chordInsert = _step38.value;
+        for (var _iterator14 = chordInserts[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+          var chordInsert = _step14.value;
           this.log('[' + unit.name + '] Should insert ' + chordInsert.text + ' @ ' + chordInsert.offset + ' units / ' + chordInsert.position + ' chars');
         } // insert these chord inserts
       } catch (err) {
-        _didIteratorError38 = true;
-        _iteratorError38 = err;
+        _didIteratorError14 = true;
+        _iteratorError14 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion38 && _iterator38.return) {
-            _iterator38.return();
+          if (!_iteratorNormalCompletion14 && _iterator14.return) {
+            _iterator14.return();
           }
         } finally {
-          if (_didIteratorError38) {
-            throw _iteratorError38;
+          if (_didIteratorError14) {
+            throw _iteratorError14;
           }
         }
       }
@@ -2225,26 +2279,26 @@ var Compiler_ = function () {
       var unitText_ = unitText;
       var chordText = '';
       unitText = '';
-      var _iteratorNormalCompletion39 = true;
-      var _didIteratorError39 = false;
-      var _iteratorError39 = undefined;
+      var _iteratorNormalCompletion15 = true;
+      var _didIteratorError15 = false;
+      var _iteratorError15 = undefined;
 
       try {
-        for (var _iterator39 = unitText_[Symbol.iterator](), _step39; !(_iteratorNormalCompletion39 = (_step39 = _iterator39.next()).done); _iteratorNormalCompletion39 = true) {
-          var char = _step39.value;
+        for (var _iterator15 = unitText_[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+          var char = _step15.value;
 
           if (char === '\n') {
             unitText += '\n';
             chordText += '\n';
             skip = 0;
           } else {
-            var _iteratorNormalCompletion42 = true;
-            var _didIteratorError42 = false;
-            var _iteratorError42 = undefined;
+            var _iteratorNormalCompletion18 = true;
+            var _didIteratorError18 = false;
+            var _iteratorError18 = undefined;
 
             try {
-              for (var _iterator42 = chordInserts[Symbol.iterator](), _step42; !(_iteratorNormalCompletion42 = (_step42 = _iterator42.next()).done); _iteratorNormalCompletion42 = true) {
-                var _chordInsert = _step42.value;
+              for (var _iterator18 = chordInserts[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                var _chordInsert = _step18.value;
 
                 if (!_chordInsert.inserted) {
                   if (_chordInsert.position <= position) {
@@ -2256,16 +2310,16 @@ var Compiler_ = function () {
                 }
               }
             } catch (err) {
-              _didIteratorError42 = true;
-              _iteratorError42 = err;
+              _didIteratorError18 = true;
+              _iteratorError18 = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion42 && _iterator42.return) {
-                  _iterator42.return();
+                if (!_iteratorNormalCompletion18 && _iterator18.return) {
+                  _iterator18.return();
                 }
               } finally {
-                if (_didIteratorError42) {
-                  throw _iteratorError42;
+                if (_didIteratorError18) {
+                  throw _iteratorError18;
                 }
               }
             }
@@ -2285,16 +2339,16 @@ var Compiler_ = function () {
 
         // and interlace the two strings
       } catch (err) {
-        _didIteratorError39 = true;
-        _iteratorError39 = err;
+        _didIteratorError15 = true;
+        _iteratorError15 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion39 && _iterator39.return) {
-            _iterator39.return();
+          if (!_iteratorNormalCompletion15 && _iterator15.return) {
+            _iterator15.return();
           }
         } finally {
-          if (_didIteratorError39) {
-            throw _iteratorError39;
+          if (_didIteratorError15) {
+            throw _iteratorError15;
           }
         }
       }
@@ -2343,38 +2397,32 @@ var Compiler_ = function () {
       return chordDuration.chord.name + ' ';
     }
   }]);
-  return Compiler_;
+  return Lyrics_;
 }();
 
 /**
  * Public API
  */
 
-var Compiler = function () {
-  function Compiler(songcheat, DEBUG) {
-    classCallCheck(this, Compiler);
+var Lyrics = function () {
+  function Lyrics(songcheat, DEBUG) {
+    classCallCheck(this, Lyrics);
 
-    this.compiler_ = new Compiler_(DEBUG);
-    if (songcheat) this.set(songcheat);
+    this.lyrics_ = new Lyrics_(DEBUG);
+    this.songcheat = songcheat;
   }
 
-  createClass(Compiler, [{
-    key: 'set',
-    value: function set$$1(songcheat) {
-      this.compiler_.log(Utils.title('COMPILE SONGCHEAT'));
-      this.scc = this.compiler_.compile(JSON.parse(JSON.stringify(songcheat)));
-    }
-  }, {
+  createClass(Lyrics, [{
     key: 'parseLyrics',
     value: function parseLyrics(unit) {
-      this.compiler_.log(Utils.title('PARSE LYRICS ' + unit.name));
-      return this.compiler_.parseLyrics(unit, Utils.duration(this.scc.lyricsUnit), this.scc.barDuration);
+      console.log(Utils.title('PARSE LYRICS ' + unit.name));
+      return this.lyrics_.parseLyrics(unit, Utils.duration(this.songcheat.lyricsUnit), this.songcheat.barDuration);
     }
   }, {
     key: 'getUnitText',
     value: function getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots) {
-      this.compiler_.log(Utils.title('GET LYRICS TEXT ' + unit.name + ' (maxConsecutiveSpaces = ' + maxConsecutiveSpaces + ', split = ' + split + ', chordChangesMode = ' + chordChangesMode + ', showDots = ' + showDots + ')'));
-      return this.compiler_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots);
+      console.log(Utils.title('GET LYRICS TEXT ' + unit.name + ' (maxConsecutiveSpaces = ' + maxConsecutiveSpaces + ', split = ' + split + ', chordChangesMode = ' + chordChangesMode + ', showDots = ' + showDots + ')'));
+      return this.lyrics_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots);
     }
   }, {
     key: 'getPartText',
@@ -2382,14 +2430,14 @@ var Compiler = function () {
       // dummy unit with no lyrics
       var unit = { name: part.name, part: part };
 
-      this.compiler_.log(Utils.title('PARSE PART LYRICS ' + unit.name));
-      this.compiler_.parseLyrics(unit, Utils.duration(this.scc.lyricsUnit), this.scc.barDuration);
+      console.log(Utils.title('PARSE PART LYRICS ' + unit.name));
+      this.lyrics_.parseLyrics(unit, Utils.duration(this.songcheat.lyricsUnit), this.songcheat.barDuration);
 
-      this.compiler_.log(Utils.title('GET PART LYRICS TEXT ' + unit.name + ' (maxConsecutiveSpaces = ' + maxConsecutiveSpaces + ', split = ' + split + ', chordChangesMode = ' + chordChangesMode + ', showDots = ' + showDots + ')'));
-      return this.compiler_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots);
+      console.log(Utils.title('GET PART LYRICS TEXT ' + unit.name + ' (maxConsecutiveSpaces = ' + maxConsecutiveSpaces + ', split = ' + split + ', chordChangesMode = ' + chordChangesMode + ', showDots = ' + showDots + ')'));
+      return this.lyrics_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots);
     }
   }]);
-  return Compiler;
+  return Lyrics;
 }();
 
 var ChordPixException = function () {
@@ -4482,5 +4530,5 @@ var Player = function () {
   return Player;
 }();
 
-export { Utils, Parser, ParserException, Compiler, CompilerException, ChordPix, ChordPixException, VexTab, VexTabException, Player, waveTables };
+export { Utils, Parser, ParserException, Compiler, CompilerException, Lyrics, LyricsException, ChordPix, ChordPixException, VexTab, VexTabException, Player, waveTables };
 //# sourceMappingURL=songcheat-core.esm.js.map

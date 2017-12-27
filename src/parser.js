@@ -314,6 +314,7 @@ export class Parser {
   }
 
   parse (songcheat) {
+    console.log('Parsing songcheat...')
     return this.parser_.parse(songcheat)
   }
 
