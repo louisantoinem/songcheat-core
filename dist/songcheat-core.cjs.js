@@ -232,7 +232,7 @@ class Utils {
     // if chord has no string in common with given strings
     if (result.length === 0) {
       // if muted chord strings were already included, nothing to try left
-      if (forceIncludeMutedStrings) throw new Error('Utils.chordStrings giving up. This means that \"strings\" is empty which should never happen!')
+      if (forceIncludeMutedStrings) throw new Error('Utils.chordStrings giving up. This means that "strings" is empty which should never happen!')
 
       // force including muted chord strings in order not to get an error in vextab (empty chord not allowed)
       return Utils.chordStrings(chord, strings, true)
