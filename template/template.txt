@@ -71,16 +71,16 @@ SHUFFLE ""
 # These 6 characters can be followed by a "/f" where f is the number of the barred fret.
 # "/-" means there is no barred fret and is the same as not specifying it at all.
 
-CHORD C     x32010 T32010
+CHORD C        x32010 T32010
 CHORD "C Maj7" x32000 T32000   "C without finger 1"
-CHORD F     xx3211 T33211   "F without E and A strings"
-CHORD F/E   xx2211 T33211/1 "finger 3 moved left by 1 fret"
-CHORD Dm    xx0231 T00241   "Finger 4 instead of 3"
-CHORD Dm/C  x30231 T30241   "Dm adding finger 3 on A string"
-CHORD G     320003 320004   "G with 3 fingers"
-CHORD G7    320001 320001   "G with finger 1 on e string"
-CHORD E     022100 023100
-CHORD F'    133211 113211/1   "Classical F Barré"
+CHORD F        xx3211 T33211   "F without E and A strings"
+CHORD F/E      xx2211 T33211/1 "finger 3 moved left by 1 fret"
+CHORD Dm       xx0231 T00241   "Finger 4 instead of 3"
+CHORD Dm/C     x30231 T30241   "Dm adding finger 3 on A string"
+CHORD G        320003 320004   "G with 3 fingers"
+CHORD G7       320001 320001   "G with finger 1 on e string"
+CHORD E        022100 023100
+CHORD F'       133211 113211/1 "Classical F Barré"
 
 # When multiple chords exists for the same name, the last one is actually used.
 # Here, we have alternate versions for F and F/E: uncomment to use them.
