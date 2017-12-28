@@ -1,7 +1,7 @@
 # Command keywords are case insensitive (displayed as uppercase below).
 # Values are case sensitive (they will be kept as entered).
 # Double quotes are used to delimit values containing spaces and/or newlines.
-# You can for example use spaces in chord/rhythm/part names but these names must be quoted.
+# You can e.g. use spaces in chord/rhythm/part names but these names must be quoted.
 
 #################
 # SONG METADATA #

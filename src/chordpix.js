@@ -83,7 +83,7 @@ export class ChordPix {
       // build final url
       return 'http://chordpix.com/i/' + (chordWidth || 450) + '/6/' + nbFrets + '/' + startingFret + '/' + relTablature + '/' + fingering.join('/') + '/' + name + '.png'
     } catch (e) {
-      throw new ChordPixException('[Chord ' + JSON.stringify(chord) + '] ' + e.message)
+      throw new ChordPixException('[Chord ' + (chord.name || JSON.stringify(chord)) + '] ' + e.message)
     }
   }
 }
