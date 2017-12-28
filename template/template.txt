@@ -140,10 +140,12 @@ SUB C2 [R1*C,,,,E]
 # 1 phrase of 4 bars
 PART "Intro"       A A
 
-# 3 phrases of 4 bars each
+# 2 phrases of 4 bars each
 PART "Verse"       A A ||
                    A A ||
-                   B
+
+# 1 phrase of 4 bars
+PART "PreChorus"   B
 
 # 2 phrases of 4 bars each
 # last bar is 4 quarters leading to the first C of verse
@@ -177,15 +179,17 @@ STRUCTURE
 "Verse" ":Imagine:there's:no hea-|ven|
 :It's ea-:sy if:you|try|
 :No:hell:below|us|
-:Above:us:only|sky|
-:Imagine:all:the|people|
+:Above:us:only|sky"
+
+"PreChorus" ":Imagine:all:the|people|
 Li:ving:for:to-|day:ah:ah:ahaha"
 
 "Verse" ":Imagine:there's:no coun-|tries|
 :It isn't:hard:to|do|
 :Nothing:to kill:or die|for|
-:And no:reli-:gion|too|
-:Imagine:all:the|peo-:ple:|
+:And no:reli-:gion|too"
+
+"PreChorus" ":Imagine:all:the|peo-:ple:|
 Li:ving:life:in|peace:youh:ouh:ouhouhou"
 
 "Chorus" ":8:You:8:may:say:I'm a|dreamer|
@@ -196,8 +200,9 @@ I:8:hope:8:some:day:you'll|join us|
 "Verse" ":Imagine:no:posse-|ssions|
 :I won-:der if:you|can|
 :No:need for:greed or|hunger|
-:A bro-:ther:hood of|man|
-:Imagine:all:the|peo-:ple:|
+:A bro-:ther:hood of|man"
+
+"PreChorus" ":Imagine:all:the|peo-:ple:|
 Sha-:ring:all:the|world:youh:ouh:ouhouhou"
 
 "Final Chorus" ":8:You:8:may:say:I'm a|dreamer|
