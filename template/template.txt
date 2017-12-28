@@ -137,16 +137,27 @@ SUB C2 [R1*C,,,,E]
 # SUB C1 [R2*F,,,,G]
 # SUB C2 [R2*C,,,,E]
 
+# 1 phrase of 4 bars
 PART "Intro"       A A
-PART "Verse"       A A || A A || B
 
+# 3 phrases of 4 bars each
+PART "Verse"       A A ||
+                   A A ||
+                   B
+
+# 2 phrases of 4 bars each
 # last bar is 4 quarters leading to the first C of verse
-PART "Chorus"      C1 C2 C1 C2 ||
-                   C1 C2 C1 "[:q ()d ()d ()d ()d*C,3xxxxx,x0xxxx,x2xxxx]"
+PART "Chorus"      C1 C2
+                   C1 C2 ||
+                   C1 C2
+                   C1 [:q ()d ()d ()d ()d*C,3xxxxx,x0xxxx,x2xxxx]
 
+# 2 phrases of 4 bars each
 # last bar is one final arpeggiated stroke
-PART "Final Chorus"   C1 C2 C1 C2 ||
-                      C1 C2 C1 "[:h ()dd (#)*C]"
+PART "Final Chorus"   C1 C2
+                      C1 C2 ||
+                      C1 C2
+                      C1 [:h ()dd (#)*C]
 
 #############
 # STRUCTURE #
