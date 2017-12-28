@@ -194,29 +194,33 @@ class Utils {
    * Return an array containing one object { string, fret, mute } for each played string
    */
 
-  static chordStrings (chord, strings) {
+  static chordStrings (chord, strings, forceIncludeMutedStrings) {
     if (!chord.tablature) throw new Error('Tablature not defined for chord ' + chord.name)
-    if (!chord.fingering) throw new Error('Fingering not defined for chord ' + chord.name)
+
+    // if specific strings have been given (i.e. not * or *x), we also consider the muted strings in chord
+    let includeMutedStrings = forceIncludeMutedStrings || !strings.match(/^\*/);
 
     var result = [];
     for (var i = 0; i < chord.tablature.length; i++) {
       // string will be between 6 and 1 since chord.tablature.length has been verified and is 6
       var string = 6 - i;
 
-      // string never played in this chord
-      if (chord.tablature[i] === 'x') continue
+      // string not played in this chord
+      if (chord.tablature[i] === 'x' && !includeMutedStrings) continue
 
-      // first time we meet a played string, it's the bass so replace B and B' with the string number
-      strings = strings.replace(/B'/g, (string >= 5 ? string - 1 : string));
-      strings = strings.replace(/B/g, string);
+      // first time we meet an included string, it's the bass so replace B and B' with the string number
+      if (chord.tablature[i] !== 'x' || forceIncludeMutedStrings) {
+        strings = strings.replace(/B'/g, (string >= 5 ? string - 1 : string));
+        strings = strings.replace(/B/g, string);
+      }
 
       // check if this string should be played with the right hand
       // * means "all strings", otherwise concatenated specific string numbers are specified (or B for bass or B' for alternate bass)
       // x after string means muted (ghost) note
       if (strings.match(/^\*/) || strings.indexOf(string) !== -1) {
-        let fret = this.char2fret(chord.tablature[i]);
+        let fret = chord.tablature[i] === 'x' ? 0 : this.char2fret(chord.tablature[i]);
         let xIndex = strings.match(/^\*/) ? 1 : strings.indexOf(string) + 1;
-        let mute = strings[xIndex] === 'x';
+        let mute = strings[xIndex] === 'x' || chord.tablature[i] === 'x';
         result.push({
           string: string,
           fret: fret,
@@ -225,8 +229,14 @@ class Utils {
       }
     }
 
-    // if chord has no string in common with strings, return a muted chord (on all strings) in order not to get an error in vextab (empty chord not allowed)
-    if (result.length === 0) return Utils.chordStrings(chord, '*x')
+    // if chord has no string in common with given strings
+    if (result.length === 0) {
+      // if muted chord strings were already included, nothing to try left
+      if (forceIncludeMutedStrings) throw new Error('Utils.chordStrings giving up. This means that \"strings\" is empty which should never happen!')
+
+      // force including muted chord strings in order not to get an error in vextab (empty chord not allowed)
+      return Utils.chordStrings(chord, strings, true)
+    }
 
     return result
   }
@@ -454,8 +464,8 @@ class Parser_ {
       }
     }
 
-    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis)
-    if (foundRhythmId === null && parts[0].match(/\(.*\)/)) {
+    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis or curly brackets)
+    if (foundRhythmId === null && (parts[0].match(/\(.*\)/) || parts[0].match(/\{.*\}/))) {
       // create inline rhythm with the name begin the score itself (so the rhythm is found next time if used several times)
       let rhythm = this.handleRhythm(param.line, 'rhythm', [{ value: parts[0], line: param.line }, { value: parts[0], line: param.line }]);
       rhythm.inline = true; // will be hidden in Rhythm panel
@@ -765,6 +775,38 @@ class Compiler_ {
     return null
   }
 
+  readFlags (token, flagsString) {
+    let flags = { stroke: null, accent: false, pm: false, fingering: null };
+    for (let flag of flagsString.split(/(dd?|uu?|>|PM|[pima]+)/)) {
+      if (flag.trim()) {
+        if (flag.match(/^(dd?|uu?)$/g)) {
+          // stroke mode
+          if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('Palm muting (PM) and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.stroke) throw new CompilerException('More than one stroke mode (d, u, dd, uu) defined for the chord placeholder: ' + token)
+          flags.stroke = flag;
+        } else if (flag.match(/^[pima]+$/)) {
+          // PIMA fingering
+          if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('Palm muting (PM) and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.fingering) throw new CompilerException('More than one fingering (pima) defined for the chord placeholder: ' + token)
+          flags.fingering = flag;
+        } else if (flag.match(/^PM$/)) {
+          // palm muting
+          if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('More than one palm muting (PM) defined for the chord placeholder: ' + token)
+          flags.pm = true;
+        } else if (flag.match(/^>$/)) {
+          // accent
+          if (flags.accent) throw new CompilerException('More than one accent (>) defined for the same placeholder: ' + token)
+          flags.accent = true;
+        } else throw new CompilerException('Invalid flag "' + flag + '" defined for chord placeholder "' + token + '"')
+      }
+    }
+    return flags
+  }
+
   compileRhythm (rhythm, initialNoteDuration) {
     this.log('Compiling rhythm ' + rhythm.id + ' with score "' + rhythm.score + '"');
 
@@ -780,7 +822,7 @@ class Compiler_ {
 
     // compile the score string into an array of objects
     rhythm.compiledScore = [];
-    for (let token of rhythm.score.split(/((?::(?:w|h|q|8|16|32)d?)|\(#\)|T?\s*\([^(]*\)[^()\sT:]*)/)) {
+    for (let token of rhythm.score.split(/((?::(?:w|h|q|8|16|32)d?)|\(#\)|[Tsbhpt]?\s*\([^(]*\)(?:dd?|uu?|>|PM|[pima]+)*|[Tsbhpt]?\s*{[^{]*}(?:dd?|uu?|>|PM|[pima]+)*)/)) {
       if ((token = token.trim())) {
         let match = null;
         if ((match = token.match(/^(:(?:w|h|q|8|16|32)d?)$/))) {
@@ -789,9 +831,9 @@ class Compiler_ {
         } else if ((match = token.match(/^\(#\)$/))) {
           // rest
           rhythm.compiledScore.push({ rest: true, duration: noteDuration, tied: false, strings: false, flags: {}, placeholderIndex: rhythm.placeholdercount++ });
-        } else if ((match = token.match(/^(T?)\s*\(([^(]*)\)([^()\s]*)$/))) {
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*\(([^(]*)\)([^(){}\s]*)$/))) {
           // chord placeholder
-          let tied = match[1] === 'T';
+          let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false;
 
           // strings = between parentheses
           let strings = match[2];
@@ -800,38 +842,40 @@ class Compiler_ {
           if (!strings.match(/^(?:(\*x?)|((?:(?:B|B'|1|2|3|4|5|6)x?)+))$/)) throw new CompilerException('Invalid syntax found in chord placeholder: ' + strings)
 
           // flags = after parentheses
-          let flagsString = match[3];
-          let flags = { stroke: null, accent: false, pm: false, fingering: null };
-          for (let flag of flagsString.split(/(dd?|uu?|>|PM|[pima]+)/)) {
-            if (flag.trim()) {
-              if (flag.match(/^(dd?|uu?)$/g)) {
-                // stroke mode
-                if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('Palm muting (PM) and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.stroke) throw new CompilerException('More than one stroke mode (d, u, dd, uu) defined for the chord placeholder: ' + token)
-                flags.stroke = flag;
-              } else if (flag.match(/^[pima]+$/)) {
-                // PIMA fingering
-                if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('Palm muting (PM) and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.fingering) throw new CompilerException('More than one fingering (pima) defined for the chord placeholder: ' + token)
-                flags.fingering = flag;
-              } else if (flag.match(/^PM$/)) {
-                // palm muting
-                if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('More than one palm muting (PM) defined for the chord placeholder: ' + token)
-                flags.pm = true;
-              } else if (flag.match(/^>$/)) {
-                // accent
-                if (flags.accent) throw new CompilerException('More than one accent (>) defined for the same placeholder: ' + token)
-                flags.accent = true;
-              } else throw new CompilerException('Invalid flag "' + flag + '" defined for chord placeholder "' + token + '"')
-            }
-          }
+          let flags = this.readFlags(token, match[3]);
 
           // add a note
           rhythm.compiledScore.push({ rest: false, duration: noteDuration, tied: tied, strings: strings, flags: flags, placeholderIndex: rhythm.placeholdercount++ });
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*{([^{]*)}([^(){}\s]*)$/))) {
+          // inline tablature column (= placeholder x chord)
+          let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false;
+
+          // final tablature column = between curly brackets
+          let tablature = match[2];
+          if (tablature.length !== 6) throw new CompilerException('Inline tablature must be exactly 6 characters long (one for each guitar string)')
+          if (!tablature.match(/^[-x0-9A-Z]{6}$/)) throw new CompilerException('Inline tablature must contain only digits and capital letters (representing a fret number) or "x" (mute) or "-" (not played), but found ' + tablature)
+
+          // create a dummy chord from this tablature containing all played strings (muted or fretted)
+          let chordTablature = tablature.replace(/x/g, '0').replace(/-/g, 'x');
+          let chord = { name: chordTablature, tablature: chordTablature, inline: true };
+
+          // create dummy associated strings containing the number of all played strings (with additional "x" if muted)
+          let strings = '';
+          let stringNum = 6;
+          for (let c of tablature) {
+            if (c !== '-') strings += stringNum + (c === 'x' ? 'x' : '');
+            stringNum--;
+          }
+          // if entered chord is "------", include all strings so that Utils.chordStrings will return 6 muted notes
+          // UPDATE: no rather throw an error
+          // if (strings === '') strings = '*'
+          if (strings === '') throw new CompilerException('Found empty inline tablature {' + tablature + '}, use a rest (#) instead')
+
+          // flags = after parentheses
+          let flags = this.readFlags(token, match[3]);
+
+          // add a note
+          rhythm.compiledScore.push({ rest: false, duration: noteDuration, tied: tied, strings: strings, flags: flags, chord: chord });
         } else throw new CompilerException('Invalid token "' + token + '" in rhythm score definition at position ' + position + (lastToken ? ' (after "' + lastToken + '")' : ''))
 
         lastToken = token;
@@ -853,7 +897,7 @@ class Compiler_ {
     let offset = 0;
     for (let note of bar.rhythm.compiledScore) {
       // get chord corresponding to the placeholder position
-      let chord = bar.chords[note.placeholderIndex];
+      let chord = note.chord || bar.chords[note.placeholderIndex];
       if (!chord) throw new CompilerException('No chord found for placeholder ' + (note.placeholderIndex + 1))
 
       // same chord as before and not a new bar: increment duration with this new note
@@ -1312,8 +1356,8 @@ class VexTab {
       // note duration, slashed if no chord given
       vextab += note.chord ? Utils.durationcode(note.duration) : Utils.durationcode(note.duration).replace(/(:(?:w|h|q|8|16|32))(d?)/g, '$1S$2');
 
-      // if tied note
-      if (note.tied) vextab += 'T';
+      // if tied note (Tsbhpt)
+      if (note.tied) vextab += note.tied;
 
       // chord or dummy note (for slash notation)
       vextab += !note.chord ? '(4/3)' : VexTab.Chord2VexTab(note.chord, note.strings, 0); // do not transpose with capo: chords are tabbed exactly as their diagrm says (author chooses to use capo'd chords or not)
@@ -1482,11 +1526,15 @@ class VexTab {
           // note with no chord set (slash)
           let phraseNote = JSON.parse(JSON.stringify(note));
           phraseNote.lastInPhrase = lastBarInPhrase && noteIndex === bar.rhythm.compiledScore.length - 1;
-          notesSlashed.push(phraseNote);
 
-          // register note with corresponding chord
+          // register slashed note without chord (i.e. remove any chord created from an inline tablature column)
+          let slashedPhraseNote = JSON.parse(JSON.stringify(phraseNote));
+          slashedPhraseNote.chord = null;
+          notesSlashed.push(slashedPhraseNote);
+
+          // register chorded note with corresponding chord
           let chordedPhraseNote = JSON.parse(JSON.stringify(phraseNote));
-          chordedPhraseNote.chord = bar.chords[note.placeholderIndex];
+          chordedPhraseNote.chord = note.chord || bar.chords[note.placeholderIndex];
           if (!chordedPhraseNote.chord) throw new VexTabException('No chord found for placeholder ' + (note.placeholderIndex + 1))
           notes.push(chordedPhraseNote);
 
@@ -2513,7 +2561,7 @@ class Player {
     // jump to next note if skipped tied note
     if (note.skip) {
       // info message, scheduled to display at the given time
-      let message = (isBar ? '\n|\t' : '\t') + ('[SKIP]').padEnd(10, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : ''));
+      let message = (isBar ? '\n|\t' : '\t') + ('[SKIP]').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : ''));
       setTimeout(function () { console.info(message); }, Math.max(0, time - audioCtx.currentTime) * 1000);
 
       self.note_(time);
@@ -2530,9 +2578,11 @@ class Player {
       if (!nextNote.tied) break
 
       // get frequencies for chord notes
-      // TODO: if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
       let nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote.chord, nextNote.strings, this.capo) : null;
       if (!Utils.arraysEqual(noteFreqs, nextNoteFreqs)) break
+
+      // if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
+      if (!nextNote.chord && nextNote.tied && nextNote.tied !== 'T') break
 
       nextNote.skip = true;
       nextPlayedNote = this.notes[nextNoteIndex + 1];
@@ -2577,7 +2627,7 @@ class Player {
 
     // info message, scheduled to display at the same time as oscillator will play our sound
     let what = note.rest ? 'REST' : (chord ? chord.name + '/' + freqs.length + ' ' + (isDown ? 'B' : '') + (isUp ? 'H' : '') : 'BEEP');
-    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED]' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '');
+    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '');
     setTimeout(function () { console.info(message); }, Math.max(0, time - audioCtx.currentTime) * 1000);
 
     // play beep (1 note) or chord (N notes)

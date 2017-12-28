@@ -207,8 +207,8 @@ class Parser_ {
       }
     }
 
-    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis)
-    if (foundRhythmId === null && parts[0].match(/\(.*\)/)) {
+    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis or curly brackets)
+    if (foundRhythmId === null && (parts[0].match(/\(.*\)/) || parts[0].match(/\{.*\}/))) {
       // create inline rhythm with the name begin the score itself (so the rhythm is found next time if used several times)
       let rhythm = this.handleRhythm(param.line, 'rhythm', [{ value: parts[0], line: param.line }, { value: parts[0], line: param.line }])
       rhythm.inline = true // will be hidden in Rhythm panel

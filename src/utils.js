@@ -190,29 +190,33 @@ export class Utils {
    * Return an array containing one object { string, fret, mute } for each played string
    */
 
-  static chordStrings (chord, strings) {
+  static chordStrings (chord, strings, forceIncludeMutedStrings) {
     if (!chord.tablature) throw new Error('Tablature not defined for chord ' + chord.name)
-    if (!chord.fingering) throw new Error('Fingering not defined for chord ' + chord.name)
+
+    // if specific strings have been given (i.e. not * or *x), we also consider the muted strings in chord
+    let includeMutedStrings = forceIncludeMutedStrings || !strings.match(/^\*/)
 
     var result = []
     for (var i = 0; i < chord.tablature.length; i++) {
       // string will be between 6 and 1 since chord.tablature.length has been verified and is 6
       var string = 6 - i
 
-      // string never played in this chord
-      if (chord.tablature[i] === 'x') continue
+      // string not played in this chord
+      if (chord.tablature[i] === 'x' && !includeMutedStrings) continue
 
-      // first time we meet a played string, it's the bass so replace B and B' with the string number
-      strings = strings.replace(/B'/g, (string >= 5 ? string - 1 : string))
-      strings = strings.replace(/B/g, string)
+      // first time we meet an included string, it's the bass so replace B and B' with the string number
+      if (chord.tablature[i] !== 'x' || forceIncludeMutedStrings) {
+        strings = strings.replace(/B'/g, (string >= 5 ? string - 1 : string))
+        strings = strings.replace(/B/g, string)
+      }
 
       // check if this string should be played with the right hand
       // * means "all strings", otherwise concatenated specific string numbers are specified (or B for bass or B' for alternate bass)
       // x after string means muted (ghost) note
       if (strings.match(/^\*/) || strings.indexOf(string) !== -1) {
-        let fret = this.char2fret(chord.tablature[i])
+        let fret = chord.tablature[i] === 'x' ? 0 : this.char2fret(chord.tablature[i])
         let xIndex = strings.match(/^\*/) ? 1 : strings.indexOf(string) + 1
-        let mute = strings[xIndex] === 'x'
+        let mute = strings[xIndex] === 'x' || chord.tablature[i] === 'x'
         result.push({
           string: string,
           fret: fret,
@@ -221,8 +225,14 @@ export class Utils {
       }
     }
 
-    // if chord has no string in common with strings, return a muted chord (on all strings) in order not to get an error in vextab (empty chord not allowed)
-    if (result.length === 0) return Utils.chordStrings(chord, '*x')
+    // if chord has no string in common with given strings
+    if (result.length === 0) {
+      // if muted chord strings were already included, nothing to try left
+      if (forceIncludeMutedStrings) throw new Error('Utils.chordStrings giving up. This means that \"strings\" is empty which should never happen!')
+
+      // force including muted chord strings in order not to get an error in vextab (empty chord not allowed)
+      return Utils.chordStrings(chord, strings, true)
+    }
 
     return result
   }

@@ -32,8 +32,8 @@ export class VexTab {
       // note duration, slashed if no chord given
       vextab += note.chord ? Utils.durationcode(note.duration) : Utils.durationcode(note.duration).replace(/(:(?:w|h|q|8|16|32))(d?)/g, '$1S$2')
 
-      // if tied note
-      if (note.tied) vextab += 'T'
+      // if tied note (Tsbhpt)
+      if (note.tied) vextab += note.tied
 
       // chord or dummy note (for slash notation)
       vextab += !note.chord ? '(4/3)' : VexTab.Chord2VexTab(note.chord, note.strings, 0) // do not transpose with capo: chords are tabbed exactly as their diagrm says (author chooses to use capo'd chords or not)
@@ -202,11 +202,15 @@ export class VexTab {
           // note with no chord set (slash)
           let phraseNote = JSON.parse(JSON.stringify(note))
           phraseNote.lastInPhrase = lastBarInPhrase && noteIndex === bar.rhythm.compiledScore.length - 1
-          notesSlashed.push(phraseNote)
 
-          // register note with corresponding chord
+          // register slashed note without chord (i.e. remove any chord created from an inline tablature column)
+          let slashedPhraseNote = JSON.parse(JSON.stringify(phraseNote))
+          slashedPhraseNote.chord = null
+          notesSlashed.push(slashedPhraseNote)
+
+          // register chorded note with corresponding chord
           let chordedPhraseNote = JSON.parse(JSON.stringify(phraseNote))
-          chordedPhraseNote.chord = bar.chords[note.placeholderIndex]
+          chordedPhraseNote.chord = note.chord || bar.chords[note.placeholderIndex]
           if (!chordedPhraseNote.chord) throw new VexTabException('No chord found for placeholder ' + (note.placeholderIndex + 1))
           notes.push(chordedPhraseNote)
 

@@ -107,10 +107,10 @@ RHYTHM R2 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
 
 # A is used in intro (2x) and in verse (4x)
 # 1 bar using the "pianistic" rhythm
-# 1 bar using the same rhythm but with ending "riff" // TODO: T should be h (hammer on)
+# 1 bar using the same rhythm but with ending "riff"
 
 SUB A  [R1*C,,,,,,C Maj7]
-       [:8 ()d (B)d ()d (B)d ()d (B)d :16 (3)dT()u :8 ()d*F,,,,,,,xxx3xx,xxxx0x]
+       [:8 ()d (B)d ()d (B)d ()d (B)d :16 {---2--}d h{---3--}u :8 {----0-}d*F]
 
 # B is end of verse just before chorus
 # 3 bars using the "powerful" rhythm
@@ -150,7 +150,7 @@ PART "Verse"       A A ||
 PART "Chorus"      C1 C2
                    C1 C2 ||
                    C1 C2
-                   C1 [:q ()d ()d ()d ()d*C,3xxxxx,x0xxxx,x2xxxx]
+                   C1 [:q ()d {3-----}d {-0----}d {-2----}d*C]
 
 # 2 phrases of 4 bars each
 # last bar is one final arpeggiated stroke

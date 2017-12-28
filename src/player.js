@@ -146,7 +146,7 @@ export class Player {
     // jump to next note if skipped tied note
     if (note.skip) {
       // info message, scheduled to display at the given time
-      let message = (isBar ? '\n|\t' : '\t') + ('[SKIP]').padEnd(10, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : ''))
+      let message = (isBar ? '\n|\t' : '\t') + ('[SKIP]').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : ''))
       setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
       self.note_(time)
@@ -163,9 +163,11 @@ export class Player {
       if (!nextNote.tied) break
 
       // get frequencies for chord notes
-      // TODO: if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
       let nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote.chord, nextNote.strings, this.capo) : null
       if (!Utils.arraysEqual(noteFreqs, nextNoteFreqs)) break
+
+      // if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
+      if (!nextNote.chord && nextNote.tied && nextNote.tied !== 'T') break
 
       nextNote.skip = true
       nextPlayedNote = this.notes[nextNoteIndex + 1]
@@ -210,7 +212,7 @@ export class Player {
 
     // info message, scheduled to display at the same time as oscillator will play our sound
     let what = note.rest ? 'REST' : (chord ? chord.name + '/' + freqs.length + ' ' + (isDown ? 'B' : '') + (isUp ? 'H' : '') : 'BEEP')
-    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED]' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
+    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
     setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
     // play beep (1 note) or chord (N notes)

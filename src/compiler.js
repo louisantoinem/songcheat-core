@@ -155,6 +155,38 @@ class Compiler_ {
     return null
   }
 
+  readFlags (token, flagsString) {
+    let flags = { stroke: null, accent: false, pm: false, fingering: null }
+    for (let flag of flagsString.split(/(dd?|uu?|>|PM|[pima]+)/)) {
+      if (flag.trim()) {
+        if (flag.match(/^(dd?|uu?)$/g)) {
+          // stroke mode
+          if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('Palm muting (PM) and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.stroke) throw new CompilerException('More than one stroke mode (d, u, dd, uu) defined for the chord placeholder: ' + token)
+          flags.stroke = flag
+        } else if (flag.match(/^[pima]+$/)) {
+          // PIMA fingering
+          if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('Palm muting (PM) and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.fingering) throw new CompilerException('More than one fingering (pima) defined for the chord placeholder: ' + token)
+          flags.fingering = flag
+        } else if (flag.match(/^PM$/)) {
+          // palm muting
+          if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
+          if (flags.pm) throw new CompilerException('More than one palm muting (PM) defined for the chord placeholder: ' + token)
+          flags.pm = true
+        } else if (flag.match(/^>$/)) {
+          // accent
+          if (flags.accent) throw new CompilerException('More than one accent (>) defined for the same placeholder: ' + token)
+          flags.accent = true
+        } else throw new CompilerException('Invalid flag "' + flag + '" defined for chord placeholder "' + token + '"')
+      }
+    }
+    return flags
+  }
+
   compileRhythm (rhythm, initialNoteDuration) {
     this.log('Compiling rhythm ' + rhythm.id + ' with score "' + rhythm.score + '"')
 
@@ -170,7 +202,7 @@ class Compiler_ {
 
     // compile the score string into an array of objects
     rhythm.compiledScore = []
-    for (let token of rhythm.score.split(/((?::(?:w|h|q|8|16|32)d?)|\(#\)|T?\s*\([^(]*\)[^()\sT:]*)/)) {
+    for (let token of rhythm.score.split(/((?::(?:w|h|q|8|16|32)d?)|\(#\)|[Tsbhpt]?\s*\([^(]*\)(?:dd?|uu?|>|PM|[pima]+)*|[Tsbhpt]?\s*{[^{]*}(?:dd?|uu?|>|PM|[pima]+)*)/)) {
       if ((token = token.trim())) {
         let match = null
         if ((match = token.match(/^(:(?:w|h|q|8|16|32)d?)$/))) {
@@ -179,9 +211,9 @@ class Compiler_ {
         } else if ((match = token.match(/^\(#\)$/))) {
           // rest
           rhythm.compiledScore.push({ rest: true, duration: noteDuration, tied: false, strings: false, flags: {}, placeholderIndex: rhythm.placeholdercount++ })
-        } else if ((match = token.match(/^(T?)\s*\(([^(]*)\)([^()\s]*)$/))) {
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*\(([^(]*)\)([^(){}\s]*)$/))) {
           // chord placeholder
-          let tied = match[1] === 'T'
+          let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false
 
           // strings = between parentheses
           let strings = match[2]
@@ -190,38 +222,40 @@ class Compiler_ {
           if (!strings.match(/^(?:(\*x?)|((?:(?:B|B'|1|2|3|4|5|6)x?)+))$/)) throw new CompilerException('Invalid syntax found in chord placeholder: ' + strings)
 
           // flags = after parentheses
-          let flagsString = match[3]
-          let flags = { stroke: null, accent: false, pm: false, fingering: null }
-          for (let flag of flagsString.split(/(dd?|uu?|>|PM|[pima]+)/)) {
-            if (flag.trim()) {
-              if (flag.match(/^(dd?|uu?)$/g)) {
-                // stroke mode
-                if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('Palm muting (PM) and stroke (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.stroke) throw new CompilerException('More than one stroke mode (d, u, dd, uu) defined for the chord placeholder: ' + token)
-                flags.stroke = flag
-              } else if (flag.match(/^[pima]+$/)) {
-                // PIMA fingering
-                if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('Palm muting (PM) and fingering (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.fingering) throw new CompilerException('More than one fingering (pima) defined for the chord placeholder: ' + token)
-                flags.fingering = flag
-              } else if (flag.match(/^PM$/)) {
-                // palm muting
-                if (flags.stroke) throw new CompilerException('Stroke (' + flags.stroke + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.fingering) throw new CompilerException('Fingering (' + flags.fingering + ') and palm muting (' + flag + ') cannot be both defined for the chord placeholder: ' + token)
-                if (flags.pm) throw new CompilerException('More than one palm muting (PM) defined for the chord placeholder: ' + token)
-                flags.pm = true
-              } else if (flag.match(/^>$/)) {
-                // accent
-                if (flags.accent) throw new CompilerException('More than one accent (>) defined for the same placeholder: ' + token)
-                flags.accent = true
-              } else throw new CompilerException('Invalid flag "' + flag + '" defined for chord placeholder "' + token + '"')
-            }
-          }
+          let flags = this.readFlags(token, match[3])
 
           // add a note
           rhythm.compiledScore.push({ rest: false, duration: noteDuration, tied: tied, strings: strings, flags: flags, placeholderIndex: rhythm.placeholdercount++ })
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*{([^{]*)}([^(){}\s]*)$/))) {
+          // inline tablature column (= placeholder x chord)
+          let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false
+
+          // final tablature column = between curly brackets
+          let tablature = match[2]
+          if (tablature.length !== 6) throw new CompilerException('Inline tablature must be exactly 6 characters long (one for each guitar string)')
+          if (!tablature.match(/^[-x0-9A-Z]{6}$/)) throw new CompilerException('Inline tablature must contain only digits and capital letters (representing a fret number) or "x" (mute) or "-" (not played), but found ' + tablature)
+
+          // create a dummy chord from this tablature containing all played strings (muted or fretted)
+          let chordTablature = tablature.replace(/x/g, '0').replace(/-/g, 'x')
+          let chord = { name: chordTablature, tablature: chordTablature, inline: true }
+
+          // create dummy associated strings containing the number of all played strings (with additional "x" if muted)
+          let strings = ''
+          let stringNum = 6
+          for (let c of tablature) {
+            if (c !== '-') strings += stringNum + (c === 'x' ? 'x' : '')
+            stringNum--
+          }
+          // if entered chord is "------", include all strings so that Utils.chordStrings will return 6 muted notes
+          // UPDATE: no rather throw an error
+          // if (strings === '') strings = '*'
+          if (strings === '') throw new CompilerException('Found empty inline tablature {' + tablature + '}, use a rest (#) instead')
+
+          // flags = after parentheses
+          let flags = this.readFlags(token, match[3])
+
+          // add a note
+          rhythm.compiledScore.push({ rest: false, duration: noteDuration, tied: tied, strings: strings, flags: flags, chord: chord })
         } else throw new CompilerException('Invalid token "' + token + '" in rhythm score definition at position ' + position + (lastToken ? ' (after "' + lastToken + '")' : ''))
 
         lastToken = token
@@ -243,7 +277,7 @@ class Compiler_ {
     let offset = 0
     for (let note of bar.rhythm.compiledScore) {
       // get chord corresponding to the placeholder position
-      let chord = bar.chords[note.placeholderIndex]
+      let chord = note.chord || bar.chords[note.placeholderIndex]
       if (!chord) throw new CompilerException('No chord found for placeholder ' + (note.placeholderIndex + 1))
 
       // same chord as before and not a new bar: increment duration with this new note
