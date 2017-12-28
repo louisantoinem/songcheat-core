@@ -681,41 +681,46 @@ class Compiler_ {
     // validate and compile each rhythm
     for (let rhythm of songcheat.rhythms) this.compileRhythm(rhythm, songcheat.signature.time.beatDuration);
 
-    for (let part of songcheat.parts) {
-      // compute a "chordChanges" property in each phrase
-      let phraseIndex = 0;
-      for (let phrase of part.phrases) {
-        phrase.chordChanges = [];
-        let lastChord = null;
-        for (let bar of phrase.bars) lastChord = this.addChordChanges(bar, phrase.chordChanges, songcheat.barDuration, false, lastChord);
-
-        this.log('Phrase wise chord durations for phrase ' + part.name + '.' + (phraseIndex + 1));
-        for (let c of phrase.chordChanges) this.log('\t[' + c.chord.name + '] = ' + c.duration + ' units');
-
-        // compute a "chordChanges" property in each bar
-        let barIndex = 0;
-        for (let bar of phrase.bars) {
-          bar.chordChanges = { 'bar': [], 'rhythm': [] };
-          for (let chordChangesMode of ['rhythm', 'bar']) this.addChordChanges(bar, bar.chordChanges[chordChangesMode], songcheat.barDuration, chordChangesMode === 'bar');
-
-          this.log('\tRythm wise chord durations for bar ' + part.name + '.' + (phraseIndex + 1) + '.' + (barIndex + 1));
-          for (let c of bar.chordChanges['rhythm']) this.log('\t\t[' + c.chord.name + '] = ' + c.duration + ' units');
-          this.log('\tBar wise chord durations for bar ' + part.name + '.' + (phraseIndex + 1) + '.' + (barIndex + 1));
-          for (let c of bar.chordChanges['bar']) this.log('\t\t[' + c.chord.name + '] = ' + c.duration + ' units');
-
-          barIndex++;
-        }
-
-        phraseIndex++;
-      }
-
-      // compute duration of part
-      part.duration = 0;
-      for (let phrase of part.phrases) { for (let bar of phrase.bars) part.duration += bar.rhythm.duration; }
-    }
+    // compile each phrase
+    for (let part of songcheat.parts) this.compilePart(part, songcheat.barDuration);
 
     // fluid API
     return songcheat
+  }
+
+  compilePart (part, barDuration) {
+    // compute a "chordChanges" property in each phrase
+    let phraseIndex = 0;
+    for (let phrase of part.phrases) {
+      phrase.chordChanges = [];
+      let lastChord = null;
+      for (let bar of phrase.bars) lastChord = this.addChordChanges(bar, phrase.chordChanges, barDuration, false, lastChord);
+
+      this.log('Phrase wise chord durations for phrase ' + part.name + '.' + (phraseIndex + 1));
+      for (let c of phrase.chordChanges) this.log('\t[' + c.chord.name + '] = ' + c.duration + ' units');
+
+      // compute a "chordChanges" property in each bar
+      let barIndex = 0;
+      for (let bar of phrase.bars) {
+        bar.chordChanges = { 'bar': [], 'rhythm': [] };
+        for (let chordChangesMode of ['rhythm', 'bar']) this.addChordChanges(bar, bar.chordChanges[chordChangesMode], barDuration, chordChangesMode === 'bar');
+
+        this.log('\tRythm wise chord durations for bar ' + part.name + '.' + (phraseIndex + 1) + '.' + (barIndex + 1));
+        for (let c of bar.chordChanges['rhythm']) this.log('\t\t[' + c.chord.name + '] = ' + c.duration + ' units');
+        this.log('\tBar wise chord durations for bar ' + part.name + '.' + (phraseIndex + 1) + '.' + (barIndex + 1));
+        for (let c of bar.chordChanges['bar']) this.log('\t\t[' + c.chord.name + '] = ' + c.duration + ' units');
+
+        barIndex++;
+      }
+
+      phraseIndex++;
+    }
+
+    // compute duration of part
+    part.duration = 0;
+    for (let phrase of part.phrases) { for (let bar of phrase.bars) part.duration += bar.rhythm.duration; }
+
+    return part
   }
 
   resolveIds (songcheat) {
@@ -831,7 +836,7 @@ class Compiler_ {
         } else if ((match = token.match(/^\(#\)$/))) {
           // rest
           rhythm.compiledScore.push({ rest: true, duration: noteDuration, tied: false, strings: false, flags: {}, placeholderIndex: rhythm.placeholdercount++ });
-        } else if ((match = token.match(/^([Tsbhpt]?)\s*\(([^(]*)\)([^(){}\s]*)$/))) {
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*\(([^(]*)\)((?:dd?|uu?|>|PM|[pima]+)*)$/))) {
           // chord placeholder
           let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false;
 
@@ -846,7 +851,7 @@ class Compiler_ {
 
           // add a note
           rhythm.compiledScore.push({ rest: false, duration: noteDuration, tied: tied, strings: strings, flags: flags, placeholderIndex: rhythm.placeholdercount++ });
-        } else if ((match = token.match(/^([Tsbhpt]?)\s*{([^{]*)}([^(){}\s]*)$/))) {
+        } else if ((match = token.match(/^([Tsbhpt]?)\s*{([^{]*)}((?:dd?|uu?|>|PM|[pima]+)*)$/))) {
           // inline tablature column (= placeholder x chord)
           let tied = match[1].match(/[Tsbhpt]/) ? match[1] : false;
 
@@ -927,6 +932,11 @@ class Compiler {
   compile (songcheat) {
     console.log(Utils.title('COMPILE SONGCHEAT'));
     return this.compiler_.compile(JSON.parse(JSON.stringify(songcheat)))
+  }
+
+  compilePart (part, barDuration) {
+    console.log(Utils.title('COMPILE PART'));
+    return this.compiler_.compilePart(JSON.parse(JSON.stringify(part)), barDuration)
   }
 }
 
@@ -1447,6 +1457,15 @@ class VexTab {
       unitIndex++;
     }
     return vextab
+  }
+
+  static Rhythm2VexTab (songcheat, rhythm) {
+    // create dummy part and unit on a chord with all open strings
+    let compiler = new Compiler();
+    let chord = { name: 'open chord', tablature: '000000', inline: true };
+    let part = compiler.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration);
+    let unit = { name: rhythm.inline ? '' : 'Rhythm ' + rhythm.name, part: part };
+    return VexTab.Unit2VexTab(songcheat, unit)
   }
 
   static Unit2VexTab (songcheat, unit, unitIndex) {
