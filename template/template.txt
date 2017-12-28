@@ -79,14 +79,14 @@ CHORD C     x32010 T32010
 CHORD CMaj7 x32000 T32000   "C without finger 1"
 CHORD F     xx3211 T33211   "F without E and A strings"
 # CHORD F     1x3211 T33211   "Alt. version: play E string on fret 1"
-CHORD F/E   0x3211 033211/1 "F with open E string"
-# CHORD F/E   xx2211 T33211/1 "Alt. version: finger 3 left by 1 fret"
+CHORD F/E   xx2211 T33211/1 "finger 3 left by 1 fret"
+# CHORD F/E   0x3211 033211/1 "Alt. version: F with open E string"
 CHORD Dm    xx0231 T00241   "Finger 4 instead of 3"
 CHORD Dm/C  x30231 T30241   "Dm adding finger 3 on A string"
 CHORD G     320003 320004   "G with 3 fingers"
 CHORD G7    320001 320001   "G with finger 1 on e string"
 CHORD E     022100 023100
-CHORD F'    113211 113211/1   "Classical F Barré"
+CHORD F'    133211 113211/1   "Classical F Barré"
 
 ###########
 # RHYTHMS #
@@ -94,42 +94,45 @@ CHORD F'    113211 113211/1   "Classical F Barré"
 
 # Rhythm: $Name $Score
 # See user guide for syntax of $Score
-# TODO: T should be h (hammer on)
 
-RHYTHM RC ":q ()d ()d ()d ()d"
+# pianistic style: 8th strum then 8th bass
 RHYTHM R1 ":8 ()d (B)d ()d (B)d ()d (B)d ()d (B)d"
+
+# idem R1 with ending "riff" // TODO: T should be h (hammer on)
 RHYTHM R2 ":8 ()d (B)d ()d (B)d ()d (B)d :16 ()dT()u :8 ()d"
+
+# more powerful rhythm, alternative for R1 in parts B (pre-chorus) and C1, C2 (chorus)
 RHYTHM R3 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
 
-# last bar of each verse
-RHYTHM R4 ":w ()d"
+# last bar of each verse: one final stroke for whole bar
+RHYTHM R4 ":hd ()d :q (#)"
 
-# last bar of final chorus
-RHYTHM R5 ":h ()dd (#)"
+# last bar of chorus: 4 quarters
+RHYTHM R5 ":q ()d ()d ()d ()d"
+
+# last bar of final chorus: one final arpeggiated stroke for whole bar
+RHYTHM R6 ":h ()dd (#)"
 
 #########
 # PARTS #
 #########
 
-SUB A   [R1*C::::::CMaj7] [R2*F::::::xxx2xx:xxx3xx:xxxx0x]
+SUB A  [R1*C::::::CMaj7] [R2*F::::::xxx2xx:xxx3xx:xxxx0x]
+SUB B  [R1*F::::F/E] [R1*Dm::::Dm/C] [R1*G] [R4*G7]
+SUB C1 [R1*F'::::G]
+SUB C2 [R1*C::::E]
 
-SUB B   [R1*F::::F/E] [R1*Dm::::Dm/C] [R1*G] [R4*G7]
-# B using "powerful" rhythm
-SUB B   [R3*F::::F/E] [R3*Dm::::Dm/C] [R3*G] [R4*G7]
+# B and/or C can use the "powerful" rhythm
+SUB B  [R3*F::::F/E] [R3*Dm::::Dm/C] [R3*G] [R4*G7]
+# SUB C1 [R3*F::::G]
+# SUB C2 [R3*C::::E]
 
-SUB C1   [R1*F::::G]
-SUB C2   [R1*C::::E]
-
-# C using "powerful" rhythm
-# SUB C1   [R3*F::::G]
-# SUB C2   [R3*C::::E]
-
-SUB C    C1 || C2
+SUB C C1 || C2
 
 PART "Intro"       A A
 PART "Verse"       A A || A A || B
-PART "Chorus"      C C || C C1 [RC*C:3xxxxx:x0xxxx:x2xxxx]
-PART "ChorusEnd"   C C || C C1 [R5*C]
+PART "Chorus"      C C || C C1 [R5*C:3xxxxx:x0xxxx:x2xxxx]
+PART "ChorusEnd"   C C || C C1 [R6*C]
 
 #############
 # STRUCTURE #
@@ -147,7 +150,7 @@ STRUCTURE
 "
 
 "Verse" ":Imagine:there's:no hea-|ven|
-:It's:easy:if you|try|
+:It's ea-:sy if:you|try|
 :No:hell:below|us|
 :Above:us:only|sky|
 :Imagine:all:the|people|
