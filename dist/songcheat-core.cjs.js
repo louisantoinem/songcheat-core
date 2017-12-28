@@ -723,6 +723,14 @@ class Compiler_ {
     return part
   }
 
+  getRhythmUnit (songcheat, rhythm) {
+    // create dummy part and unit on a chord with all open strings
+    let chord = { name: 'AIR', tablature: '000000', inline: true };
+    let part = this.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration);
+    let unit = { name: rhythm.inline ? '' : 'Rhythm ' + rhythm.name, part: part };
+    return unit
+  }
+
   resolveIds (songcheat) {
     let unitIndex = 0;
     if (songcheat.structure) {
@@ -934,9 +942,8 @@ class Compiler {
     return this.compiler_.compile(JSON.parse(JSON.stringify(songcheat)))
   }
 
-  compilePart (part, barDuration) {
-    console.log(Utils.title('COMPILE PART'));
-    return this.compiler_.compilePart(JSON.parse(JSON.stringify(part)), barDuration)
+  getRhythmUnit (songcheat, rhythm) {
+    return this.compiler_.getRhythmUnit(songcheat, rhythm)
   }
 }
 
@@ -1460,12 +1467,9 @@ class VexTab {
   }
 
   static Rhythm2VexTab (songcheat, rhythm) {
-    // create dummy part and unit on a chord with all open strings
+    // run Unit2VexTab on dummy rhythm unit
     let compiler = new Compiler();
-    let chord = { name: 'open chord', tablature: '000000', inline: true };
-    let part = compiler.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration);
-    let unit = { name: rhythm.inline ? '' : 'Rhythm ' + rhythm.name, part: part };
-    return VexTab.Unit2VexTab(songcheat, unit)
+    return VexTab.Unit2VexTab(songcheat, compiler.getRhythmUnit(songcheat, rhythm))
   }
 
   static Unit2VexTab (songcheat, unit, unitIndex) {
@@ -2632,7 +2636,7 @@ class Player {
     // played chord (for a rest, chord is set but strings is not)
     if (chord && note.strings) {
       // get frequencies for chord notes
-      freqs = this.chord2frequencies(chord, this.mode === this.MODE_BASS ? note.strings.replace(/\*/g, 'B') : note.strings, this.capo);
+      freqs = this.chord2frequencies(chord, this.mode === this.MODE_BASS ? 'B' : note.strings, this.capo);
 
       // reverse string order if up stroke
       if (isUp) freqs = freqs.reverse();
@@ -2641,11 +2645,11 @@ class Player {
       // volume = volume / (2.0 * Math.sqrt(freqs.length));
       // UPDATE: no, bass among chords is otherwise louder than it should
       // UPDATE: instead increase volume only if BASS ONLY mode
-      if (this.mode === this.MODE_BASS) volume *= 3;
+      if (this.mode === this.MODE_BASS) volume *= 2;
     }
 
     // info message, scheduled to display at the same time as oscillator will play our sound
-    let what = note.rest ? 'REST' : (chord ? chord.name + '/' + freqs.length + ' ' + (isDown ? 'B' : '') + (isUp ? 'H' : '') : 'BEEP');
+    let what = note.rest ? 'REST' : (chord ? chord.name + '/' + freqs.length + (isDown ? ' B' : '') + (isUp ? ' H' : '') : 'BEEP');
     let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '');
     setTimeout(function () { console.info(message); }, Math.max(0, time - audioCtx.currentTime) * 1000);
 

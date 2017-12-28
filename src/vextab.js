@@ -127,12 +127,9 @@ export class VexTab {
   }
 
   static Rhythm2VexTab (songcheat, rhythm) {
-    // create dummy part and unit on a chord with all open strings
+    // run Unit2VexTab on dummy rhythm unit
     let compiler = new Compiler()
-    let chord = { name: 'open chord', tablature: '000000', inline: true }
-    let part = compiler.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration)
-    let unit = { name: rhythm.inline ? '' : 'Rhythm ' + rhythm.name, part: part }
-    return VexTab.Unit2VexTab(songcheat, unit)
+    return VexTab.Unit2VexTab(songcheat, compiler.getRhythmUnit(songcheat, rhythm))
   }
 
   static Unit2VexTab (songcheat, unit, unitIndex) {

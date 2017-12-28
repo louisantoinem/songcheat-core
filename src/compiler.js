@@ -103,6 +103,14 @@ class Compiler_ {
     return part
   }
 
+  getRhythmUnit (songcheat, rhythm) {
+    // create dummy part and unit on a chord with all open strings
+    let chord = { name: 'AIR', tablature: '000000', inline: true }
+    let part = this.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration)
+    let unit = { name: rhythm.inline ? '' : 'Rhythm ' + rhythm.name, part: part }
+    return unit
+  }
+
   resolveIds (songcheat) {
     let unitIndex = 0
     if (songcheat.structure) {
@@ -314,8 +322,7 @@ export class Compiler {
     return this.compiler_.compile(JSON.parse(JSON.stringify(songcheat)))
   }
 
-  compilePart (part, barDuration) {
-    console.log(Utils.title('COMPILE PART'))
-    return this.compiler_.compilePart(JSON.parse(JSON.stringify(part)), barDuration)
+  getRhythmUnit (songcheat, rhythm) {
+    return this.compiler_.getRhythmUnit(songcheat, rhythm)
   }
 }
