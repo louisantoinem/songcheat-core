@@ -6,7 +6,9 @@
   "module": "dist/songcheat-core.esm.js",
   "watch": {
     "template": {
-      "patterns": ["template"],
+      "patterns": [
+        "template"
+      ],
       "extensions": "txt",
       "quiet": true
     }
