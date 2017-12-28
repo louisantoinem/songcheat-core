@@ -84,7 +84,7 @@ class Parser_ {
 
       if (keyword === 'chord') lastResult.chordIndex = this.songcheat.chords.length - 1
       else if (keyword === 'rhythm') lastResult.rhythmIndex = this.songcheat.rhythms.length - 1
-      else if (keyword === 'part') lastResult.partIndex = this.songcheat.parts.length - 1
+      else if (keyword === 'part' || keyword === 'sub') lastResult.partIndex = this.songcheat.parts.length - 1
       else if (keyword === 'structure') {
         // special case since there is no distinct UNIT keyword for each unit, but a single STRUCTURE keyword for all units
         let paramIndex = 0
@@ -101,7 +101,7 @@ class Parser_ {
 
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value)
-    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
+    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
   }
 
   tokenize (text) {
@@ -184,17 +184,17 @@ class Parser_ {
     let str = param.value.substr(1, param.value.length - 2)
     let parts = str.split(/\*|:/)
 
-    // find rhythm
-    let found = false
+    // find rhythm by its name (if several, use last one)
+    let foundRhythmId = null
     for (let rhythm of this.songcheat['rhythms']) {
       if (rhythm.name === parts[0]) {
-        bar.rhythm = rhythm.id
-        found = true
-        break
+        foundRhythmId = rhythm.id
+        // break
       }
     }
 
-    if (!found) throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm')
+    if (foundRhythmId !== null) bar.rhythm = foundRhythmId
+    else throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm')
 
     // find chords
     parts = parts.slice(1)
@@ -206,28 +206,34 @@ class Parser_ {
         continue
       }
 
-      // search for chord by its name
-      let found = false
+      // search for chord by its name (if several, use last one)
+      let foundChordId = null
       for (let chord of this.songcheat['chords']) {
         if (chord.name === part) {
-          bar.chords.push(chord.id)
-          found = true
-          break
+          foundChordId = chord.id
+          // break
         }
       }
 
       // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
-      if (!found && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
+      if (foundChordId === null && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
         // create inline chord with the name being the tablature itself, and no fingering nor comment
         let chord = this.handleChord(param.line, 'chord', [{ value: part, line: param.line }, { value: part.split('/')[0], line: param.line }, { value: '000000/' + (part.split('/')[1] || '-'), line: param.line }])
-        bar.chords.push(chord.id)
-        found = true
+        chord.inline = true // will be hidden in Chords panel and not displayed as a chord change
+        foundChordId = chord.id
       }
 
-      if (!found) throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature')
+      if (foundChordId !== null) bar.chords.push(foundChordId)
+      else throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature')
     }
 
     return bar
+  }
+
+  handleSub (line, keyword, params) {
+    // a sub is a part like any other but with "sub" = true (will not be displayed in Parts panel)
+    let part = this.handlePart(line, keyword, params)
+    part.sub = true
   }
 
   handlePart (line, keyword, params) {
@@ -265,30 +271,33 @@ class Parser_ {
       }
 
       // not a || phrase separator nor a [] bar: must be a part name
-      let found = false
+      // so search for part by its name (if several, use last one)
+      let foundPart = null
       for (let p of this.songcheat['parts']) {
         if (p.name === param.value) {
-          // insert part at current position
-          let phraseIndex = 0
-          for (let ph of p.phrases) {
-            if (phraseIndex > 0) {
-              part.phrases.push({ 'bars': bars })
-              bars = []
-            }
-            for (let b of ph.bars) bars.push(b)
-            phraseIndex++
-          }
-
-          found = true
-          break
+          foundPart = p
+          // break
         }
       }
 
-      if (!found) throw new ParserException(param.line, param.value + ' is not the name of an existing part')
+      // insert found part at current position
+      if (foundPart !== null) {
+        let phraseIndex = 0
+        for (let ph of foundPart.phrases) {
+          if (phraseIndex > 0) {
+            part.phrases.push({ 'bars': bars })
+            bars = []
+          }
+          for (let b of ph.bars) bars.push(b)
+          phraseIndex++
+        }
+      } else throw new ParserException(param.line, param.value + ' is not the name of an existing part')
     }
 
     // end of last phrase
     if (bars.length > 0) part.phrases.push({ 'bars': bars })
+
+    return part
   }
 
   handleStructure (line, keyword, params) {

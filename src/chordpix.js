@@ -50,7 +50,8 @@ export class ChordPix {
 
       // check fingering is valid
       if (typeof chord.fingering !== 'string') throw new Error('chord.fingering must be a string')
-      if (chord.fingering.length !== 8) throw new Error('chord.fingering must be exactly 8 characters long (....../.)')
+      if (chord.fingering.length === 6) chord.fingering += '/-'
+      if (chord.fingering.length !== 8) throw new Error('chord.fingering must be exactly 6 or 8 characters long (....../.)')
       if (!chord.fingering.match(/^[PT01234]{6}.*$/)) throw new Error('the first 6 characters of chord.fingering can only be P,T,1,2,3,4 or 0 (each character represents a finger)')
       if (!chord.fingering.match(/^[PT01234]{6}\/[-0-9A-Z]$/)) throw new Error('the last 2 characters of chord.fingering must be a "/" followed by a digit or capital letter (representing the number of the barred fret) or "-" if there is no barred fret')
 

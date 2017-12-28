@@ -152,7 +152,7 @@ export class VexTab {
     for (let phrase of unit.part.phrases) {
       for (let bar of phrase.bars) {
         for (let chordChange of bar.chordChanges['rhythm']) {
-          chordGroups.push({ offset: offset, text: chordChange.chord.name + (DEBUG ? '/' + chordChange.duration : '') })
+          chordGroups.push({ offset: offset, text: Utils.getChordDisplay(chordChange) + (DEBUG ? '/' + chordChange.duration : '') })
           offset += chordChange.duration
         }
       }

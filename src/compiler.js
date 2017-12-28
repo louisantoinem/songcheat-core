@@ -38,10 +38,10 @@ class Compiler_ {
     // resolve all id references (rhythms and chords)
     this.resolveIds(songcheat)
 
-    // default structure if not specified : one unit for each part
+    // default structure if not specified : one unit for each (non sub) part
     if (!songcheat.structure) {
       songcheat.structure = []
-      for (let part of songcheat.parts) songcheat.structure.push({ 'part': part })
+      for (let part of songcheat.parts) if (!part.sub) songcheat.structure.push({ 'part': part })
     }
 
     // give a name to each unit if not already set = name of part with automatic numbering
@@ -56,7 +56,7 @@ class Compiler_ {
     // give a color to each part if not already set
     let colors = ['red', '#06D6A0', 'blue', 'purple', 'orange', 'magenta']
     let partIndex = 0
-    for (let part of songcheat.parts) { if (!part.color) part.color = colors[partIndex++ % colors.length] }
+    for (let part of songcheat.parts) { if (!part.color && !part.sub) part.color = colors[partIndex++ % colors.length] }
 
     // validate and compile each rhythm
     for (let rhythm of songcheat.rhythms) this.compileRhythm(rhythm, songcheat.signature.time.beatDuration)

@@ -223,4 +223,16 @@ export class Utils {
 
     return result
   }
+
+  /**
+    * Return string for chord duration
+    */
+
+  static getChordDisplay (chordDuration) {
+    // space and not empty if hidden (ensures that a white space will show that next change does not happen at the begin of the bar)
+    if (chordDuration.hidden || chordDuration.chord.inline) return ' '
+
+    // a space prevents chord names to be glued together on group and prevents a next group from starting directly after last chord of previous group
+    return chordDuration.chord.name + ' '
+  }
 }

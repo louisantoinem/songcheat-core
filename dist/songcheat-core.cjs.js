@@ -1,5 +1,5 @@
 /**
- * SongCheat Core 1.0.0 built on Wed Dec 27 2017 06:55:28 GMT+0100 (CET).
+ * SongCheat Core 1.0.0 built on Thu Dec 28 2017 03:28:21 GMT+0100 (CET).
   * Copyright (c) 2017 Louis Antoine <louisantoinem@gmail.com>
  *
  * http://www.songcheat.io  http://github.com/louisantoinem/songcheat-core
@@ -365,6 +365,20 @@ var Utils = function () {
 
       return result;
     }
+
+    /**
+      * Return string for chord duration
+      */
+
+  }, {
+    key: 'getChordDisplay',
+    value: function getChordDisplay(chordDuration) {
+      // space and not empty if hidden (ensures that a white space will show that next change does not happen at the begin of the bar)
+      if (chordDuration.hidden || chordDuration.chord.inline) return ' ';
+
+      // a space prevents chord names to be glued together on group and prevents a next group from starting directly after last chord of previous group
+      return chordDuration.chord.name + ' ';
+    }
   }]);
   return Utils;
 }();
@@ -460,7 +474,7 @@ var Parser_ = function () {
 
         lastResult = { line: token.line, keyword: keyword, params: params, chordIndex: null, rhythmIndex: null, partIndex: null, unitIndex: null };
 
-        if (keyword === 'chord') lastResult.chordIndex = this.songcheat.chords.length - 1;else if (keyword === 'rhythm') lastResult.rhythmIndex = this.songcheat.rhythms.length - 1;else if (keyword === 'part') lastResult.partIndex = this.songcheat.parts.length - 1;else if (keyword === 'structure') {
+        if (keyword === 'chord') lastResult.chordIndex = this.songcheat.chords.length - 1;else if (keyword === 'rhythm') lastResult.rhythmIndex = this.songcheat.rhythms.length - 1;else if (keyword === 'part' || keyword === 'sub') lastResult.partIndex = this.songcheat.parts.length - 1;else if (keyword === 'structure') {
           // special case since there is no distinct UNIT keyword for each unit, but a single STRUCTURE keyword for all units
           var paramIndex = 0;
           var _iteratorNormalCompletion = true;
@@ -498,7 +512,7 @@ var Parser_ = function () {
     key: 'isKeyword',
     value: function isKeyword(token) {
       var keyword = Utils.camelCase(token.value);
-      return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false;
+      return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false;
     }
   }, {
     key: 'tokenize',
@@ -644,8 +658,8 @@ var Parser_ = function () {
       var str = param.value.substr(1, param.value.length - 2);
       var parts = str.split(/\*|:/);
 
-      // find rhythm
-      var found = false;
+      // find rhythm by its name (if several, use last one)
+      var foundRhythmId = null;
       var _iteratorNormalCompletion4 = true;
       var _didIteratorError4 = false;
       var _iteratorError4 = undefined;
@@ -655,9 +669,8 @@ var Parser_ = function () {
           var rhythm = _step4.value;
 
           if (rhythm.name === parts[0]) {
-            bar.rhythm = rhythm.id;
-            found = true;
-            break;
+            foundRhythmId = rhythm.id;
+            // break
           }
         }
       } catch (err) {
@@ -675,7 +688,7 @@ var Parser_ = function () {
         }
       }
 
-      if (!found) throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm');
+      if (foundRhythmId !== null) bar.rhythm = foundRhythmId;else throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm');
 
       // find chords
       parts = parts.slice(1);
@@ -694,8 +707,8 @@ var Parser_ = function () {
             continue;
           }
 
-          // search for chord by its name
-          var _found = false;
+          // search for chord by its name (if several, use last one)
+          var foundChordId = null;
           var _iteratorNormalCompletion6 = true;
           var _didIteratorError6 = false;
           var _iteratorError6 = undefined;
@@ -705,9 +718,8 @@ var Parser_ = function () {
               var chord = _step6.value;
 
               if (chord.name === part) {
-                bar.chords.push(chord.id);
-                _found = true;
-                break;
+                foundChordId = chord.id;
+                // break
               }
             }
 
@@ -727,14 +739,14 @@ var Parser_ = function () {
             }
           }
 
-          if (!_found && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
+          if (foundChordId === null && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
             // create inline chord with the name being the tablature itself, and no fingering nor comment
             var _chord = this.handleChord(param.line, 'chord', [{ value: part, line: param.line }, { value: part.split('/')[0], line: param.line }, { value: '000000/' + (part.split('/')[1] || '-'), line: param.line }]);
-            bar.chords.push(_chord.id);
-            _found = true;
+            _chord.inline = true; // will be hidden in Chords panel and not displayed as a chord change
+            foundChordId = _chord.id;
           }
 
-          if (!_found) throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature');
+          if (foundChordId !== null) bar.chords.push(foundChordId);else throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature');
         }
       } catch (err) {
         _didIteratorError5 = true;
@@ -752,6 +764,13 @@ var Parser_ = function () {
       }
 
       return bar;
+    }
+  }, {
+    key: 'handleSub',
+    value: function handleSub(line, keyword, params) {
+      // a sub is a part like any other but with "sub" = true (will not be displayed in Parts panel)
+      var part = this.handlePart(line, keyword, params);
+      part.sub = true;
     }
   }, {
     key: 'handlePart',
@@ -790,7 +809,8 @@ var Parser_ = function () {
         }
 
         // not a || phrase separator nor a [] bar: must be a part name
-        var found = false;
+        // so search for part by its name (if several, use last one)
+        var foundPart = null;
         var _iteratorNormalCompletion7 = true;
         var _didIteratorError7 = false;
         var _iteratorError7 = undefined;
@@ -800,65 +820,12 @@ var Parser_ = function () {
             var p = _step7.value;
 
             if (p.name === param.value) {
-              // insert part at current position
-              var phraseIndex = 0;
-              var _iteratorNormalCompletion8 = true;
-              var _didIteratorError8 = false;
-              var _iteratorError8 = undefined;
-
-              try {
-                for (var _iterator8 = p.phrases[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                  var ph = _step8.value;
-
-                  if (phraseIndex > 0) {
-                    part.phrases.push({ 'bars': bars });
-                    bars = [];
-                  }
-                  var _iteratorNormalCompletion9 = true;
-                  var _didIteratorError9 = false;
-                  var _iteratorError9 = undefined;
-
-                  try {
-                    for (var _iterator9 = ph.bars[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                      var b = _step9.value;
-                      bars.push(b);
-                    }
-                  } catch (err) {
-                    _didIteratorError9 = true;
-                    _iteratorError9 = err;
-                  } finally {
-                    try {
-                      if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                        _iterator9.return();
-                      }
-                    } finally {
-                      if (_didIteratorError9) {
-                        throw _iteratorError9;
-                      }
-                    }
-                  }
-
-                  phraseIndex++;
-                }
-              } catch (err) {
-                _didIteratorError8 = true;
-                _iteratorError8 = err;
-              } finally {
-                try {
-                  if (!_iteratorNormalCompletion8 && _iterator8.return) {
-                    _iterator8.return();
-                  }
-                } finally {
-                  if (_didIteratorError8) {
-                    throw _iteratorError8;
-                  }
-                }
-              }
-
-              found = true;
-              break;
+              foundPart = p;
+              // break
             }
           }
+
+          // insert found part at current position
         } catch (err) {
           _didIteratorError7 = true;
           _iteratorError7 = err;
@@ -874,11 +841,67 @@ var Parser_ = function () {
           }
         }
 
-        if (!found) throw new ParserException(param.line, param.value + ' is not the name of an existing part');
+        if (foundPart !== null) {
+          var phraseIndex = 0;
+          var _iteratorNormalCompletion8 = true;
+          var _didIteratorError8 = false;
+          var _iteratorError8 = undefined;
+
+          try {
+            for (var _iterator8 = foundPart.phrases[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+              var ph = _step8.value;
+
+              if (phraseIndex > 0) {
+                part.phrases.push({ 'bars': bars });
+                bars = [];
+              }
+              var _iteratorNormalCompletion9 = true;
+              var _didIteratorError9 = false;
+              var _iteratorError9 = undefined;
+
+              try {
+                for (var _iterator9 = ph.bars[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                  var b = _step9.value;
+                  bars.push(b);
+                }
+              } catch (err) {
+                _didIteratorError9 = true;
+                _iteratorError9 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                    _iterator9.return();
+                  }
+                } finally {
+                  if (_didIteratorError9) {
+                    throw _iteratorError9;
+                  }
+                }
+              }
+
+              phraseIndex++;
+            }
+          } catch (err) {
+            _didIteratorError8 = true;
+            _iteratorError8 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                _iterator8.return();
+              }
+            } finally {
+              if (_didIteratorError8) {
+                throw _iteratorError8;
+              }
+            }
+          }
+        } else throw new ParserException(param.line, param.value + ' is not the name of an existing part');
       }
 
       // end of last phrase
       if (bars.length > 0) part.phrases.push({ 'bars': bars });
+
+      return part;
     }
   }, {
     key: 'handleStructure',
@@ -1002,7 +1025,7 @@ var Compiler_ = function () {
       // resolve all id references (rhythms and chords)
       this.resolveIds(songcheat);
 
-      // default structure if not specified : one unit for each part
+      // default structure if not specified : one unit for each (non sub) part
       if (!songcheat.structure) {
         songcheat.structure = [];
         var _iteratorNormalCompletion = true;
@@ -1012,7 +1035,7 @@ var Compiler_ = function () {
         try {
           for (var _iterator = songcheat.parts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var part = _step.value;
-            songcheat.structure.push({ 'part': part });
+            if (!part.sub) songcheat.structure.push({ 'part': part });
           }
         } catch (err) {
           _didIteratorError = true;
@@ -1094,7 +1117,7 @@ var Compiler_ = function () {
       try {
         for (var _iterator4 = songcheat.parts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
           var _part = _step4.value;
-          if (!_part.color) _part.color = colors[partIndex++ % colors.length];
+          if (!_part.color && !_part.sub) _part.color = colors[partIndex++ % colors.length];
         }
 
         // validate and compile each rhythm
@@ -1975,7 +1998,7 @@ var Lyrics_ = function () {
               if (!_group3) throw new Error('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset + ' units');
 
               // register chord change in group
-              _group3.chordChanges['phrase'].push({ offset: offset, text: this.getChordDisplay(chordDuration) });
+              _group3.chordChanges['phrase'].push({ offset: offset, text: Utils.getChordDisplay(chordDuration) });
 
               offset += chordDuration.duration;
             }
@@ -2066,7 +2089,7 @@ var Lyrics_ = function () {
                     if (!_group4) throw new Error('No closest group found for chord ' + _chordDuration.chord.name + ' with offset ' + offset[chordChangesMode] + ' units');
 
                     // register chord change in group
-                    _group4.chordChanges[chordChangesMode].push({ offset: offset[chordChangesMode], text: this.getChordDisplay(_chordDuration) });
+                    _group4.chordChanges[chordChangesMode].push({ offset: offset[chordChangesMode], text: Utils.getChordDisplay(_chordDuration) });
 
                     offset[chordChangesMode] += _chordDuration.duration;
                   }
@@ -2465,15 +2488,6 @@ var Lyrics_ = function () {
       // - use spread operator to correctly count astral unicode symbols
       return [].concat(toConsumableArray(group.text.replace(/\n/g, ''))).length;
     }
-  }, {
-    key: 'getChordDisplay',
-    value: function getChordDisplay(chordDuration) {
-      // space and not empty if hidden, to ensure that a white space will show that this change does not happen at the begin of the bar
-      if (chordDuration.hidden) return ' ';
-
-      // a space prevents chord names to be glued together on group and prevents a next group from starting directly after last chord of previous group
-      return chordDuration.chord.name + ' ';
-    }
   }]);
   return Lyrics_;
 }();
@@ -2603,7 +2617,8 @@ var ChordPix = function () {
 
         // check fingering is valid
         if (typeof chord.fingering !== 'string') throw new Error('chord.fingering must be a string');
-        if (chord.fingering.length !== 8) throw new Error('chord.fingering must be exactly 8 characters long (....../.)');
+        if (chord.fingering.length === 6) chord.fingering += '/-';
+        if (chord.fingering.length !== 8) throw new Error('chord.fingering must be exactly 6 or 8 characters long (....../.)');
         if (!chord.fingering.match(/^[PT01234]{6}.*$/)) throw new Error('the first 6 characters of chord.fingering can only be P,T,1,2,3,4 or 0 (each character represents a finger)');
         if (!chord.fingering.match(/^[PT01234]{6}\/[-0-9A-Z]$/)) throw new Error('the last 2 characters of chord.fingering must be a "/" followed by a digit or capital letter (representing the number of the barred fret) or "-" if there is no barred fret');
 
@@ -3033,7 +3048,7 @@ var VexTab = function () {
                 for (var _iterator13 = bar.chordChanges['rhythm'][Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
                   var chordChange = _step13.value;
 
-                  chordGroups.push({ offset: offset, text: chordChange.chord.name + (DEBUG ? '/' + chordChange.duration : '') });
+                  chordGroups.push({ offset: offset, text: Utils.getChordDisplay(chordChange) + (DEBUG ? '/' + chordChange.duration : '') });
                   offset += chordChange.duration;
                 }
               } catch (err) {
@@ -4360,21 +4375,51 @@ var Player = function () {
       // get note to play
       if (!this.notes) return false;
       var note = this.notes[this.noteIndex];
+      var nextPlayedNote = this.notes[this.noteIndex + 1];
       if (!note) return false;
 
+      // some shortcut vars based on note properties
       var isBar = note.offset === 0;
       var isBeat = note.offset % Utils.duration(this.beatDuration) === 0;
       var isUp = note.flags.stroke === 'u' || note.flags.stroke === 'uu';
       var isDown = note.flags.stroke === 'd' || note.flags.stroke === 'dd';
       var isArpeggiated = note.flags.stroke && note.flags.stroke.length === 2;
 
-      // get number of ms that this note should last
-      var ms = note.tied ? 0 : this.ms_(note);
+      // set next note to play
+      this.noteIndex = (this.noteIndex + 1) % this.notes.length;
 
-      // consume next ties note(s) if any
-      for (var nextNoteIndex = this.noteIndex + 1; nextNoteIndex < this.notes.length && this.notes[nextNoteIndex].tied; nextNoteIndex++) {
-        ms += this.ms_(this.notes[nextNoteIndex]);
-      } // beep or chord volume
+      // jump to next note if skipped tied note
+      if (note.skip) {
+        // info message, scheduled to display at the given time
+        var _message = (isBar ? '\n|\t' : '\t') + '[SKIP]'.padEnd(10, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : isBeat ? ' [BEAT]' : '');
+        setTimeout(function () {
+          console.info(_message);
+        }, Math.max(0, time - audioCtx.currentTime) * 1000);
+
+        self.note_(time);
+        return;
+      }
+
+      // get number of ms that this note should last
+      var ms = this.ms_(note);
+
+      // consume next ties note(s) as long as they are the same
+      var noteFreqs = note.chord && note.strings ? this.chord2frequencies(note.chord, note.strings, this.capo) : null;
+      for (var nextNoteIndex = this.noteIndex; nextNoteIndex < this.notes.length; nextNoteIndex++) {
+        var nextNote = this.notes[nextNoteIndex];
+        if (!nextNote.tied) break;
+
+        // get frequencies for chord notes
+        // TODO: if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
+        var nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote.chord, nextNote.strings, this.capo) : null;
+        if (!Utils.arraysEqual(noteFreqs, nextNoteFreqs)) break;
+
+        nextNote.skip = true;
+        nextPlayedNote = this.notes[nextNoteIndex + 1];
+        ms += this.ms_(nextNote);
+      }
+
+      // beep or chord volume
       var volume = 0.25 * (this.volume / 100.0); // base gain from 0 to 1.5 according to user volume slider
       if (note.flags.accent) volume *= 1.5; // increase gain by 50% if accent
       if (note.rest) volume = 0; // silence if rest
@@ -4388,8 +4433,8 @@ var Player = function () {
       var chord = this.mode === this.MODE_RHYTHM ? null : note.chord;
 
       // beep duration is 5 ms
-      // actual notes are played for the whole duration if tied otherwise for 90%
-      var beepduration = chord ? note.tied ? ms : ms * 0.90 : Math.min(ms, 5);
+      // actual notes are played for the whole duration if next played (i.e. not skipped) note is tied otherwise for 90%
+      var beepduration = chord ? nextPlayedNote && nextPlayedNote.tied ? ms : ms * 0.90 : Math.min(ms, 5);
 
       // for rhythm type is always square and no distortion, for actual notes use the user-defined settings
       var type = chord ? this.type : 'square';
@@ -4410,21 +4455,12 @@ var Player = function () {
         if (this.mode === this.MODE_BASS) volume *= 3;
       }
 
-      // set next note to play
-      this.noteIndex = (this.noteIndex + 1) % this.notes.length;
-
       // info message, scheduled to display at the same time as oscillator will play our sound
-      var what = note.rest ? 'REST' : note.tied ? 'TIED' : chord ? chord.name + '/' + freqs.length + ' ' + (isDown ? 'B' : '') + (isUp ? 'H' : '') : 'BEEP';
-      var message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(10, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + volume * 100 + '] ' + (isBar ? ' [BAR]' : isBeat ? ' [BEAT]' : '') + (note.flags.accent ? ' [ACCENT]' : '');
+      var what = note.rest ? 'REST' : chord ? chord.name + '/' + freqs.length + ' ' + (isDown ? 'B' : '') + (isUp ? 'H' : '') : 'BEEP';
+      var message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + volume * 100 + ']' + (note.tied ? ' [TIED]' : '') + (isBar ? ' [BAR]' : isBeat ? ' [BEAT]' : '') + (note.flags.accent ? ' [ACCENT]' : '');
       setTimeout(function () {
         console.info(message);
       }, Math.max(0, time - audioCtx.currentTime) * 1000);
-
-      // jump to next note if tied
-      if (note.tied) {
-        self.note_(time);
-        return;
-      }
 
       // play beep (1 note) or chord (N notes)
       var fIndex = 0;

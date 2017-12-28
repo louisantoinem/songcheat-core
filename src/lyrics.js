@@ -85,7 +85,7 @@ class Lyrics_ {
         if (!group) throw new Error('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset + ' units')
 
         // register chord change in group
-        group.chordChanges['phrase'].push({ offset: offset, text: this.getChordDisplay(chordDuration) })
+        group.chordChanges['phrase'].push({ offset: offset, text: Utils.getChordDisplay(chordDuration) })
 
         offset += chordDuration.duration
       }
@@ -103,7 +103,7 @@ class Lyrics_ {
             if (!group) throw new Error('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset[chordChangesMode] + ' units')
 
             // register chord change in group
-            group.chordChanges[chordChangesMode].push({ offset: offset[chordChangesMode], text: this.getChordDisplay(chordDuration) })
+            group.chordChanges[chordChangesMode].push({ offset: offset[chordChangesMode], text: Utils.getChordDisplay(chordDuration) })
 
             offset[chordChangesMode] += chordDuration.duration
           }
@@ -271,14 +271,6 @@ class Lyrics_ {
     // - tabs will be converted to spaces and may thus count as 1
     // - use spread operator to correctly count astral unicode symbols
     return [...group.text.replace(/\n/g, '')].length
-  }
-
-  getChordDisplay (chordDuration) {
-    // space and not empty if hidden, to ensure that a white space will show that this change does not happen at the begin of the bar
-    if (chordDuration.hidden) return ' '
-
-    // a space prevents chord names to be glued together on group and prevents a next group from starting directly after last chord of previous group
-    return chordDuration.chord.name + ' '
   }
 }
 
