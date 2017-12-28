@@ -126,7 +126,16 @@ class Parser_ {
       // if not a comment or empty line
       if (line && !line.match(/^#/)) {
         // split at spaces and tabs unless enclosed in quotes, then trim spaces and quotes
-        for (let value of line.split(reSpaces).map(s => s.trim().replace(/^"|"$/g, ''))) tokens.push({ 'value': value, 'line': lineNumber })
+        let values = line.split(reSpaces).map(s => s.trim().replace(/^"|"$/g, ''))
+
+        for (let vIndex = 0; vIndex < values.length; vIndex++) {
+          let value = values[vIndex]
+
+          // if token starts with a [ and does not end on ], concatenate next tokens until ] found
+          if (value.match(/^\[/)) { while (vIndex < values.length - 1 && !value.match(/\]$/)) value += ' ' + values[++vIndex] }
+
+          tokens.push({ 'value': value, 'line': lineNumber })
+        }
       }
 
       // increment line number
@@ -175,14 +184,19 @@ class Parser_ {
 
   handleRhythm (line, keyword, params) {
     if (params.length !== 2) throw new ParserException(line, keyword.toUpperCase() + ' expected exactly 2 values (id and score), but found ' + params.length)
+
     this.songcheat['rhythms'] = this.songcheat['rhythms'] || []
-    this.songcheat['rhythms'].push({ 'id': this.songcheat['rhythms'].length + 1, 'name': params[0].value, 'score': params[1].value })
+    let rhythm = { 'id': this.songcheat['rhythms'].length + 1, 'name': params[0].value, 'score': params[1].value }
+    this.songcheat['rhythms'].push(rhythm)
+
+    // return created rhythm (used when meeting an inline rhythm)
+    return rhythm
   }
 
   readBar (param) {
     let bar = { 'rhythm': null, 'chords': [] }
     let str = param.value.substr(1, param.value.length - 2)
-    let parts = str.split(/\*|:/)
+    let parts = str.split(/\*|,/)
 
     // find rhythm by its name (if several, use last one)
     let foundRhythmId = null
@@ -191,6 +205,14 @@ class Parser_ {
         foundRhythmId = rhythm.id
         // break
       }
+    }
+
+    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis)
+    if (foundRhythmId === null && parts[0].match(/\(.*\)/)) {
+      // create inline rhythm with the name begin the score itself (so the rhythm is found next time if used several times)
+      let rhythm = this.handleRhythm(param.line, 'rhythm', [{ value: parts[0], line: param.line }, { value: parts[0], line: param.line }])
+      rhythm.inline = true // will be hidden in Rhythm panel
+      foundRhythmId = rhythm.id
     }
 
     if (foundRhythmId !== null) bar.rhythm = foundRhythmId
@@ -217,7 +239,7 @@ class Parser_ {
 
       // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
       if (foundChordId === null && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
-        // create inline chord with the name being the tablature itself, and no fingering nor comment
+        // create inline chord with the name being the tablature itself (so the chord is found next time if used several times), and no fingering nor comment
         let chord = this.handleChord(param.line, 'chord', [{ value: part, line: param.line }, { value: part.split('/')[0], line: param.line }, { value: '000000/' + (part.split('/')[1] || '-'), line: param.line }])
         chord.inline = true // will be hidden in Chords panel and not displayed as a chord change
         foundChordId = chord.id

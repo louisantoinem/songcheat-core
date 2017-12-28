@@ -1,6 +1,7 @@
 # Command keywords are case insensitive (displayed as uppercase below).
 # Values are case sensitive (they will be kept as entered).
 # Double quotes are used to delimit values containing spaces and/or newlines.
+# You can for example use spaces in chord/rhythm/part names but these names must be quoted.
 
 #################
 # SONG METADATA #
@@ -62,8 +63,6 @@ SHUFFLE ""
 
 # Chord: $Name $Tablature $Fingering $Comment
 # You can use # and b in chord names, will be displayed as nice sharp resp. flat symbols.
-# Although not recommended, spaces are allowed in chord names.
-# You then have to use quotes, also when using this chord in a bar (quote whole bar).
 # $Fingering and $Comment are optional.
 # $Tablature must contain 6 characters (one per string).
 # Each character can either be 0 (open string) or a fret number or "x" (mute).
@@ -72,21 +71,22 @@ SHUFFLE ""
 # These 6 characters can be followed by a "/f" where f is the number of the barred fret.
 # "/-" means there is no barred fret and is the same as not specifying it at all.
 
-# When multiple chords exists for the same name, the last one is actually used.
-# Below, we have an alternate version for 2 chords: uncomment to use them.
-
 CHORD C     x32010 T32010
-CHORD CMaj7 x32000 T32000   "C without finger 1"
+CHORD "C Maj7" x32000 T32000   "C without finger 1"
 CHORD F     xx3211 T33211   "F without E and A strings"
-# CHORD F     1x3211 T33211   "Alt. version: play E string on fret 1"
-CHORD F/E   xx2211 T33211/1 "finger 3 left by 1 fret"
-# CHORD F/E   0x3211 033211/1 "Alt. version: F with open E string"
+CHORD F/E   xx2211 T33211/1 "finger 3 moved left by 1 fret"
 CHORD Dm    xx0231 T00241   "Finger 4 instead of 3"
 CHORD Dm/C  x30231 T30241   "Dm adding finger 3 on A string"
 CHORD G     320003 320004   "G with 3 fingers"
 CHORD G7    320001 320001   "G with finger 1 on e string"
 CHORD E     022100 023100
 CHORD F'    133211 113211/1   "Classical F Barré"
+
+# When multiple chords exists for the same name, the last one is actually used.
+# Here, we have alternate versions for F and F/E: uncomment to use them.
+
+# CHORD F     1x3211 T33211   "F without A string"
+# CHORD F/E   0x3211 033211/1 "finger 1 off the fret"
 
 ###########
 # RHYTHMS #
@@ -98,41 +98,55 @@ CHORD F'    133211 113211/1   "Classical F Barré"
 # pianistic style: 8th strum then 8th bass
 RHYTHM R1 ":8 ()d (B)d ()d (B)d ()d (B)d ()d (B)d"
 
-# idem R1 with ending "riff" // TODO: T should be h (hammer on)
-RHYTHM R2 ":8 ()d (B)d ()d (B)d ()d (B)d :16 ()dT()u :8 ()d"
-
-# more powerful rhythm, alternative for R1 in parts B (pre-chorus) and C1, C2 (chorus)
-RHYTHM R3 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
-
-# last bar of each verse: one final stroke for whole bar
-RHYTHM R4 ":hd ()d :q (#)"
-
-# last bar of chorus: 4 quarters
-RHYTHM R5 ":q ()d ()d ()d ()d"
-
-# last bar of final chorus: one final arpeggiated stroke for whole bar
-RHYTHM R6 ":h ()dd (#)"
+# more powerful rhythm, alternative for R1 in parts B (pre-chorus) and C (chorus)
+RHYTHM R2 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
 
 #########
 # PARTS #
 #########
 
-SUB A  [R1*C::::::CMaj7] [R2*F::::::xxx2xx:xxx3xx:xxxx0x]
-SUB B  [R1*F::::F/E] [R1*Dm::::Dm/C] [R1*G] [R4*G7]
-SUB C1 [R1*F'::::G]
-SUB C2 [R1*C::::E]
+# A is used in intro (2x) and in verse (4x)
+# 1 bar using the "pianistic" rhythm
+# 1 bar using the same rhythm but with ending "riff" // TODO: T should be h (hammer on)
 
-# B and/or C can use the "powerful" rhythm
-SUB B  [R3*F::::F/E] [R3*Dm::::Dm/C] [R3*G] [R4*G7]
-# SUB C1 [R3*F::::G]
-# SUB C2 [R3*C::::E]
+SUB A  [R1*C,,,,,,C Maj7]
+       [:8 ()d (B)d ()d (B)d ()d (B)d :16 (3)dT()u :8 ()d*F,,,,,,,xxx3xx,xxxx0x]
 
-SUB C C1 || C2
+# B is end of verse just before chorus
+# 3 bars using the "powerful" rhythm
+# 1 last bar which is one final stroke
+
+SUB B  [R2*F,,,,F/E]
+       [R2*Dm,,,,Dm/C]
+       [R2*G]
+       [:hd ()d :q (#)*G7]
+
+# B could also use the "pianistic" rhythm: uncomment to do so
+# SUB B  [R1*F,,,,F/E]
+#        [R1*Dm,,,,Dm/C]
+#        [R1*G]
+#        [:hd ()d :q (#)*G7]
+
+# C is used in intermediary and final chorus
+# 2 bars using the "pianistic" rhythm
+
+SUB C1 [R1*F',,,,G]
+SUB C2 [R1*C,,,,E]
+
+# C could also use the "powerful" rhythm: uncomment to do so
+# SUB C1 [R2*F,,,,G]
+# SUB C2 [R2*C,,,,E]
 
 PART "Intro"       A A
 PART "Verse"       A A || A A || B
-PART "Chorus"      C C || C C1 [R5*C:3xxxxx:x0xxxx:x2xxxx]
-PART "ChorusEnd"   C C || C C1 [R6*C]
+
+# last bar is 4 quarters leading to the first C of verse
+PART "Chorus"      C1 C2 C1 C2 ||
+                   C1 C2 C1 "[:q ()d ()d ()d ()d*C,3xxxxx,x0xxxx,x2xxxx]"
+
+# last bar is one final arpeggiated stroke
+PART "Final Chorus"   C1 C2 C1 C2 ||
+                      C1 C2 C1 "[:h ()dd (#)*C]"
 
 #############
 # STRUCTURE #
@@ -175,7 +189,7 @@ I:8:hope:8:some:day:you'll|join us|
 :Imagine:all:the|peo-:ple:|
 Sha-:ring:all:the|world:youh:ouh:ouhouhou"
 
-"ChorusEnd" ":8:You:8:may:say:I'm a|dreamer|
+"Final Chorus" ":8:You:8:may:say:I'm a|dreamer|
 :8:But:8:I'm:not:the only|one|
 I:8:hope:8:some:day:you'll|join us|
 :8:And:8:the:world:will|live as one"

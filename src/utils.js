@@ -221,6 +221,9 @@ export class Utils {
       }
     }
 
+    // if chord has no string in common with strings, return a muted chord (on all strings) in order not to get an error in vextab (empty chord not allowed)
+    if (result.length === 0) return Utils.chordStrings(chord, '*x')
+
     return result
   }
 
@@ -229,8 +232,11 @@ export class Utils {
     */
 
   static getChordDisplay (chordDuration) {
-    // space and not empty if hidden (ensures that a white space will show that next change does not happen at the begin of the bar)
-    if (chordDuration.hidden || chordDuration.chord.inline) return ' '
+    // one space instead of empty string if hidden (ensures that a white space in ascii lyrics will show that next change does not happen at the begin of the bar)
+    if (chordDuration.hidden) return ' '
+
+    // space if inline (still takes some space in ascii lyrics but no name displayed)
+    if (chordDuration.chord.inline) return ' '
 
     // a space prevents chord names to be glued together on group and prevents a next group from starting directly after last chord of previous group
     return chordDuration.chord.name + ' '
