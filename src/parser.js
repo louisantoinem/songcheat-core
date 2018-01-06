@@ -331,11 +331,13 @@ class Parser_ {
       let param = params[pIndex]
 
       let found = false
-      for (let part of this.songcheat['parts']) {
-        if (part.name === param.value) {
-          this.songcheat['structure'].push({ 'id': this.songcheat['structure'].length + 1, 'part': part.id, 'lyrics': params[pIndex + 1].value })
-          found = true
-          break
+      if (this.songcheat['parts']) {
+        for (let part of this.songcheat['parts']) {
+          if (part.name === param.value) {
+            this.songcheat['structure'].push({ 'id': this.songcheat['structure'].length + 1, 'part': part.id, 'lyrics': params[pIndex + 1].value })
+            found = true
+            break
+          }
         }
       }
 
