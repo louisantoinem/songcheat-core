@@ -1031,7 +1031,7 @@ class Lyrics_ {
         // find closest group starting at or before chord offset
         let group = null;
         for (let g of unit.groups) { if (g.offset <= offset) group = g; }
-        if (!group) throw new Error('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset + ' units')
+        if (!group) throw new LyricsException('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset + ' units')
 
         // register chord change in group
         group.chordChanges['phrase'].push({ offset: offset, text: Utils.getChordDisplay(chordDuration) });
@@ -1049,7 +1049,7 @@ class Lyrics_ {
             // find closest group starting at or before chord offset
             let group = null;
             for (let g of unit.groups) { if (g.offset <= offset[chordChangesMode]) group = g; }
-            if (!group) throw new Error('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset[chordChangesMode] + ' units')
+            if (!group) throw new LyricsException('No closest group found for chord ' + chordDuration.chord.name + ' with offset ' + offset[chordChangesMode] + ' units')
 
             // register chord change in group
             group.chordChanges[chordChangesMode].push({ offset: offset[chordChangesMode], text: Utils.getChordDisplay(chordDuration) });
@@ -1076,7 +1076,7 @@ class Lyrics_ {
     debugText += 'ρ max = ' + unit.pmax.toFixed(2);
     this.log(debugText);
 
-    if (zeroDuration) throw new Error('Detected group with 0 duration')
+    if (zeroDuration) throw new LyricsException('Detected group with 0 duration')
 
     return warnings
   }
@@ -1193,7 +1193,7 @@ class Lyrics_ {
   }
 
   registerGroup (unit, offset, step, barDuration) {
-    if (!barDuration) throw new Error('Invalid bar duration passed to registerGroup')
+    if (!barDuration) throw new LyricsException('Invalid bar duration passed to registerGroup')
 
     while (step > 0) {
       // duration added to preceding group may never be more than what's left until end of bar
