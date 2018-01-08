@@ -101,7 +101,7 @@ class Parser_ {
 
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value)
-    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
+    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
   }
 
   tokenize (text) {

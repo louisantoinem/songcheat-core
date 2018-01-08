@@ -14,6 +14,20 @@ export class Utils {
   }
 
   /**
+   * Math helper functions
+   */
+
+  static prevPowerOf2 (x) {
+    return Math.pow(2, Math.floor(Math.log(x) / Math.log(2)))
+  }
+  static nextPowerOf2 (x) {
+    return Math.pow(2, Math.ceil(Math.log(x) / Math.log(2)))
+  }
+  static closestPowerOf2 (x) {
+    return Math.pow(2, Math.round(Math.log(x) / Math.log(2)))
+  }
+
+  /**
    * String helper functions
    */
 

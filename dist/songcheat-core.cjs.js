@@ -18,6 +18,20 @@ class Utils {
   }
 
   /**
+   * Math helper functions
+   */
+
+  static prevPowerOf2 (x) {
+    return Math.pow(2, Math.floor(Math.log(x) / Math.log(2)))
+  }
+  static nextPowerOf2 (x) {
+    return Math.pow(2, Math.ceil(Math.log(x) / Math.log(2)))
+  }
+  static closestPowerOf2 (x) {
+    return Math.pow(2, Math.round(Math.log(x) / Math.log(2)))
+  }
+
+  /**
    * String helper functions
    */
 
@@ -358,7 +372,7 @@ class Parser_ {
 
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value);
-    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
+    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
   }
 
   tokenize (text) {
