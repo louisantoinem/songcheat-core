@@ -285,12 +285,12 @@ export class Lyrics {
   }
 
   parseLyrics (unit) {
-    console.log(Utils.title('PARSE LYRICS ' + unit.name))
+    console.log(Utils.title('PARSE UNIT LYRICS ' + unit.name))
     return this.lyrics_.parseLyrics(unit, Utils.duration(this.songcheat.lyricsUnit), this.songcheat.barDuration)
   }
 
   getUnitText (unit, maxConsecutiveSpaces, split, chordChangesMode, showDots) {
-    console.log(Utils.title(`GET LYRICS TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, chordChangesMode = ${chordChangesMode}, showDots = ${showDots})`))
+    console.log(Utils.title(`GET UNIT TEXT ${unit.name} (maxsp ${maxConsecutiveSpaces} split ${split} mode ${chordChangesMode} dots ${showDots})`))
     return this.lyrics_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots)
   }
 
@@ -301,7 +301,7 @@ export class Lyrics {
     console.log(Utils.title('PARSE PART LYRICS ' + unit.name))
     this.lyrics_.parseLyrics(unit, Utils.duration(this.songcheat.lyricsUnit), this.songcheat.barDuration)
 
-    console.log(Utils.title(`GET PART LYRICS TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, chordChangesMode = ${chordChangesMode}, showDots = ${showDots})`))
+    console.log(Utils.title(`GET PART TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, chordChangesMode = ${chordChangesMode}, showDots = ${showDots})`))
     return this.lyrics_.getUnitText(unit, maxConsecutiveSpaces, split, chordChangesMode, showDots)
   }
 }

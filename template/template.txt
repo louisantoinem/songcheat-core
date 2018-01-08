@@ -74,7 +74,7 @@ SHUFFLE ""
 CHORD C        x32010 T32010
 CHORD "C Maj7" x32000 T32000   "C without finger 1"
 CHORD F        xx3211 T33211   "F without E and A strings"
-CHORD F/E      xx2211 T33211/1 "finger 3 moved left by 1 fret"
+CHORD F/E      xx2211 T33211/1 "Finger 3 moved left by 1 fret"
 CHORD Dm       xx0231 T00241   "Finger 4 instead of 3"
 CHORD Dm/C     x30231 T30241   "Dm adding finger 3 on A string"
 CHORD G        320003 320004   "G with 3 fingers"
