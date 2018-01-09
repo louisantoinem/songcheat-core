@@ -18,4 +18,4 @@ Can be used both in Node and in browser.
 Can be used both in Node and in browser (but actually displaying the generated VexTab requires a browser).
 
 * Player: plays a SongCheat through the web audio API.
-Can be used both in browser only (but actually displaying the generated VexTab requires a browser).
+Can be used in browser only (no Audio API available in Node yet).
