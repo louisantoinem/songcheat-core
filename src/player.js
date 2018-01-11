@@ -72,7 +72,7 @@ export class Player {
   sound (time, duration, frequency, volume, distortion, type, onended) {
     let audioCtx = this.audioCtx
     let gainNode = audioCtx.createGain()
-    gainNode.gain.value = volume
+    gainNode.gain.setValueAtTime(volume, audioCtx.currentTime)
 
     if (distortion) {
       let distoNode = audioCtx.createWaveShaper()
@@ -85,7 +85,7 @@ export class Player {
     let oscillator = audioCtx.createOscillator()
     oscillator.connect(gainNode)
 
-    oscillator.frequency.value = frequency
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime)
     oscillator.onended = onended
 
     // type can be a periodic wave or a standard oscillator type
