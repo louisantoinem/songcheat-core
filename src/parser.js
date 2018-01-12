@@ -200,7 +200,7 @@ class Parser_ {
 
     // find rhythm by its name (if several, use last one)
     let foundRhythmId = null
-    for (let rhythm of this.songcheat['rhythms']) {
+    if (this.songcheat['rhythms']) for (let rhythm of this.songcheat['rhythms']) {
       if (rhythm.name === parts[0]) {
         foundRhythmId = rhythm.id
         // break
@@ -230,7 +230,7 @@ class Parser_ {
 
       // search for chord by its name (if several, use last one)
       let foundChordId = null
-      for (let chord of this.songcheat['chords']) {
+      if (this.songcheat['chords']) for (let chord of this.songcheat['chords']) {
         if (chord.name === part) {
           foundChordId = chord.id
           // break
