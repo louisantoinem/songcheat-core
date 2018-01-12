@@ -59,7 +59,7 @@ class Compiler_ {
     for (let part of songcheat.parts) { if (!part.color && !part.sub) part.color = colors[partIndex++ % colors.length] }
 
     // validate and compile each rhythm
-    for (let rhythm of songcheat.rhythms) this.compileRhythm(rhythm, songcheat.signature.time.beatDuration)
+    for (let rhythm of songcheat.rhythms) this.compileRhythm(rhythm, Utils.duration(songcheat.signature.time.beatDuration))
 
     // compile each phrase
     for (let part of songcheat.parts) this.compilePart(part, songcheat.barDuration)
