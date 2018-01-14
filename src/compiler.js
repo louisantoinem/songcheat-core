@@ -104,11 +104,14 @@ class Compiler_ {
   }
 
   getRhythmUnit (songcheat, rhythm) {
+    if (rhythm.unit) return rhythm.unit
+
     // create dummy part and unit on a chord with all open strings
     let chord = { name: 'AIR', tablature: '000000', inline: true }
     let part = this.compilePart({ phrases: [{ bars: [{ rhythm: rhythm, chords: [chord] }] }] }, songcheat.barDuration)
-    let unit = { name: rhythm.inline ? 'Inline rhythm' : 'Rhythm ' + rhythm.name, part: part }
-    return unit
+    rhythm.unit = { name: rhythm.inline ? 'Inline rhythm' : 'Rhythm ' + rhythm.name, part: part }
+
+    return rhythm.unit
   }
 
   resolveIds (songcheat) {
