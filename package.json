@@ -16,7 +16,7 @@
   "scripts": {
     "clean": "rm -f dist/*",
     "lint": "standard --fix src/*js test/*.js *.js",
-    "start": "npm run lint && node template/convert && rm dist/songcheat-core.esm.js && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
+    "start": "npm run lint && node template/convert && rm -f dist/songcheat-core.esm.js && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
     "test": "node test",
     "build": "npm run clean && npm run lint && node template/convert && rollup -c rollup.config.build.js",
     "template": "node template/convert.js",
@@ -39,6 +39,7 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
+    "json-stringify-pretty-compact": "^1.1.0",
     "npm-watch": "^0.3.0",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
