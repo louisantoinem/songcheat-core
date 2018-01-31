@@ -13,7 +13,7 @@ import { GroupList } from './group_list'
 import { GroupParser } from './group_parser'
 import { Parser, ParserException } from './parser'
 import { Compiler, CompilerException } from './compiler'
-import { Lyrics, LyricsException } from './lyrics'
+import { Ascii, AsciiException } from './ascii'
 import { VexTab, VexTabException } from './vextab'
 import waveTables from '@mohayonao/wave-tables'
 import { Player } from './player'
@@ -27,7 +27,7 @@ export {
   Group, GroupList, GroupParser,
   Parser, ParserException,
   Compiler, CompilerException,
-  Lyrics, LyricsException,
+  Ascii, AsciiException,
   VexTab, VexTabException,
   Player, waveTables
 }

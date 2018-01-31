@@ -103,8 +103,12 @@ These classes are used by the compile process to convert the POJO returned by `P
 
 * `VexTab`
 
-   Allows converting a SongCheat to a VexTab string.
-   This class can be used both in Node and in browser, but actually displaying the generated VexTab requires a browser).
+  Allows converting a SongCheat to a VexTab string.
+  This class can be used both in Node and in browser, but actually displaying the generated VexTab requires a browser).
+
+* `Ascii`
+
+  Creates a configurable ascii string mixing lyrics and chord changes for a unit or part.
 
 * `Player`
 

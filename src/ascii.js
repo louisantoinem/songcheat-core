@@ -3,17 +3,17 @@ import { Compiler } from './compiler'
 
 let KEEP_EMPTY_LINES = false
 
-export class LyricsException {
+export class AsciiException {
   constructor (message) {
     this.message = message
   }
 
   toString () {
-    return 'Lyrics error: ' + this.message
+    return 'Ascii error: ' + this.message
   }
 }
 
-class Lyrics_ {
+class Ascii_ {
   constructor (DEBUG) {
     // DEBUG 1 forces showing . * | characters in unit text (even if showDots is passed false) as well as _ for groups that were automatically created when crossing a bar
     this.DEBUG = DEBUG
@@ -138,19 +138,19 @@ class Lyrics_ {
  * Public API
  */
 
-export class Lyrics {
+export class Ascii {
   constructor (songcheat, DEBUG) {
-    this.lyrics_ = new Lyrics_(DEBUG)
+    this.ascii_ = new Ascii_(DEBUG)
     this.songcheat = songcheat
   }
 
   getUnitText (unit, maxConsecutiveSpaces, split, showDots) {
     console.log(Utils.title(`GET UNIT TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.lyrics_.getUnitText(unit, maxConsecutiveSpaces, split, showDots)
+    return this.ascii_.getUnitText(unit, maxConsecutiveSpaces, split, showDots)
   }
 
   getPartText (part, maxConsecutiveSpaces, split, showDots) {
     console.log(Utils.title(`GET PART TEXT ${part.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.lyrics_.getUnitText(new Compiler().getPartUnit(this.songcheat, part), maxConsecutiveSpaces, split, showDots)
+    return this.ascii_.getUnitText(new Compiler().getPartUnit(this.songcheat, part), maxConsecutiveSpaces, split, showDots)
   }
 }
