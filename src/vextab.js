@@ -224,10 +224,10 @@ export class VexTab {
             if (songcheat.mode.indexOf('r') >= 0) {
               let strokes = songcheat.mode.indexOf('t') < 0
               vextab += VexTab.Notes2Stave(songcheat, offset, notesSlashed, strokes, 'top', unit.name, -1, true, false)
-              if (strokes && fingeringGroups.length > 0) vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, 11, 'Arial-9-normal') // PIMA on same line as strokes
-              if (showLyrics && lyricsGroups.length > 0) vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, strokes ? 13 : 11, 'Times-11-italic')
+              if (strokes && fingeringGroups.length > 0) vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, 12, 'Arial-9-normal') // PIMA on same line as strokes
+              if (showLyrics && lyricsGroups.length > 0) vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, strokes ? 14 : 12, 'Times-11-italic')
               if (chordGroups.length > 0) vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, 2, 'Arial-10-normal')
-              vextab += 'options space=' + (strokes ? 40 : 20) + '\n'
+              vextab += 'options space=' + (strokes ? 50 : 25) + '\n'
             }
 
             // tablature: shows PM, frets and strokes/fingering
