@@ -1,13 +1,11 @@
 import { Utils } from './utils'
 
-export class ParserException {
+export class ParserException extends Error {
   constructor (line, message) {
-    this.message = message
-    this.line = line
+    super('Parser error at line ' + line + ': ' + message)
   }
-
   toString () {
-    return 'Parser error at line ' + this.line + ': ' + this.message
+    return this.message
   }
 }
 
@@ -43,6 +41,13 @@ class Parser_ {
       let handler = this['handle' + Utils.firstUpper(keyword)] || this.handleDefault
       if (typeof handler === 'function') handler.call(this, token.line, keyword, params)
       else throw new ParserException(token.line, 'non function handler found for keyword ' + keyword)
+    }
+
+    // remove sub parts
+    if (this.songcheat['parts']) {
+      let parts = []
+      for (let part of this.songcheat['parts']) if (!part.sub) parts.push(part)
+      this.songcheat['parts'] = parts
     }
 
     return this.songcheat
@@ -101,7 +106,7 @@ class Parser_ {
 
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value)
-    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit' /* will disappear soon */, 'structure'].indexOf(keyword) >= 0 ? keyword : false
+    return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'mode', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit', 'structure'].indexOf(keyword) >= 0 ? keyword : false
   }
 
   tokenize (text) {
@@ -163,7 +168,7 @@ class Parser_ {
   handleTime (line, keyword, params) {
     if (params.length !== 3) throw new ParserException(line, keyword.toUpperCase() + ' expected exactly 3 values, but found ' + params.length)
     this.songcheat['signature'] = this.songcheat['signature'] || []
-    this.songcheat['signature']['time'] = { 'beatsPerBar': params[1].value, 'beatDuration': params[2].value, 'symbol': params[0].value }
+    this.songcheat['signature']['time'] = { 'beatsPerBar': params[1].value, 'beat': params[2].value, 'symbol': params[0].value }
   }
 
   handleChord (line, keyword, params) {
@@ -171,93 +176,25 @@ class Parser_ {
 
     let name = params[0].value
     let tablature = params[1].value
-    let fingering = params.length >= 3 ? params[2].value : '000000/-'
+    let fingering = params.length >= 3 ? params[2].value : null
     let comment = params.length >= 4 ? params[3].value : ''
 
     this.songcheat['chords'] = this.songcheat['chords'] || []
-    let chord = { 'id': this.songcheat['chords'].length + 1, 'name': name, 'tablature': tablature, 'fingering': fingering, 'comment': comment }
+    let chord = { name, tablature, fingering, comment }
     this.songcheat['chords'].push(chord)
-
-    // return created chord (used when meeting an inline chord)
-    return chord
   }
 
   handleRhythm (line, keyword, params) {
-    if (params.length !== 2) throw new ParserException(line, keyword.toUpperCase() + ' expected exactly 2 values (id and score), but found ' + params.length)
+    if (params.length !== 2) throw new ParserException(line, keyword.toUpperCase() + ' expected exactly 2 values (name and score), but found ' + params.length)
 
     this.songcheat['rhythms'] = this.songcheat['rhythms'] || []
-    let rhythm = { 'id': this.songcheat['rhythms'].length + 1, 'name': params[0].value, 'score': params[1].value }
+    let rhythm = { 'name': params[0].value, 'score': params[1].value }
     this.songcheat['rhythms'].push(rhythm)
-
-    // return created rhythm (used when meeting an inline rhythm)
-    return rhythm
-  }
-
-  readBar (param) {
-    let bar = { 'rhythm': null, 'chords': [] }
-    let str = param.value.substr(1, param.value.length - 2)
-    let parts = str.split(/\*|,/)
-
-    // find rhythm by its name (if several, use last one)
-    let foundRhythmId = null
-    if (this.songcheat['rhythms']) {
-      for (let rhythm of this.songcheat['rhythms']) {
-        if (rhythm.name === parts[0]) {
-          foundRhythmId = rhythm.id
-        // break
-        }
-      }
-    }
-
-    // if no rhythm found with this name but this is a potential score (at least one pair of parenthesis or curly brackets)
-    if (foundRhythmId === null && (parts[0].match(/\(.*\)/) || parts[0].match(/\{.*\}/))) {
-      // create inline rhythm with the name begin the score itself (so the rhythm is found next time if used several times)
-      let rhythm = this.handleRhythm(param.line, 'rhythm', [{ value: parts[0], line: param.line }, { value: parts[0], line: param.line }])
-      rhythm.inline = true // will be hidden in Rhythm panel
-      foundRhythmId = rhythm.id
-    }
-
-    if (foundRhythmId !== null) bar.rhythm = foundRhythmId
-    else throw new ParserException(param.line, parts[0] + ' is not the name of an existing rhythm')
-
-    // find chords
-    parts = parts.slice(1)
-    for (let part of parts) {
-      // chord repeater
-      if (!part.trim()) {
-        if (bar.chords.length === 0) throw new ParserException(param.line, 'found chord repeater but there is no chord yet in bar')
-        bar.chords.push(JSON.parse(JSON.stringify(bar.chords[bar.chords.length - 1])))
-        continue
-      }
-
-      // search for chord by its name (if several, use last one)
-      let foundChordId = null
-      if (this.songcheat['chords']) {
-        for (let chord of this.songcheat['chords']) {
-          if (chord.name === part) {
-            foundChordId = chord.id
-          // break
-          }
-        }
-      }
-
-      // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
-      if (foundChordId === null && part.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
-        // create inline chord with the name being the tablature itself (so the chord is found next time if used several times), and no fingering nor comment
-        let chord = this.handleChord(param.line, 'chord', [{ value: part, line: param.line }, { value: part.split('/')[0], line: param.line }, { value: '000000/' + (part.split('/')[1] || '-'), line: param.line }])
-        chord.inline = true // will be hidden in Chords panel and not displayed as a chord change
-        foundChordId = chord.id
-      }
-
-      if (foundChordId !== null) bar.chords.push(foundChordId)
-      else throw new ParserException(param.line, part + ' is not the name of an existing chord and is not a valid chord tablature')
-    }
-
-    return bar
   }
 
   handleSub (line, keyword, params) {
-    // a sub is a part like any other but with "sub" = true (will not be displayed in Parts panel)
+    // a sub is a part like any other but with "sub" = true
+    // meaning that this part will not be exported in parsed songcheat (i.e. it cannot be used for a unit)
     let part = this.handlePart(line, keyword, params)
     part.sub = true
   }
@@ -267,7 +204,7 @@ class Parser_ {
     this.songcheat['parts'] = this.songcheat['parts'] || []
 
     // extract part name from params
-    let part = { 'id': this.songcheat['parts'].length + 1, 'name': params[0].value, 'phrases': [] }
+    let part = { 'name': params[0].value, 'phrases': [] }
     params = params.splice(1)
     this.songcheat['parts'].push(part)
 
@@ -292,7 +229,9 @@ class Parser_ {
 
       // bar between []
       if (param.value.match(/^\[[^[\]]+\]$/)) {
-        bars.push(this.readBar(param))
+        let str = param.value.substr(1, param.value.length - 2)
+        let parts = str.split(/\s*\*/)
+        bars.push({ 'rhythm': parts[0], 'chords': parts[1] || '' })
         continue
       }
 
@@ -330,22 +269,8 @@ class Parser_ {
     if (params.length < 2) throw new ParserException(line, keyword.toUpperCase() + ' expected at least 2 values (part name and lyrics), but found ' + params.length)
     if (params.length % 2 !== 0) throw new ParserException(line, keyword.toUpperCase() + ' expected an even number of parameters (N x part name and lyrics), but found ' + params.length)
     this.songcheat['structure'] = this.songcheat['structure'] || []
-
     for (let pIndex = 0; pIndex < params.length; pIndex += 2) {
-      let param = params[pIndex]
-
-      let found = false
-      if (this.songcheat['parts']) {
-        for (let part of this.songcheat['parts']) {
-          if (part.name === param.value) {
-            this.songcheat['structure'].push({ 'id': this.songcheat['structure'].length + 1, 'part': part.id, 'lyrics': params[pIndex + 1].value })
-            found = true
-            break
-          }
-        }
-      }
-
-      if (!found) throw new ParserException(param.line, param.value + '" is not the name of an existing part')
+      this.songcheat['structure'].push({ 'part': params[pIndex].value, 'lyrics': params[pIndex + 1].value })
     }
   }
 }

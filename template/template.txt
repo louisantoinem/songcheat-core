@@ -192,10 +192,10 @@ Li:ving:for:to-|day:ah:ah:ahaha"
 "PreChorus" ":Imagine:all:the|peo-:ple:|
 Li:ving:life:in|peace:youh:ouh:ouhouhou"
 
-"Chorus" ":8:You:8:may:say:I'm a|dreamer|
-:8:But:8:I'm:not:the only|one|
-I:8:hope:8:some:day:you'll|join us|
-:8:And:8:the:world:will|be as one"
+"Chorus" ":8:You:may:say:I'm a|dreamer|
+:8:But:I'm:not:the only|one|
+I:8:hope:some:day:you'll|join us|
+:8:And:the:world:will|be as one"
 
 "Verse" ":Imagine:no:posse-|ssions|
 :I won-:der if:you|can|
@@ -205,7 +205,7 @@ I:8:hope:8:some:day:you'll|join us|
 "PreChorus" ":Imagine:all:the|peo-:ple:|
 Sha-:ring:all:the|world:youh:ouh:ouhouhou"
 
-"Final Chorus" ":8:You:8:may:say:I'm a|dreamer|
-:8:But:8:I'm:not:the only|one|
-I:8:hope:8:some:day:you'll|join us|
-:8:And:8:the:world:will|live as one"
+"Final Chorus" ":8:You:may:say:I'm a|dreamer|
+:8:But:I'm:not:the only|one|
+I:8:hope:some:day:you'll|join us|
+:8:And:the:world:will|live as one"

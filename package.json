@@ -16,10 +16,10 @@
   "scripts": {
     "clean": "rm -f dist/*",
     "lint": "standard --fix src/*js test/*.js *.js",
-    "start": "npm run lint && node template/convert && rm -f dist/songcheat-core.esm.js && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
+    "start": "npm run lint && npm run template && rm -f dist/songcheat-core.esm.js && ln -s ../src/main.js dist/songcheat-core.esm.js && rollup -cw",
     "test": "node test",
-    "build": "npm run clean && npm run lint && node template/convert && rollup -c rollup.config.build.js",
-    "template": "node template/convert.js",
+    "build": "npm run clean && npm run lint && npm run template && rollup -c rollup.config.build.js",
+    "template": "node template/convert",
     "watch": "npm-watch"
   },
   "keywords": [

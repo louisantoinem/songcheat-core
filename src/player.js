@@ -1,33 +1,34 @@
 import { Utils } from './utils'
+import { Duration } from './duration'
+import { Score } from './score'
 import waveTables from '@mohayonao/wave-tables'
 
 export class Player {
-  constructor (audioCtx, notes, config) {
+  constructor (audioCtx, score, config) {
+    if (!(score instanceof Score)) throw new Error(`new Player: score must be of type Score (got ${typeof score})`)
+
     this.MODE_RHYTHM = 1 // play beeps only
     this.MODE_BASS = 2 // when there is a strummed chord, play only bass (no effect onindividual strings)
     this.MODE_CHORDS = 3 // play actual strummed chords
 
     config = config || {}
     config.signature = config.signature || {}
-    config.signature.time = config.signature.time || {}
 
     // audio context
     this.audioCtx = audioCtx
 
-    // notes to beep
-    this.notes = notes
+    // time signature
+    this.time = score.time
 
     // config: loop or not and callback at end if no loop
     this.loop = config.loop || false
     this.onDone = config.onDone || null
     this.onCountdown = config.onCountdown || function () {}
 
-    // config: capo and signature (tempo, time, shuffle)
+    // config: capo, tempo, shuffle
     this.capo = config.capo || 0
     this.tempo = config.signature.tempo || 100
-    this.beatsPerBar = config.signature.time.beatsPerBar || 4
-    this.beatDuration = config.signature.time.beatDuration || ':q'
-    this.shuffle = config.signature.shuffle ? Utils.duration(config.signature.shuffle) : false
+    this.shuffle = config.signature.shuffle ? new Duration(config.signature.shuffle) : null
 
     // tuning, defaults to standard tuning
     this.tuning = config.tuning || [329.63, // E4
@@ -48,6 +49,16 @@ export class Player {
     this.setVolume(50)
     this.setMode(this.MODE_CHORDS)
     this.setType(config.type || 'Piano')
+
+    // add an offset property in each note, used to detect bars and beats but also for shuffling notes
+    this.notes = []
+    let offset = score.start()
+    for (let note of score.notes) {
+      let _note = note._copy()
+      _note.offset = offset
+      offset = offset.add(note.duration)
+      this.notes.push(_note)
+    }
   }
 
   makeDistortionCurve (amount) {
@@ -96,9 +107,9 @@ export class Player {
     oscillator.stop(time + duration)
   }
 
-  chord2frequencies (chord, strings, transpose) {
+  chord2frequencies (note, transpose) {
     let freqs = []
-    for (let o of Utils.chordStrings(chord, strings)) {
+    for (let o of note.playedStrings()) {
       if (!o.mute) freqs.push(this.tuning[o.string - 1] * Math.pow(Math.pow(2, 1 / 12), transpose + o.fret))
     }
     return freqs
@@ -106,12 +117,12 @@ export class Player {
 
   ms_ (note) {
     // base duration of note
-    let ms_ = note.duration * this.msPerUnit
+    let ms_ = note.duration.units * this.msPerUnit
 
     // change duration proportions for shuffled notes
-    if (this.shuffle && note.duration === this.shuffle) {
-      if (note.offset % (2 * this.shuffle) === 0) ms_ *= 1.3333
-      else ms_ *= 0.6667
+    if (this.shuffle && note.duration.equals(this.shuffle)) {
+      if (note.offset.multipleOf(this.shuffle.times(2))) ms_ *= 4 / 3
+      else ms_ *= 2 / 3
     }
 
     return ms_
@@ -134,8 +145,8 @@ export class Player {
     if (!note) return false
 
     // some shortcut vars based on note properties
-    let isBar = note.offset === 0
-    let isBeat = note.offset % Utils.duration(this.beatDuration) === 0
+    let isBar = note.offset.bar()
+    let isBeat = note.offset.beat()
     let isUp = note.flags.stroke === 'u' || note.flags.stroke === 'uu'
     let isDown = note.flags.stroke === 'd' || note.flags.stroke === 'dd'
     let isArpeggiated = note.flags.stroke && note.flags.stroke.length === 2
@@ -146,7 +157,8 @@ export class Player {
     // jump to next note if skipped tied note
     if (note.skip) {
       // info message, scheduled to display at the given time
-      let message = (isBar ? '\n|\t' : '\t') + ('[SKIP]').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : ''))
+      let what = 'SKIP ' + (note.chord ? note.chord.name + (isDown ? ' D' : '') + (isUp ? ' U' : '') : 'BEEP')
+      let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + note.offset + ' ' + note.duration + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
       setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
       self.note_(time)
@@ -157,13 +169,13 @@ export class Player {
     let ms = this.ms_(note)
 
     // consume next ties note(s) as long as they are the same
-    let noteFreqs = note.chord && note.strings ? this.chord2frequencies(note.chord, note.strings, this.capo) : null
+    let noteFreqs = note.chord && note.strings ? this.chord2frequencies(note, this.capo) : null
     for (let nextNoteIndex = this.noteIndex; nextNoteIndex < this.notes.length; nextNoteIndex++) {
       let nextNote = this.notes[nextNoteIndex]
       if (!nextNote.tied) break
 
       // get frequencies for chord notes
-      let nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote.chord, nextNote.strings, this.capo) : null
+      let nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote, this.capo) : null
       if (!Utils.arraysEqual(noteFreqs, nextNoteFreqs)) break
 
       // if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
@@ -173,6 +185,12 @@ export class Player {
       nextPlayedNote = this.notes[nextNoteIndex + 1]
       ms += this.ms_(nextNote)
     }
+
+    // note chord ignored in rhythm mode
+    if (this.mode === this.MODE_RHYTHM) note = note.setChord(null)
+
+    // note strings forced to 'B' in bass mode
+    if (this.mode === this.MODE_BASS) note = note.setStrings('B')
 
     // beep or chord volume
     let volume = 0.25 * (this.volume / 100.0) // base gain from 0 to 1.5 according to user volume slider
@@ -184,21 +202,18 @@ export class Player {
     if (isBar) freqs[0] *= 2 // octave
     else if (isBeat) freqs[0] *= 1.5 // quinte
 
-    // get note chord, ignored in rhythm mode
-    let chord = this.mode === this.MODE_RHYTHM ? null : note.chord
-
     // beep duration is 5 ms
     // actual notes are played for the whole duration if next played (i.e. not skipped) note is tied otherwise for 90%
-    let beepduration = chord ? (nextPlayedNote && nextPlayedNote.tied ? ms : ms * 0.90) : Math.min(ms, 5)
+    let beepduration = note.chord ? (nextPlayedNote && nextPlayedNote.tied ? ms : ms * 0.90) : Math.min(ms, 5)
 
     // for rhythm type is always square and no distortion, for actual notes use the user-defined settings
-    let type = chord ? this.type : 'square'
-    let distortion = chord ? this.distortion : null
+    let type = note.chord ? this.type : 'square'
+    let distortion = note.chord ? this.distortion : null
 
-    // played chord (for a rest, chord is set but strings is not)
-    if (chord && note.strings) {
+    // played chord
+    if (note.chord) {
       // get frequencies for chord notes
-      freqs = this.chord2frequencies(chord, this.mode === this.MODE_BASS ? 'B' : note.strings, this.capo)
+      freqs = this.chord2frequencies(note, this.capo)
 
       // reverse string order if up stroke
       if (isUp) freqs = freqs.reverse()
@@ -211,8 +226,8 @@ export class Player {
     }
 
     // info message, scheduled to display at the same time as oscillator will play our sound
-    let what = note.rest ? 'REST' : (chord ? chord.name + '/' + freqs.length + (isDown ? ' B' : '') + (isUp ? ' H' : '') : 'BEEP')
-    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + (note.offset + Utils.durationcode(note.duration)).padEnd(5, ' ') + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
+    let what = note.rest ? 'REST' : (note.chord ? note.chord.name + '/' + freqs.length + (isDown ? ' D' : '') + (isUp ? ' U' : '') : 'BEEP')
+    let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + note.offset + ' ' + note.duration + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
     setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
     // play beep (1 note) or chord (N notes)
@@ -240,6 +255,7 @@ export class Player {
   }
 
   stop () {
+    console.log('Player stopped at ' + new Date())
     this.stopped = true
     this.paused = false
     if (this.cd) {
@@ -268,13 +284,7 @@ export class Player {
     this.onCountdown(countdown)
     if (countdown) this.cd = setTimeout(function () { self.play(countdown - 1) }, 1000)
     else {
-      // compute for each note the offset wrt the bar it's contained in
-      let offset = 0
-      for (let note of this.notes) {
-        note.offset = offset
-        offset = (offset + note.duration) % (this.beatsPerBar * Utils.duration(this.beatDuration))
-      }
-
+      console.log('Player started or resumed at ' + new Date())
       this.note_(audioCtx.currentTime)
     }
   }
@@ -308,7 +318,7 @@ export class Player {
 
     // compute ms per duration unit based on given tempo and beat duration
     let msPerBeat = 60000 / (this.tempo * this.speedpct / 100.0) // ms/beat = ms/minute : beats/minute
-    this.msPerUnit = msPerBeat / Utils.duration(this.beatDuration) // ms/unit = ms/beat : units/beat
+    this.msPerUnit = msPerBeat / this.time.beat.units // ms/unit = ms/beat : units/beat
     console.info('Player gone to ' + msPerBeat + ' ms / beat')
   }
 
