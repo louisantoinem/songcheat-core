@@ -17,13 +17,12 @@ class Compiler_ {
   }
 
   compile (songcheat) {
-    // default values for optional properties
-    songcheat.mode = songcheat.mode || 'rt'
-    songcheat.lyricsMode = songcheat.lyricsMode || 's'
-    songcheat.barsPerLine = songcheat.barsPerLine || 4
     songcheat.chords = songcheat.chords || []
     songcheat.rhythms = songcheat.rhythms || []
     songcheat.parts = songcheat.parts || []
+
+    // default values for optional properties
+    songcheat.mode = songcheat.mode || 'nt'
 
     // default values for signature fields
     songcheat.signature = songcheat.signature || {}
@@ -161,7 +160,7 @@ class Compiler_ {
     for (let phrase of part.phrases) {
       let barIndex = 0
       for (let bar of phrase.bars) {
-        let messageHeader = `Bar ${part.name}.${phraseIndex + 1}.${barIndex + 1} "${bar.rhythm} * ${bar.chords}"`
+        let messageHeader = `Bar ${part.name}.${phraseIndex + 1}.${barIndex + 1} "${Utils.preview(bar.rhythm.toString(), 80)} * ${bar.chords || '(no chords)'}"`
         try {
           // check that parsed bar is valid
           if (!bar.rhythm) throw new CompilerException('Rhythm not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
@@ -212,11 +211,14 @@ class Compiler_ {
 
   getRhythmUnit (songcheat, rhythm) {
     if (rhythm._unit) return rhythm._unit
+    let name = rhythm.inline ? 'Inline rhythm' : 'Rhythm ' + rhythm.name
+    this.logTitle(`Creating dummy rhythm unit for ${name}`)
 
     // compile dummy part having one bar without chords and unit without lyrics
     rhythm._unit = this.compileUnit(songcheat, {
-      name: rhythm.inline ? 'Inline rhythm' : 'Rhythm ' + rhythm.name,
+      name: name,
       part: this.compilePart(songcheat, {
+        name: name,
         phrases: [{
           bars: [{ rhythm, chords: '' }]
         }]

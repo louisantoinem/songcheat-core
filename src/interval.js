@@ -57,9 +57,10 @@ export class Interval {
 
   // Convert the interval to one or several duration codes.
   // Return the combination of codes matching the largest value <= units.
-  // If no combination matches exactly, display an error in console.
+  // If no combination matches exactly (and not silent), throws an Error.
+  // If silent, never throws an error but return an object { codes, remaining }.
   // Codes representing the time's bar then beat are used in priority, until the remaiming part must be expressed with codes smaller than a beat.
-  codes (_silent) {
+  codes (silent) {
     var codes = []
     var remaining = this.units
     while (remaining > 0) {
@@ -69,9 +70,9 @@ export class Interval {
       remaining -= Duration._units(code)
     }
 
-    if (_silent) return { codes, remaining }
+    if (silent) return { codes, remaining }
 
-    if (!Utils.almostZero(remaining)) console.error('Interval.codes: could not find codes adding up to a value of ' + this.units.toFixed(2) + ' units, stopped at ' + codes + ', remains ' + remaining.toFixed(2))
+    if (!Utils.almostZero(remaining)) throw new Error('No exact match found, stopped at ' + codes + ', remains ' + remaining.toFixed(2))
     return codes
   }
 

@@ -14,6 +14,31 @@ export class VexTabException {
 }
 
 export class VexTab {
+
+  static Units2VexTab (songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes) {
+    // all units concatenated
+    if (units.length > 1 && !separateUnits) {
+      console.log('VexTabbing ' + units.length + ' units')
+      return VexTab._Units2VexTab(songcheat.mode, songcheat, units, barsPerLine, showLyrics, showStrokes) + '\n'
+    }
+
+    // each unit starting with a new stave
+    let vextab = ''
+    for (let unit of units) {
+      console.log('VexTabbing unit "' + unit.name + '"')
+      vextab += VexTab._Units2VexTab(songcheat.mode, songcheat, [unit], barsPerLine, showLyrics, showStrokes) + '\n'
+    }
+    return vextab
+  }
+
+  static Rhythm2VexTab (songcheat, rhythm) {
+    // run Unit2VexTab on dummy rhythm unit
+    let compiler = new Compiler()
+    return VexTab._Units2VexTab('r', songcheat, [compiler.getRhythmUnit(songcheat, rhythm)], 0, false, true)
+  }
+
+  // Private stuff
+
   // build VexTab chord notation
   static Chord2VexTab (note, transpose) {
     var vextabchord = []
@@ -42,7 +67,7 @@ export class VexTab {
       // stroke flag d or u (dd and uu are not built-in in vextab and are handled later through text2VexTab)
       if (strokes && note.flags.stroke && note.flags.stroke.length === 1) vextab += note.flags.stroke
 
-      // accent (put on top)
+      // accent (put on top or bottom)
       if (accents && note.flags.accent) vextab += '$.a>/' + accents + '.$'
     }
 
@@ -51,29 +76,27 @@ export class VexTab {
     return vextab
   }
 
-  static Notes2Stave (songcheat, offset, notes, strokes, accents, subtitle, hs, notation, tablature) {
+  static Notes2Stave (songcheat, offset, notes, strokes, accents, notation, tablature, slashed) {
     let vextab = ''
 
-    console.log('Drawing ' + (notation ? 'notation ' : '') + (tablature ? 'tablature ' : '') + 'stave with ' + notes.length + ' notes')
+    console.log('[Notes2Stave] Drawing ' + (notation ? 'notation ' : '') + (tablature ? 'tablature ' : '') + 'stave with ' + notes.length + ' notes')
 
     // start new stave with signature
-    vextab += '\ntabstave notation=' + (notation ? 'true' : 'false') + ' tablature=' + (tablature ? 'true' : 'false') + '\n'
-    vextab += 'tuning=' + songcheat.tuning + ' key=' + songcheat.signature.key + ' time=' + songcheat.signature.time.symbol + '\n'
-
-    // add subtitle if first bar
-    if (subtitle && offset.zero()) vextab += 'text .' + hs + ',.font=Arial-10-bold,[' + subtitle + ']\n'
-
+    vextab += '\ntabstave notation=' + (notation ? 'true' : 'false') + ' tablature=' + (tablature ? 'true' : 'false') + ' time=' + songcheat.signature.time.symbol + '\n'
+    if (!slashed) vextab += 'tuning=' + songcheat.tuning + ' key=' + songcheat.signature.key + '\n'
     vextab += 'notes '
 
     // initial bar line if needed (double if first bar)
     if (offset.bar()) vextab += (offset.zero() ? '=||' : '|')
 
     // add each note, followed by a bar or phrase sign if needed
+    let noteIndex = 0
     for (let note of notes) {
       vextab += VexTab.Note2VexTab(note, strokes, accents)
       offset = offset.add(note.duration)
       if (note.lastInPhrase && !offset.bar()) console.warn('Phrase matches no bar (' + offset.extendToBar().sub(offset) + ' duration units away)')
-      if (offset.bar()) vextab += note.lastInPhrase ? '=||' : '|'
+      if (offset.bar() && noteIndex != notes.length - 1 /* if adding last | or || sign, tab and notation are not aligned anymore */) vextab += note.lastInPhrase ? '=||' : '|'
+      noteIndex++
     }
 
     return vextab + '\n'
@@ -105,8 +128,14 @@ export class VexTab {
 
           // add codes to fill the distance between current and next gap filler position
           let gap = next.sub(gapFillerOffset)
-          // console.log(`[Text2VexTab] "${groupText}" - Adding gap ${gap} from stave start`)
-          for (let code of gap.codes()) line += ',' + code + ', '
+          try {
+            let codes = gap.codes()
+            for (let code of codes) line += ',' + code + ', '
+          } catch (e) {
+            console.error(`[Text2VexTab] "${groupText}" - Error adding gap ${gap} from stave start : ${e.message}`)
+            let { codes } = gap.codes(true)
+            for (let code of codes) line += ',' + code + ', '
+          }
 
           // add a bar sign if needed
           if (next.bar()) line += ',|'
@@ -132,139 +161,162 @@ export class VexTab {
     return text
   }
 
-  static Songcheat2VexTab (songcheat) {
-    let vextab = ''
-    let unitIndex = 0
-    for (let unit of songcheat.structure) {
-      if (typeof songcheat.showUnitIndex === 'undefined' || songcheat.showUnitIndex === null || songcheat.showUnitIndex === unitIndex) {
-        vextab += VexTab.Unit2VexTab(songcheat, unit, unitIndex) + '\n'
-      }
-      unitIndex++
-    }
-    return vextab
-  }
-
-  static Rhythm2VexTab (songcheat, rhythm) {
-    // run Unit2VexTab on dummy rhythm unit
-    let compiler = new Compiler()
-    return VexTab.Unit2VexTab(songcheat, compiler.getRhythmUnit(songcheat, rhythm))
-  }
-
-  static Unit2VexTab (songcheat, unit, unitIndex) {
-    let stems = songcheat.mode.indexOf('s') >= 0
-    let stemsdown = songcheat.mode.indexOf('sd') >= 0
-    let showLyrics = songcheat.lyricsMode === 's'
-
+  static _Units2VexTab (staveMode, songcheat, units, barsPerLine, showLyrics, showStrokes) {
+    let stems = staveMode.indexOf('s') >= 0
+    let stemsdown = staveMode.indexOf('sd') >= 0
+    let stemsup = stems && !stemsdown
     let vextab = 'options tempo=' + songcheat.signature.tempo + ' player=false tab-stems=' + (stems ? 'true' : 'false') + ' tab-stem-direction=' + (stemsdown ? 'down' : 'up') + '\n'
-    unitIndex = unitIndex || 0
 
-    let maxStaveLength = (new Interval(songcheat.signature.time, songcheat.signature.time.bar)).times(songcheat.barsPerLine)
+    // get lyrics, chords, fingering/stroke and PM word groups
+    let lyricsGroups = []
+    let chordGroups = []
+    let pmGroups = []
+    let fingeringGroups = []
+    let subtitlesGroups = []
+    let unitOffset = new Interval(songcheat.signature.time)
+    for (let unit of units) {
+      subtitlesGroups.push({ offset: unitOffset, text: `[${unit.name}]` })
+      for (let group of unit.lyricsGroups.groups) lyricsGroups.push({ offset: unitOffset.add(group.offset), text: group.text + (DEBUG ? '/' + group.length : '') })
+      for (let group of unit.part.chordGroups.groups) chordGroups.push({ offset: unitOffset.add(group.offset), text: group.text + (DEBUG ? '/' + group.length : '') })
+      let noteOffset = unitOffset
+      for (let note of unit.part.score.notes) {
+        if (note.flags.pm) pmGroups.push({ offset: noteOffset, text: 'PM' })
+        if (note.flags.fingering) fingeringGroups.push({ offset: noteOffset, text: note.flags.fingering.toLowerCase() })
+        else if (note.flags.stroke && note.flags.stroke.length === 2) fingeringGroups.push({ offset: noteOffset, text: note.flags.stroke === 'dd' ? '⤋' : '⤊' })
+        noteOffset = noteOffset.add(note.duration)
+      }
+      unitOffset = unitOffset.add(unit.part.score.length)
+    }
+
+    let maxStaveLength = barsPerLine ? (new Interval(songcheat.signature.time, songcheat.signature.time.bar)).times(barsPerLine) : null
     let staveLength = new Interval(songcheat.signature.time)
     let notes = []
     let notesSlashed = []
 
-    console.log('VexTabbing unit ' + (unitIndex + 1) + ' "' + unit.name + '"')
-
-    // space before first unit and between units
-    vextab += 'options space=' + (unitIndex > 0 && songcheat.showUnitIndex === null ? 50 : 20) + '\n'
-
-    // get lyrics word groups
-    let lyricsGroups = []
-    for (let group of unit.lyricsGroups.groups) lyricsGroups.push({ offset: group.offset, text: group.text + (DEBUG ? '/' + group.length : '') })
-
-    // get chord word groups
-    let chordGroups = []
-    for (let group of unit.part.chordGroups.groups) chordGroups.push({ offset: group.offset, text: group.text + (DEBUG ? '/' + group.length : '') })
-
-    // get fingering/stroke and PM word groups
-    let noteOffset = new Interval(songcheat.signature.time)
-    let pmGroups = []
-    let fingeringGroups = []
-    for (let note of unit.part.score.notes) {
-      if (note.flags.pm) pmGroups.push({ offset: noteOffset, text: 'PM' })
-      if (note.flags.fingering) fingeringGroups.push({ offset: noteOffset, text: note.flags.fingering.toLowerCase() })
-      else if (note.flags.stroke && note.flags.stroke.length === 2) fingeringGroups.push({ offset: noteOffset, text: note.flags.stroke === 'dd' ? '⤋' : '⤊' })
-      noteOffset = noteOffset.add(note.duration)
-    }
-
-    // for each phrase in unit
+    // for each phrase in each unit
     let offset = new Interval(songcheat.signature.time)
-    let phraseIndex = 0
-    for (let phrase of unit.part.phrases) {
-      let lastPhraseInPart = phraseIndex === unit.part.phrases.length - 1
+    let unitIndex = 0
+    for (let unit of units) {
+      let lastUnit = unitIndex === units.length - 1
 
-      // for each bar in phrase
-      let barIndex = 0
-      for (let bar of phrase.bars) {
-        console.log('\t\tbar ' + (barIndex + 1))
-        let lastBarInPhrase = barIndex === phrase.bars.length - 1
+      let phraseIndex = 0
+      for (let phrase of unit.part.phrases) {
+        let lastPhraseInPart = phraseIndex === unit.part.phrases.length - 1
 
-        // for each note in bar
-        let noteIndex = 0
-        for (let note of bar.score.notes) {
-          // register chorded and slashed note (i.e. without chord)
-          let chordedNote = note._copy()
-          let slashedNote = note.setChord(null)
-          notes.push(chordedNote)
-          notesSlashed.push(slashedNote)
+        // for each bar in phrase
+        let barIndex = 0
+        for (let bar of phrase.bars) {
+          console.log('[Units2VexTab] ' + unit.name + '.' + (phraseIndex + 1) + '.' + (barIndex + 1))
+          let lastBarInPhrase = barIndex === phrase.bars.length - 1
 
-          // add lastInPhrase prop in our copies
-          let lastInPhrase = lastBarInPhrase && noteIndex === bar.score.notes.length - 1
-          chordedNote.lastInPhrase = slashedNote.lastInPhrase = lastInPhrase
+          // for each note in bar
+          let noteIndex = 0
+          for (let note of bar.score.notes) {
+            // register chorded and slashed note (i.e. without chord)
+            let chordedNote = note._copy()
+            let slashedNote = note.setChord(null)
+            notes.push(chordedNote)
+            notesSlashed.push(slashedNote)
 
-          // draw staves when we have completed barsPerLine bars or if the part is done
-          staveLength = staveLength.add(note.duration)
-          let partDone = lastPhraseInPart && lastInPhrase
-          if (staveLength.compare(maxStaveLength) >= 0 || partDone) {
-            console.log((partDone ? '[EOP]' : '[EOL]') + ' Drawing ' + notes.length + ' notes stave' + (songcheat.mode.length > 1 ? 's' : '') + ' with a length of ' + staveLength)
+            // add lastInPhrase prop in our copies
+            let lastNoteInPhrase = lastBarInPhrase && noteIndex === bar.score.notes.length - 1
+            chordedNote.lastInPhrase = slashedNote.lastInPhrase = lastNoteInPhrase
 
-            // notation: shows unit.name, chords, accents, stems (slashes) and lyrics
-            // if tablature is not displayed, it also shows strokes/fingering
-            // it never shows PM and frets
-            if (songcheat.mode.indexOf('r') >= 0) {
-              let strokes = songcheat.mode.indexOf('t') < 0
-              vextab += VexTab.Notes2Stave(songcheat, offset, notesSlashed, strokes, 'top', unit.name, -1, true, false)
-              if (strokes && fingeringGroups.length > 0) vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, 12, 'Arial-9-normal') // PIMA on same line as strokes
-              if (showLyrics && lyricsGroups.length > 0) vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, strokes ? 14 : 12, 'Times-11-italic')
-              if (chordGroups.length > 0) vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, 2, 'Arial-10-normal')
-              vextab += 'options space=' + (strokes ? 50 : 25) + '\n'
+            // draw staves when we have completed barsPerLine bars or if the part is done
+            staveLength = staveLength.add(note.duration)
+            let isDone = lastUnit && lastPhraseInPart && lastNoteInPhrase
+            if (isDone || (maxStaveLength !== null && staveLength.compare(maxStaveLength) >= 0)) {
+              console.log('[Units2VexTab] ' + (isDone ? 'EOF' : 'EOL') + ': drawing ' + notes.length + ' notes ' + staveMode + ' stave' + (staveMode.length > 1 ? 's' : '') + ' with a length of ' + staveLength)
+
+              let notation = staveMode.indexOf('n') >= 0
+              let tablature = staveMode.indexOf('t') >= 0
+              let rhythm = staveMode.indexOf('r') >= 0
+
+              // rhythm notation: includes strokes and accents
+              if (rhythm) {
+                // stave with notes
+                vextab += 'options space=20\n'
+                vextab += VexTab.Notes2Stave(songcheat, offset, notesSlashed, showStrokes, 'top', true, false, true)
+
+                // unit names and chords
+                vextab += VexTab.Text2VexTab(subtitlesGroups, offset, staveLength, -1, 'Arial-10-bold')
+                vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, 2, 'Arial-10-normal')
+
+                // PIMA and PM are mutually exclusive with strokes so they are displayed on the same line and under same conditions as strokes
+                if (showStrokes) {
+                  let strokesH = 11
+                  vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, strokesH, 'Arial-9-normal')
+                  vextab += VexTab.Text2VexTab(pmGroups, offset, staveLength, strokesH, 'Arial-9-normal')
+                }
+
+                // show lyrics if requested
+                if (showLyrics) {
+                  let lyricsH = 11 + (showStrokes ? 2 : 0)
+                  vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, lyricsH, 'Times-11-italic')
+                }
+
+                // space below stave
+                vextab += 'options space=40\n'
+              }
+
+              // notation and/or tablature
+              if (notation || tablature) {
+                // set stave distance if both notation and tablature
+                let staveDistance = stemsup ? 80 : 45
+                if (notation && tablature) vextab += `options stave-distance=${staveDistance}\n`
+
+                // stave with notes
+                vextab += 'options space=20\n'
+                if (notation) vextab += 'options space=20\n'
+                vextab += VexTab.Notes2Stave(songcheat, offset, notes, showStrokes, false, notation, tablature)
+
+                // unit names and chords
+                let topH = notation || stemsup ? -1 : 2
+                vextab += VexTab.Text2VexTab(subtitlesGroups, offset, staveLength, topH - 3, 'Arial-10-bold')
+                vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, topH - 1, 'Arial-9-bold')
+
+                // PIMA and PM are mutually exclusive with strokes so they are displayed on the same line and under same conditions as strokes
+                if (showStrokes) {
+                  let strokesH = notation ? (stemsdown ? 12 : 22) + (staveDistance / 10) : 10
+                  vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, strokesH, 'Arial-9-normal')
+                  vextab += VexTab.Text2VexTab(pmGroups, offset, staveLength, strokesH, 'Arial-9-normal')
+                }
+
+                // show lyrics if requested
+                if (showLyrics) {
+                  let lyricsH = notation ? (stemsup ? 8 : 10) + (staveDistance / 10) : (10 + (showStrokes ? 2 : 0) + (stemsdown ? 3 : 0))
+                  vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, lyricsH, 'Times-11-italic')
+                }
+
+                // space below stave
+                vextab += 'options space=40\n'
+                if (notation) vextab += 'options space=30\n'
+                if (!tablature || stemsdown) vextab += 'options space=30\n'
+              }
+
+              // increment offset
+              offset = offset.add(staveLength)
+
+              // clear workspace
+              notes = []
+              notesSlashed = []
+              staveLength = new Interval(songcheat.signature.time)
             }
 
-            // tablature: shows PM, frets and strokes/fingering
-            // if notation is not displayed, it also shows unit.name, chords, lyrics and stems (if mode "ts")
-            // it never shows accents
-            if (songcheat.mode.indexOf('t') >= 0) {
-              if (stems) vextab += 'options space=' + 30 + '\n'
-              vextab += VexTab.Notes2Stave(songcheat, offset, notes, true, false, songcheat.mode.indexOf('r') < 0 ? unit.name : false, stems ? -3 : -1, false, true)
-              if (fingeringGroups.length > 0) vextab += VexTab.Text2VexTab(fingeringGroups, offset, staveLength, 10, 'Arial-9-normal') // PIMA on same line as strokes
-              if (pmGroups.length > 0) vextab += VexTab.Text2VexTab(pmGroups, offset, staveLength, 10, 'Arial-9-normal') // PM on same line as strokes
-              if (songcheat.mode.indexOf('r') < 0 && showLyrics && lyricsGroups.length > 0) vextab += VexTab.Text2VexTab(lyricsGroups, offset, staveLength, 12, 'Times-11-italic')
-              if (songcheat.mode.indexOf('r') < 0 && chordGroups.length > 0) vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, stems ? -1 : 1, 'Arial-10-normal')
-              vextab += 'options space=' + (songcheat.mode.indexOf('r') ? 30 : 10) + '\n'
-            }
-
-            // space after staves
-            vextab += 'options space=' + 10 + '\n'
-
-            // increment offset
-            offset = offset.add(staveLength)
-
-            // clear workspace
-            notes = []
-            notesSlashed = []
-            staveLength = new Interval(songcheat.signature.time)
+            // next note in bar
+            noteIndex++
           }
 
-          // next note in bar
-          noteIndex++
+          // next bar in phrase
+          barIndex++
         }
 
-        // next bar in phrase
-        barIndex++
+        // next phrase in part
+        phraseIndex++
       }
 
-      // next phrase in part
-      phraseIndex++
+      // next unit
+      unitIndex++
     }
 
     return vextab
