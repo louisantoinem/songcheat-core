@@ -89,10 +89,12 @@ export class Rhythm {
   //
 
   _getChord (chords, chordName) {
+    chordName = chordName.trim()
+
     // search for chord by its name (if several, use last one)
     let chordNames = []
     for (let chord of chords) {
-      if (chord.name.trim() === chordName.trim()) return chord
+      if (chord.name.trim() === chordName) return chord
       chordNames.push(chord.name)
     }
 

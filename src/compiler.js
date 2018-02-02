@@ -160,12 +160,12 @@ class Compiler_ {
     for (let phrase of part.phrases) {
       let barIndex = 0
       for (let bar of phrase.bars) {
-        let messageHeader = `Bar ${part.name}.${phraseIndex + 1}.${barIndex + 1} "${Utils.preview(bar.rhythm.toString(), 80)} * ${bar.chords || '(no chords)'}"`
+        let messageHeader = `Bar ${part.name}.${phraseIndex + 1}.${barIndex + 1}`
         try {
           // check that parsed bar is valid
           if (!bar.rhythm) throw new CompilerException('Rhythm not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
           if (typeof bar.chords === 'undefined') throw new CompilerException('Chords not defined for bar ' + (barIndex + 1) + ' of phrase ' + (phraseIndex + 1) + ' of ' + part.name)
-          this.logTitle(messageHeader)
+          this.logTitle(`${messageHeader} "${Utils.preview(bar.rhythm.toString(), 80)} * ${bar.chords || '(no chords)'}"`)
 
           // resolve rhythm name if not done yet (not needed for bar of dummy part compiled by getRhythmUnit)
           if (!(bar.rhythm instanceof Rhythm)) {
