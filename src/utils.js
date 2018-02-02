@@ -5,7 +5,7 @@ export class Utils {
     let startTime = new Date().getTime()
     let ret = f()
     let elapsed = new Date().getTime() - startTime
-    f = elapsed > (warnThr || 25) ? console.warn : console.log
+    f = elapsed >= (typeof warnThr === 'undefined' ? 25 : warnThr) ? console.warn : console.log
     f(what + ' took ' + ((offset || 0) + elapsed) + 'ms')
     return ret
   }

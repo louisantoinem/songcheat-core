@@ -15,26 +15,15 @@ export class VexTabException {
 
 export class VexTab {
 
-  static Units2VexTab (songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes) {
-    // all units concatenated
-    if (units.length > 1 && !separateUnits) {
-      console.log('VexTabbing ' + units.length + ' units')
-      return VexTab._Units2VexTab(songcheat.mode, songcheat, units, barsPerLine, showLyrics, showStrokes) + '\n'
-    }
-
-    // each unit starting with a new stave
-    let vextab = ''
-    for (let unit of units) {
-      console.log('VexTabbing unit "' + unit.name + '"')
-      vextab += VexTab._Units2VexTab(songcheat.mode, songcheat, [unit], barsPerLine, showLyrics, showStrokes) + '\n'
-    }
-    return vextab
+  static Units2VexTab (songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore) {
+    console.log('[Units2VexTab] VexTabbing ' + units.length + ' units')
+    return VexTab._Units2VexTab(songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore)
   }
 
   static Rhythm2VexTab (songcheat, rhythm) {
     // run Unit2VexTab on dummy rhythm unit
     let compiler = new Compiler()
-    return VexTab._Units2VexTab('r', songcheat, [compiler.getRhythmUnit(songcheat, rhythm)], 0, false, true)
+    return VexTab._Units2VexTab('r', songcheat, [compiler.getRhythmUnit(songcheat, rhythm)], 0, false, false, true)
   }
 
   // Private stuff
@@ -95,7 +84,11 @@ export class VexTab {
       vextab += VexTab.Note2VexTab(note, strokes, accents)
       offset = offset.add(note.duration)
       if (note.lastInPhrase && !offset.bar()) console.warn('Phrase matches no bar (' + offset.extendToBar().sub(offset) + ' duration units away)')
-      if (offset.bar() && noteIndex != notes.length - 1 /* if adding last | or || sign, tab and notation are not aligned anymore */) vextab += note.lastInPhrase ? '=||' : '|'
+      // #99 when adding a final | or || sign, staff and tab are not aligned anymore
+      // UPDATE: hacked vextab-div.js with the correction proposed here: https://github.com/0xfe/vextab/issues/99#issuecomment-362538056
+      // if (noteIndex != notes.length - 1) {
+      if (offset.bar()) vextab += note.lastInPhrase ? '=||' : '|'
+      // }
       noteIndex++
     }
 
@@ -161,11 +154,14 @@ export class VexTab {
     return text
   }
 
-  static _Units2VexTab (staveMode, songcheat, units, barsPerLine, showLyrics, showStrokes) {
+  static _Units2VexTab (staveMode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, splitAtMaxStaves) {
     let stems = staveMode.indexOf('s') >= 0
     let stemsdown = staveMode.indexOf('sd') >= 0
     let stemsup = stems && !stemsdown
-    let vextab = 'options tempo=' + songcheat.signature.tempo + ' player=false tab-stems=' + (stems ? 'true' : 'false') + ' tab-stem-direction=' + (stemsdown ? 'down' : 'up') + '\n'
+
+    let vextabs = []
+    let vextabOptions = 'options tempo=' + songcheat.signature.tempo + ' player=false tab-stems=' + (stems ? 'true' : 'false') + ' tab-stem-direction=' + (stemsdown ? 'down' : 'up') + '\n'
+    let vextab = vextabOptions
 
     // get lyrics, chords, fingering/stroke and PM word groups
     let lyricsGroups = []
@@ -190,6 +186,7 @@ export class VexTab {
 
     let maxStaveLength = barsPerLine ? (new Interval(songcheat.signature.time, songcheat.signature.time.bar)).times(barsPerLine) : null
     let staveLength = new Interval(songcheat.signature.time)
+    let staveCount = 0
     let notes = []
     let notesSlashed = []
 
@@ -224,9 +221,11 @@ export class VexTab {
 
             // draw staves when we have completed barsPerLine bars or if the part is done
             staveLength = staveLength.add(note.duration)
-            let isDone = lastUnit && lastPhraseInPart && lastNoteInPhrase
-            if (isDone || (maxStaveLength !== null && staveLength.compare(maxStaveLength) >= 0)) {
+            let unitIsDone = lastPhraseInPart && lastNoteInPhrase
+            let isDone = unitIsDone && lastUnit
+            if (isDone || (separateUnits && unitIsDone) || (maxStaveLength !== null && staveLength.compare(maxStaveLength) >= 0)) {
               console.log('[Units2VexTab] ' + (isDone ? 'EOF' : 'EOL') + ': drawing ' + notes.length + ' notes ' + staveMode + ' stave' + (staveMode.length > 1 ? 's' : '') + ' with a length of ' + staveLength)
+              staveCount++
 
               let notation = staveMode.indexOf('n') >= 0
               let tablature = staveMode.indexOf('t') >= 0
@@ -273,7 +272,7 @@ export class VexTab {
                 // unit names and chords
                 let topH = notation || stemsup ? -1 : 2
                 vextab += VexTab.Text2VexTab(subtitlesGroups, offset, staveLength, topH - 3, 'Arial-10-bold')
-                vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, topH - 1, 'Arial-9-bold')
+                vextab += VexTab.Text2VexTab(chordGroups, offset, staveLength, topH - 1, 'Arial-10-normal')
 
                 // PIMA and PM are mutually exclusive with strokes so they are displayed on the same line and under same conditions as strokes
                 if (showStrokes) {
@@ -301,6 +300,12 @@ export class VexTab {
               notes = []
               notesSlashed = []
               staveLength = new Interval(songcheat.signature.time)
+
+              // register score if it has reached the maximum number of staves or if it is the last one
+              if (splitAtMaxStaves && (isDone || staveCount % splitAtMaxStaves === 0)) {
+                vextabs.push(vextab)
+                vextab = vextabOptions
+              }
             }
 
             // next note in bar
@@ -319,6 +324,12 @@ export class VexTab {
       unitIndex++
     }
 
+    if (splitAtMaxStaves) {
+      console.warn(`[Units2VexTab] Returning ${staveCount} staves grouped in ${vextabs.length} scores of maximum ${splitAtMaxStaves} staves each`)
+      return vextabs
+    }
+
+    console.warn(`[Units2VexTab] Returning score containing ${staveCount} staves`)
     return vextab
   }
 }
