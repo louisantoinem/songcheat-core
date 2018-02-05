@@ -14,7 +14,6 @@ export class VexTabException {
 }
 
 export class VexTab {
-
   static Units2VexTab (songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore) {
     console.log('[Units2VexTab] VexTabbing ' + units.length + ' units')
     return VexTab._Units2VexTab(songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore)
@@ -79,17 +78,14 @@ export class VexTab {
     if (offset.bar()) vextab += (offset.zero() ? '=||' : '|')
 
     // add each note, followed by a bar or phrase sign if needed
-    let noteIndex = 0
     for (let note of notes) {
       vextab += VexTab.Note2VexTab(note, strokes, accents)
       offset = offset.add(note.duration)
       if (note.lastInPhrase && !offset.bar()) console.warn('Phrase matches no bar (' + offset.extendToBar().sub(offset) + ' duration units away)')
       // #99 when adding a final | or || sign, staff and tab are not aligned anymore
       // UPDATE: hacked vextab-div.js with the correction proposed here: https://github.com/0xfe/vextab/issues/99#issuecomment-362538056
-      // if (noteIndex != notes.length - 1) {
+      // // if (noteIndex != notes.length - 1)
       if (offset.bar()) vextab += note.lastInPhrase ? '=||' : '|'
-      // }
-      noteIndex++
     }
 
     return vextab + '\n'
