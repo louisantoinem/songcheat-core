@@ -48,6 +48,11 @@ export class Duration {
     throw new Error('Duration.times: there exists no duration code corresponding to ' + (this.units * factor) + ' units')
   }
 
+  static valid (code) {
+    try { return Duration._units(code) } catch (e) { }
+    return false
+  }
+
   //
   // Private stuff
   //

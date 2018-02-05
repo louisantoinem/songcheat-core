@@ -256,7 +256,7 @@ class Parser_ {
           for (let b of ph.bars) bars.push(b)
           phraseIndex++
         }
-      } else throw new ParserException(param.line, param.value + ' is not the name of an existing part')
+      } else throw new ParserException(param.line, `"${param.value}" is not the name of an existing part`)
     }
 
     // end of last phrase

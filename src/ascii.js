@@ -23,7 +23,7 @@ class Ascii_ {
     if (this.DEBUG > 0) console.log.apply(console, arguments)
   }
 
-  getUnitText (unit, maxConsecutiveSpaces, split, showDots) {
+  getUnitText (unit, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
     var unitText = ''
     var barIndex = 0
     var groupIndex = 0
@@ -130,7 +130,7 @@ class Ascii_ {
     }
 
     // and interlace the two strings
-    return Utils.interlace(chordText, unitText, null, KEEP_EMPTY_LINES)
+    return Utils.interlace(chordText, unitText, null, KEEP_EMPTY_LINES, chordsWrapper)
   }
 }
 
@@ -144,13 +144,13 @@ export class Ascii {
     this.songcheat = songcheat
   }
 
-  getUnitText (unit, maxConsecutiveSpaces, split, showDots) {
+  getUnitText (unit, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
     console.log(Utils.title(`GET UNIT TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.ascii_.getUnitText(unit, maxConsecutiveSpaces, split, showDots)
+    return this.ascii_.getUnitText(unit, maxConsecutiveSpaces, split, showDots, chordsWrapper)
   }
 
-  getPartText (part, maxConsecutiveSpaces, split, showDots) {
+  getPartText (part, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
     console.log(Utils.title(`GET PART TEXT ${part.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.ascii_.getUnitText(new Compiler().getPartUnit(this.songcheat, part), maxConsecutiveSpaces, split, showDots)
+    return this.ascii_.getUnitText(new Compiler().getPartUnit(this.songcheat, part), maxConsecutiveSpaces, split, showDots, chordsWrapper)
   }
 }

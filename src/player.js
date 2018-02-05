@@ -28,7 +28,7 @@ export class Player {
     // config: capo, tempo, shuffle
     this.capo = config.capo || 0
     this.tempo = config.signature.tempo || 100
-    this.shuffle = config.signature.shuffle ? new Duration(config.signature.shuffle) : null
+    this.shuffle = Duration.valid(config.signature.shuffle) ? new Duration(config.signature.shuffle) : null
 
     // tuning, defaults to standard tuning
     this.tuning = config.tuning || [329.63, // E4

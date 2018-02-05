@@ -90,14 +90,22 @@ export class Utils {
     // http://php.net/manual/fr/regexp.reference.unicode.php
     // http://www.fileformat.info/info/unicode/category/Mn/list.htm
 
+    // grave
     s = s.replace(/a\u0300/g, 'à')
     s = s.replace(/e\u0300/g, 'è')
+    s = s.replace(/u\u0300/g, 'ù')
+
+    // acute
     s = s.replace(/e\u0301/g, 'é')
+
+    // circumflex
     s = s.replace(/e\u0302/g, 'ê')
     s = s.replace(/i\u0302/g, 'î')
     s = s.replace(/o\u0302/g, 'ô')
     s = s.replace(/u\u0302/g, 'û')
     s = s.replace(/a\u0302/g, 'â')
+
+    // tilde
     s = s.replace(/o\u0303/g, 'õ')
     s = s.replace(/a\u0303/g, 'ã')
 
@@ -134,11 +142,13 @@ export class Utils {
    * If the second file contains more line then the first one, these additional lines will be ignored
    **/
 
-  static interlace (text1, text2, sepLine, keepEmptyLines) {
+  static interlace (text1, text2, sepLine, keepEmptyLines, wrapper1, wrapper2) {
+    wrapper1 = wrapper1 || (s => { return s })
+    wrapper2 = wrapper2 || (s => { return s })
     var a1 = text1.split(/\r?\n/)
     var a2 = text2.split(/\r?\n/)
     var a = a1.map(function (v, i) {
-      let lines = keepEmptyLines || (a2[i] && a2[i].trim()) ? [v, a2[i]] : [v]
+      let lines = keepEmptyLines || (a2[i] && a2[i].trim()) ? [wrapper1(v), wrapper2(a2[i])] : [wrapper1(v)]
       if (typeof sepLine === 'string') lines.push(sepLine)
       return lines.join('\n')
     })

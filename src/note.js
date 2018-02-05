@@ -104,6 +104,7 @@ export class Note {
     note.tuplet = this.tuplet
     note.lastOfTuplet = this.lastOfTuplet
     note.chord = this.chord
+    note.offset = this.offset
     return note
   }
 
@@ -116,6 +117,7 @@ export class Note {
     note.tuplet = this.tuplet
     note.lastOfTuplet = this.lastOfTuplet
     note.chord = this.chord
+    note.offset = this.offset
     return note
   }
 }
