@@ -239,7 +239,7 @@ class Parser_ {
       // so search for part by its name (if several, use last one)
       let foundPart = null
       for (let p of this.songcheat['parts']) {
-        if (p.name === param.value) {
+        if (p !== part && p.name === param.value) {
           foundPart = p
           // break
         }
