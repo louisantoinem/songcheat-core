@@ -59,7 +59,7 @@ class Compiler_ {
     //
 
     // give a color to each part if not already set
-    let colors = ['red', 'green', 'blue', 'purple', 'orange', 'magenta']
+    let colors = ['blue', 'red', 'green', 'purple', 'orange', 'magenta']
     let partIndex = 0
     for (let part of songcheat.parts) if (!part.color) part.color = colors[partIndex++ % colors.length]
 
