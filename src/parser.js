@@ -1,4 +1,5 @@
 import { Utils } from './utils'
+import { Tokenizer } from './tokenizer'
 
 export class ParserException extends Error {
   constructor (line, message) {
@@ -19,7 +20,7 @@ class Parser_ {
     this.songcheat = {}
 
     // split text into tokens
-    let tokens = this.tokenize(text)
+    let tokens = Tokenizer.tokenize(text)
     if (tokens.length === 0) return this.songcheat
 
     let tokenIndex = 0
@@ -53,101 +54,9 @@ class Parser_ {
     return this.songcheat
   }
 
-  getPrecedingKeyword (text, line) {
-    // reset
-    this.songcheat = {}
-
-    let lastResult = null
-
-    // split text into tokens
-    let tokens = this.tokenize(text)
-    if (tokens.length === 0) return true
-
-    let tokenIndex = 0
-    while (tokenIndex < tokens.length) {
-      let token = tokens[tokenIndex]
-      let keyword = this.isKeyword(token)
-
-      if (token.line > line) return lastResult
-
-      // we must be on a keyword, otherwise it means that first token in text is not a keyword as expected
-      if (!keyword) throw new ParserException(token.line, 'expected keyword, found "' + token.value + '"')
-
-      // get all tokens until next keyword or end
-      let params = []
-      for (++tokenIndex; tokenIndex < tokens.length; ++tokenIndex) {
-        if (this.isKeyword(tokens[tokenIndex])) break
-        params.push(tokens[tokenIndex])
-      }
-
-      // use specific handler if any or default one
-      let handler = this['handle' + Utils.firstUpper(keyword)] || this.handleDefault
-      if (typeof handler === 'function') handler.call(this, token.line, keyword, params)
-      else throw new ParserException(token.line, 'non function handler found for keyword ' + keyword)
-
-      lastResult = { line: token.line, keyword: keyword, params: params, chordIndex: null, rhythmIndex: null, partIndex: null, unitIndex: null }
-
-      if (keyword === 'chord') lastResult.chordIndex = this.songcheat.chords.length - 1
-      else if (keyword === 'rhythm') lastResult.rhythmIndex = this.songcheat.rhythms.length - 1
-      else if (keyword === 'part' || keyword === 'sub') lastResult.partIndex = this.songcheat.parts.length - 1
-      else if (keyword === 'structure') {
-        // special case since there is no distinct UNIT keyword for each unit, but a single STRUCTURE keyword for all units
-        let paramIndex = 0
-        for (let param of params) {
-          if (param.line > line) break
-          lastResult.unitIndex = Math.floor(paramIndex / 2)
-          paramIndex++
-        }
-      }
-    }
-
-    return lastResult
-  }
-
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value)
     return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'mode', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit', 'structure'].indexOf(keyword) >= 0 ? keyword : false
-  }
-
-  tokenize (text) {
-    let tokens = []
-
-    // https://stackoverflow.com/questions/4780728/regex-split-string-preserving-quotes?noredirect=1&lq=1
-    let reSpaces = /(?<=^[^"]*(?:"[^"]*"[^"]*)*)[\s\t]+(?=(?:[^"]*"[^"]*")*[^"]*$)/
-    let reNewline = /(?<=^[^"]*(?:"[^"]*"[^"]*)*)(\r?\n)(?=(?:[^"]*"[^"]*")*[^"]*$)/
-
-    let lineNumber = 1
-
-    // split at newlines unless enclosed in quotes
-    for (let line of text.split(reNewline)) {
-      // split also returns the newlines, ignore them
-      if (line.match(/^\r?\n$/)) continue
-
-      // trim line
-      line = line.trim()
-
-      // console.log("L" + lineNumber + ": ["+ line + "]");
-
-      // if not a comment or empty line
-      if (line && !line.match(/^#/)) {
-        // split at spaces and tabs unless enclosed in quotes, then trim spaces and quotes
-        let values = line.split(reSpaces).map(s => s.trim().replace(/^"|"$/g, ''))
-
-        for (let vIndex = 0; vIndex < values.length; vIndex++) {
-          let value = values[vIndex]
-
-          // if token starts with a [ and does not end on ], concatenate next tokens until ] found
-          if (value.match(/^\[/)) { while (vIndex < values.length - 1 && !value.match(/\]$/)) value += ' ' + values[++vIndex] }
-
-          tokens.push({ 'value': value, 'line': lineNumber })
-        }
-      }
-
-      // increment line number
-      lineNumber += (1 + (line.match(/(?:\r?\n)/g) || []).length)
-    }
-
-    return tokens
   }
 
   handleDefault (line, keyword, params) {
@@ -227,16 +136,7 @@ class Parser_ {
         continue
       }
 
-      // bar between []
-      if (param.value.match(/^\[[^[\]]+\]$/)) {
-        let str = param.value.substr(1, param.value.length - 2)
-        let parts = str.split(/\s*\*/)
-        bars.push({ 'rhythm': parts[0], 'chords': parts[1] || '' })
-        continue
-      }
-
-      // not a || phrase separator nor a [] bar: must be a part name
-      // so search for part by its name (if several, use last one)
+      // search for part by its name (if several, use last one)
       let foundPart = null
       for (let p of this.songcheat['parts']) {
         if (p !== part && p.name === param.value) {
@@ -256,7 +156,12 @@ class Parser_ {
           for (let b of ph.bars) bars.push(b)
           phraseIndex++
         }
-      } else throw new ParserException(param.line, `"${param.value}" is not the name of an existing part`)
+        continue
+      }
+
+      // not a || phrase separator nor a part name: must be a bar
+      let parts = param.value.split(/\s*\*/)
+      bars.push({ 'rhythm': parts[0], 'chords': parts[1] || '' })
     }
 
     // end of last phrase

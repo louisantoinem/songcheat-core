@@ -11,6 +11,7 @@ import { Rhythm } from './rhythm'
 import { Group } from './group'
 import { GroupList } from './group_list'
 import { GroupParser } from './group_parser'
+import { Tokenizer, TokenizerException } from './tokenizer'
 import { Parser, ParserException } from './parser'
 import { Compiler, CompilerException } from './compiler'
 import { Ascii, AsciiException } from './ascii'
@@ -25,6 +26,7 @@ export {
   ChordPix, ChordPixException,
   Note, Score, ScoreParser, Rhythm,
   Group, GroupList, GroupParser,
+  Tokenizer, TokenizerException,
   Parser, ParserException,
   Compiler, CompilerException,
   Ascii, AsciiException,

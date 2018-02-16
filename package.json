@@ -1,6 +1,6 @@
 {
   "name": "songcheat-core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Base classes for handling SongCheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
   "module": "dist/songcheat-core.esm.js",
@@ -41,6 +41,7 @@
     "babel-preset-env": "^1.6.1",
     "json-stringify-pretty-compact": "^1.1.0",
     "npm-watch": "^0.3.0",
+    "promisify": "0.0.3",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-json": "^2.3.0",
