@@ -36,7 +36,7 @@ export class Tokenizer {
         // character enclosed in quotes
         currentToken += char
       } else if (char.match(/\s/)) {
-        // (non consecutive) space : register previous token
+        // (non consecutive) space (i.e. space, tab or newline) : register previous token
         if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, line: lineNumber })
         currentToken = ''
       } else if (char === '#' && (lastChar === null || lastChar.match(/\s/))) {
@@ -52,6 +52,9 @@ export class Tokenizer {
     }
 
     if (inQuotes) throw new TokenizerException(inQuotes, `Unmatched quote`)
+
+    // register last token
+    if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, line: lineNumber })
 
     return tokens
   }
