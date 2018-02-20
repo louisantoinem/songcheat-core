@@ -100,7 +100,7 @@ export class Player {
     oscillator.onended = onended
 
     // type can be a periodic wave or a standard oscillator type
-    if (waveTables[type]) oscillator.setPeriodicWave(audioCtx.createPeriodicWave(waveTables[type].real, waveTables[type].imag))
+    if (waveTables[type]) oscillator.setPeriodicWave(audioCtx.createPeriodicWave(new Float32Array(waveTables[type].real), new Float32Array(waveTables[type].imag)))
     else oscillator.type = type
 
     oscillator.start(time)
