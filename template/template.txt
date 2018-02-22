@@ -8,23 +8,20 @@
 #################
 
 # Some mandatory basic information about the song
+# Possible values for DIFFICULTY: 1 = VERY EASY, 2 = EASY, 3 = MODERATE, 4 = HARD, 5 = VERY HARD
 
-ARTIST "John Lennon"
-TITLE "Imagine"
-YEAR 1971
-DIFFICULTY 3 # Possible values: 1 = VERY EASY, 2 = EASY, 3 = MODERATE, 4 = HARD, 5 = VERY HARD
+ARTIST "Artist"
+TITLE "Title"
+YEAR 2018
+DIFFICULTY 1
 
 # Some optional information about the song
 # Video and tutorial: Youtube, DailyMotion or Vimeo
 # Comment can be long and multiline
 
 VIDEO ""
-TUTORIAL "https://www.youtube.com/watch?v=AST3RA-x9oA"
-COMMENT "Lennon composed \"Imagine\" one morning in early 1971, on a Steinway piano, in a bedroom at his Tittenhurst Park estate in Ascot, Berkshire, England. Ono watched as he composed the melody, chord structure and almost all the lyrics, nearly completing the song in one brief writing session.
-
-Described as a piano ballad performed in the soft rock genre, the song is in the key of C major. Its 4-bar piano introduction begins with a C chord then moves to Cmaj7 before changing to F; the 12-bar verses also follow this chord progression, with their last 4 bars moving from Am/E to Dm and Dm/C, finishing with G, G11 then G7, before resolving back to C. The 8-bar choruses progress from F to G to C, then Cmaj7 and E before ending on E7, a C chord substituted for E7 in the final bar. The 4-bar outro begins with F, then G, before resolving on C.
-
-With a duration of 3 minutes and 3 seconds and a time signature of 4/4, the song's tempo falls around 75 beats per minute."
+TUTORIAL ""
+COMMENT "My next killer SongCheat"
 
 ################
 # GUITAR SETUP #
@@ -53,7 +50,7 @@ CAPO 0
 
 KEY C
 TIME 4/4 4 :q
-TEMPO 76
+TEMPO 80
 SHUFFLE ""
 
 ##########
@@ -70,22 +67,14 @@ SHUFFLE ""
 # These 6 characters can be followed by a "/f" where f is the number of the barred fret.
 # "/-" means there is no barred fret and is the same as not specifying it at all.
 
-CHORD C        x32010 T32010
-CHORD "C Maj7" x32000 T32000   "C without finger 1"
-CHORD F        xx3211 T33211   "F without E and A strings"
-CHORD F/E      xx2211 T33211/1 "Finger 3 moved left by 1 fret"
-CHORD Dm       xx0231 T00241   "Finger 4 instead of 3"
-CHORD Dm/C     x30231 T30241   "Dm adding finger 3 on A string"
-CHORD G        320003 320004   "G with 3 fingers"
-CHORD G7       320001 320001   "G with finger 1 on e string"
-CHORD E        022100 023100
-CHORD F'       133211 113211/1 "Classical F Barré"
+CHORD C x32010 T32010
+CHORD G 320003 210003   "G with 3 fingers"
+CHORD F 133211 113211/1 "F Barré"
 
 # When multiple chords exists for the same name, the last one is actually used.
-# Here, we have alternate versions for F and F/E: uncomment to use them.
+# Here, we have an alternate version for G, uncomment to use it.
 
-# CHORD F     1x3211 T33211   "F without A string"
-# CHORD F/E   0x3211 033211/1 "finger 1 off the fret"
+# CHORD G 320033 210034 "G with 4 fingers"
 
 ###########
 # RHYTHMS #
@@ -94,71 +83,16 @@ CHORD F'       133211 113211/1 "Classical F Barré"
 # Rhythm: $Name $Score
 # See user guide for syntax of $Score
 
-# pianistic style: 8th strum then 8th bass
+# pianistic style: strum / bass
 RHYTHM R1 ":8 ()d (B)d ()d (B)d ()d (B)d ()d (B)d"
-
-# more powerful rhythm, alternative for R1 in parts B (pre-chorus) and C (chorus)
-RHYTHM R2 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
 
 #########
 # PARTS #
 #########
 
-# A is used in intro (2x) and in verse (4x)
-# 1 bar using the "pianistic" rhythm
-# 1 bar using the same rhythm but with ending "riff"
+SUB A R1*G R1*C
 
-SUB A  R1*C,,,,,,"C Maj7"
-       ":8 ()d (B)d ()d (B)d ()d (B)d :16 {---2--}d h{---3--}u :8 {----0-}d*F"
-
-# B is end of verse just before chorus
-# 3 bars using the "powerful" rhythm
-# 1 last bar which is one final stroke
-
-SUB B  R2*F,,,,F/E
-       R2*Dm,,,,Dm/C
-       R2*G
-       ":hd ()d :q (#)*G7"
-
-# B could also use the "pianistic" rhythm: uncomment to do so
-# SUB B  R1*F,,,,F/E
-#        R1*Dm,,,,Dm/C
-#        R1*G
-#        ":hd ()d :q (#)*G7"
-
-# C is used in intermediary and final chorus
-# 2 bars using the "pianistic" rhythm
-
-SUB C1 R1*F',,,,G
-SUB C2 R1*C,,,,E
-
-# C could also use the "powerful" rhythm: uncomment to do so
-# SUB C1 R2*F,,,,G
-# SUB C2 R2*C,,,,E
-
-# 1 phrase of 4 bars
-PART "Intro"       A A
-
-# 2 phrases of 4 bars each
-PART "Verse"       A A ||
-                   A A ||
-
-# 1 phrase of 4 bars
-PART "PreChorus"   B
-
-# 2 phrases of 4 bars each
-# last bar is 4 quarters leading to the first C of verse
-PART "Chorus"      C1 C2
-                   C1 C2 ||
-                   C1 C2
-                   C1 ":q ()d {3-----}d {-0----}d {-2----}d*C"
-
-# 2 phrases of 4 bars each
-# last bar is one final arpeggiated stroke
-PART "Final Chorus"   C1 C2
-                      C1 C2 ||
-                      C1 C2
-                      C1 ":h ()dd (#)*C"
+PART "Sample"       A A || A A
 
 #############
 # STRUCTURE #
@@ -172,39 +106,4 @@ PART "Final Chorus"   C1 C2
 
 STRUCTURE
 
-"Intro" "||
-"
-
-"Verse" ":Imagine:there's:no hea-|ven|
-:It's ea-:sy if:you|try|
-:No:hell:below|us|
-:Above:us:only|sky"
-
-"PreChorus" ":Imagine:all:the|people|
-Li:ving:for:to-|day:ah:ah:ahaha"
-
-"Verse" ":Imagine:there's:no coun-|tries|
-:It isn't:hard:to|do|
-:Nothing:to kill:or die|for|
-:And no:reli-:gion|too"
-
-"PreChorus" ":Imagine:all:the|peo-:ple:|
-Li:ving:life:in|peace:youh:ouh:ouhouhou"
-
-"Chorus" ":8:You:may:say:I'm a|dreamer|
-:8:But:I'm:not:the only|one|
-I:8:hope:some:day:you'll|join us|
-:8:And:the:world:will|be as one"
-
-"Verse" ":Imagine:no:posse-|ssions|
-:I won-:der if:you|can|
-:No:need for:greed or|hunger|
-:A bro-:ther:hood of|man"
-
-"PreChorus" ":Imagine:all:the|peo-:ple:|
-Sha-:ring:all:the|world:youh:ouh:ouhouhou"
-
-"Final Chorus" ":8:You:may:say:I'm a|dreamer|
-:8:But:I'm:not:the only|one|
-I:8:hope:some:day:you'll|join us|
-:8:And:the:world:will|live as one"
+"Sample" ""

@@ -56,6 +56,7 @@ class Parser_ {
 
   isKeyword (token) {
     let keyword = Utils.camelCase(token.value)
+    if (token.quoted) return false
     return ['artist', 'title', 'year', 'difficulty', 'video', 'tutorial', 'source', 'comment', 'mode', 'tuning', 'capo', 'key', 'time', 'tempo', 'shuffle', 'chord', 'rhythm', 'sub', 'part', 'lyricsUnit', 'structure'].indexOf(keyword) >= 0 ? keyword : false
   }
 

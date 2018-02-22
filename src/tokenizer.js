@@ -11,6 +11,7 @@ export class Tokenizer {
   static tokenize (text) {
     let tokens = []
     let currentToken = ''
+    let currentTokenQuoted = false
     let inQuotes = false
     let inComment = false
     let lastChar = null
@@ -31,14 +32,18 @@ export class Tokenizer {
         // escaped quote: replace final \ by "
         if (lastChar === '\\') currentToken = currentToken.replace(/\\$/, '"')
         // non escaped quote: set or clear inQuotes
-        else inQuotes = inQuotes ? false : lineNumber
+        else {
+          inQuotes = inQuotes ? false : lineNumber
+          currentTokenQuoted = true
+        }
       } else if (inQuotes) {
         // character enclosed in quotes
         currentToken += char
       } else if (char.match(/\s/)) {
         // (non consecutive) space (i.e. space, tab or newline) : register previous token
-        if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, line: lineNumber })
+        if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, quoted: currentTokenQuoted, line: lineNumber })
         currentToken = ''
+        currentTokenQuoted = false
       } else if (char === '#' && (lastChar === null || lastChar.match(/\s/))) {
         // hashtag at start of line or after a space: start comment
         inComment = true
@@ -54,7 +59,7 @@ export class Tokenizer {
     if (inQuotes) throw new TokenizerException(inQuotes, `Unmatched quote`)
 
     // register last token
-    if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, line: lineNumber })
+    if (lastChar && !lastChar.match(/\s/)) tokens.push({ value: currentToken, quoted: currentTokenQuoted, line: lineNumber })
 
     return tokens
   }
