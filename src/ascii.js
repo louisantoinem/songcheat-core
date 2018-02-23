@@ -61,8 +61,8 @@ class Ascii_ {
       // replace last character of filler by a | if this is the end of a bar
       filler = filler.replace(/(.)$/, group.data.bar ? (split > 0 && (barIndex + 1) % split === 0 ? '|\n' : '|') : (this.DEBUG ? '*' : '$1'))
 
-      // append filler to text, remove new lines if splitting at bars
-      var groupText = (split > 0 ? group.text.replace(/\n/g, '') : group.text) + filler
+      // append filler to text, replace new lines by spaces (except if first char) if splitting at bars
+      var groupText = (split > 0 ? group.text.replace(/^\n/g, '').replace(/\n/g, ' ') : group.text) + filler
 
       this.log('Display group ' + (groupIndex + 1) + ' "' + groupText.replace(/\n/g, '\\') + '" on ' + strlen + ' chars (FullLength=ceil(' + (group.length.units * unit.pmax).toFixed(2) + ') MaxLength=' + (maxLength || 'n/a') + ' FitLength=' + fitLength + ' ChordsLength=' + chordsLength + ')')
       unitText += groupText

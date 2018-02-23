@@ -96,7 +96,7 @@ export class VexTab {
 
     // for groups that start within our range
     for (let group of textGroups) {
-      let groupText = group.text.replace(/\n/g, '')
+      let groupText = group.text.replace(/^\n/g, '').replace(/\n/g, ' ')
 
       if (group.offset.compare(offset.add(staveLength)) >= 0) break
       if (group.offset.compare(offset) >= 0) {
