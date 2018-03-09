@@ -42,8 +42,18 @@ class Ascii_ {
       // used if maxConsecutiveSpaces is set (and displayed in debug message)
       let maxLength = null
       let fitLength = group.data.len + (needFinalSpace ? 1 : 0)
-      let chordsLength = group.data.bar ? 1 : 0 // 1 for the final bar sign if any
-      if (group.data.chordChanges.groups) { for (let i = 0; i < group.data.chordChanges.groups.length; i++) chordsLength += group.data.chordChanges.groups[i].text.length }
+
+      // get length needed for chord changes
+      let chordsLength = 0
+      for (let chordChange of group.data.chordChanges.groups) {
+        // add 1 if start of first (non empty) chord group does not match start of text group
+        if (chordsLength === 0 && chordChange.offset.compare(group.offset) !== 0) chordsLength = 1
+
+        chordsLength += chordChange.text.length
+      }
+
+      // add 1 for the final bar sign if any
+      chordsLength += group.data.bar ? 1 : 0
 
       // if maxConsecutiveSpaces is set
       if (maxConsecutiveSpaces > 0) {
@@ -84,6 +94,9 @@ class Ascii_ {
 
         // ensure that chords already there still have enough room
         while (positionDelta - lengthYetPlacedOnThisGroup < 0) { positionDelta++ }
+
+        // if start of chord group does not match start of text group, delta must be at least 1
+        if (chordChange.offset.compare(group.offset) !== 0) positionDelta = positionDelta === 0 ? 1 : positionDelta
 
         let chordInsert = { text: chordChange.text, offset: chordChange.offset, position: position + positionDelta }
         this.log('Should insert ' + chordInsert.text + ' @ ' + chordInsert.offset + ' / ' + chordInsert.position + ' chars (position delta from group start = ' + positionDelta + ' chars, initially ' + positionDelta_ + ' chars)')
