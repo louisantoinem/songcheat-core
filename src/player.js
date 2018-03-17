@@ -119,10 +119,12 @@ export class Player {
     // base duration of note
     let ms_ = note.duration.units * this.msPerUnit
 
+    let SHUFFLE = 33.33333333
+
     // change duration proportions for shuffled notes
     if (this.shuffle && note.duration.equals(this.shuffle)) {
-      if (note.offset.multipleOf(this.shuffle.times(2))) ms_ *= 4 / 3
-      else ms_ *= 2 / 3
+      if (note.offset.multipleOf(this.shuffle.times(2))) ms_ *= (100.0 - SHUFFLE) / 50.0
+      else ms_ *= SHUFFLE / 50.0
     }
 
     return ms_
