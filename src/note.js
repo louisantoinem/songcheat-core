@@ -40,9 +40,9 @@ export class Note {
     // if specific strings have been given (i.e. not * or *x), we also consider the muted strings in chord
     let includeMutedStrings = forceIncludeMutedStrings || !strings.match(/^\*/)
 
-    for (var i = 0; i < this.chord.tablature.length; i++) {
+    for (let i = 0; i < this.chord.tablature.length; i++) {
       // string will be between 6 and 1 since this.chord.tablature.length has been verified and is 6
-      var string = 6 - i
+      let string = 6 - i
 
       // first time we meet an included string, it's the bass so replace B and B' with the string number
       if (this.chord.tablature[i] !== 'x' || forceIncludeMutedStrings) {
@@ -52,9 +52,9 @@ export class Note {
     }
 
     var result = []
-    for (var i = 0; i < this.chord.tablature.length; i++) {
+    for (let i = 0; i < this.chord.tablature.length; i++) {
       // string will be between 6 and 1 since this.chord.tablature.length has been verified and is 6
-      var string = 6 - i
+      let string = 6 - i
 
       // string not played in this chord
       if (this.chord.tablature[i] === 'x' && !includeMutedStrings) continue
