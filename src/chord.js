@@ -52,6 +52,10 @@ export class Chord {
   // Read-only API
   //
 
+  barredFret () {
+    return this.fingering[7] === '-' ? 0 : Chord.char2fret(this.fingering[7])
+  }
+
   // Return string representation
   toString (verbose) {
     let s = `${Utils.padOn(this.name, 8)}TAB=${Utils.padOn(this.tablature, 6)}  FNG=${Utils.padOn(this.fingering, 8)}${verbose && this.comment ? ' REM=' + this.comment : ''}${this.inline ? ' INLINE' : ''}`

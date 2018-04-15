@@ -40,6 +40,17 @@ export class Note {
     // if specific strings have been given (i.e. not * or *x), we also consider the muted strings in chord
     let includeMutedStrings = forceIncludeMutedStrings || !strings.match(/^\*/)
 
+    for (var i = 0; i < this.chord.tablature.length; i++) {
+      // string will be between 6 and 1 since this.chord.tablature.length has been verified and is 6
+      var string = 6 - i
+
+      // first time we meet an included string, it's the bass so replace B and B' with the string number
+      if (this.chord.tablature[i] !== 'x' || forceIncludeMutedStrings) {
+        strings = strings.replace(/B'/g, (string === 6 ? 5 : (string === 5 ? 6 : string)))
+        strings = strings.replace(/B/g, string)
+      }
+    }
+
     var result = []
     for (var i = 0; i < this.chord.tablature.length; i++) {
       // string will be between 6 and 1 since this.chord.tablature.length has been verified and is 6
@@ -48,22 +59,17 @@ export class Note {
       // string not played in this chord
       if (this.chord.tablature[i] === 'x' && !includeMutedStrings) continue
 
-      // first time we meet an included string, it's the bass so replace B and B' with the string number
-      if (this.chord.tablature[i] !== 'x' || forceIncludeMutedStrings) {
-        strings = strings.replace(/B'/g, (string >= 5 ? string - 1 : string))
-        strings = strings.replace(/B/g, string)
-      }
-
       // check if this string should be played with the right hand
       // * means "all strings", otherwise concatenated specific string numbers are specified (or B for bass or B' for alternate bass)
       // x after string means muted (ghost) note
+      // if a specific (not muted) string number is given, don't mute even if chord says it should (use default fret instead: barred fret if any or 0)
       if (strings.match(/^\*/) || strings.indexOf(string) !== -1) {
         let fret = this.chord.tablature[i] === 'x' ? 0 : Chord.char2fret(this.chord.tablature[i])
         let xIndex = strings.match(/^\*/) ? 1 : strings.indexOf(string) + 1
-        let mute = strings[xIndex] === 'x' || this.chord.tablature[i] === 'x'
+        let mute = strings[xIndex] === 'x' || (this.chord.tablature[i] === 'x' && strings.indexOf(string) === -1)
         result.push({
           string: string,
-          fret: fret,
+          fret: this.chord.tablature[i] === 'x' ? this.chord.barredFret() : fret,
           mute: mute
         })
       }
