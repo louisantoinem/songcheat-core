@@ -23,6 +23,7 @@ export class Player {
     // config: loop or not and callback at end if no loop
     this.loop = config.loop || false
     this.onDone = config.onDone || null
+    this.onNote = config.onNote || function () {}
     this.onCountdown = config.onCountdown || function () {}
 
     // config: capo, tempo, shuffle
@@ -136,6 +137,7 @@ export class Player {
 
     // stop or pause requested
     if (this.stopped || this.paused) {
+      if (this.onDone) this.onDone()
       this.donePlaying = true
       return true
     }
@@ -230,7 +232,10 @@ export class Player {
     // info message, scheduled to display at the same time as oscillator will play our sound
     let what = note.rest ? 'REST' : (note.chord ? note.chord.name + '/' + freqs.length + (isDown ? ' D' : '') + (isUp ? ' U' : '') : 'BEEP')
     let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + note.offset + ' ' + note.duration + ' ' + ms.toFixed(0) + ' ms [VOL ' + (volume * 100) + ']' + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
-    setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
+    setTimeout(() => {
+      this.onNote(note, isBar, isBeat, isUp, isDown, isArpeggiated)
+      console.info(message)
+    }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
     // play beep (1 note) or chord (N notes)
     let fIndex = 0
