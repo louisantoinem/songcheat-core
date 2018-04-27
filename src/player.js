@@ -110,10 +110,12 @@ export class Player {
 
   chord2frequencies (note, transpose) {
     let freqs = []
+    let mutes = []
     for (let o of note.playedStrings()) {
-      if (!o.mute) freqs.push(this.tuning[o.string - 1] * Math.pow(Math.pow(2, 1 / 12), transpose + o.fret))
+      freqs.push(this.tuning[o.string - 1] * Math.pow(Math.pow(2, 1 / 12), transpose + o.fret))
+      mutes.push(o.mute)
     }
-    return freqs
+    return { chordFreqs: freqs, chordMutes: mutes }
   }
 
   ms_ (note) {
@@ -154,6 +156,7 @@ export class Player {
     let isUp = note.flags.stroke === 'u' || note.flags.stroke === 'uu'
     let isDown = note.flags.stroke === 'd' || note.flags.stroke === 'dd'
     let isArpeggiated = note.flags.stroke && note.flags.stroke.length === 2
+    let palmMuted = note.flags.pm
 
     // set next note to play
     this.noteIndex = (this.noteIndex + 1) % this.notes.length
@@ -173,14 +176,17 @@ export class Player {
     let ms = this.ms_(note)
 
     // consume next ties note(s) as long as they are the same
-    let noteFreqs = note.chord && note.strings ? this.chord2frequencies(note, this.capo) : null
+    let { chordFreqs, chordMutes } = note.chord && note.strings ? this.chord2frequencies(note, this.capo) : null
+    let noteFreqs = chordFreqs
+    let noteMutes = chordMutes
     for (let nextNoteIndex = this.noteIndex; nextNoteIndex < this.notes.length; nextNoteIndex++) {
       let nextNote = this.notes[nextNoteIndex]
       if (!nextNote.tied) break
 
       // get frequencies for chord notes
-      let nextNoteFreqs = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote, this.capo) : null
-      if (!Utils.arraysEqual(noteFreqs, nextNoteFreqs)) break
+      let { chordFreqs, chordMutes } = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote, this.capo) : null
+      if (!Utils.arraysEqual(noteFreqs, chordFreqs)) break
+      if (!Utils.arraysEqual(noteMutes, chordMutes)) break
 
       // if no chord (i.e. we are playing a pure rhythm), consider note is the same only if type T (i.e. not for types sbhpt)
       if (!nextNote.chord && nextNote.tied && nextNote.tied !== 'T') break
@@ -203,12 +209,14 @@ export class Player {
 
     // beep frequency
     let freqs = [440 * 1.5]
+    let mutes = [true]
     if (isBar) freqs[0] *= 2 // octave
     else if (isBeat) freqs[0] *= 1.5 // quinte
 
     // beep duration is 5 ms
     // actual notes are played for the whole duration if next played (i.e. not skipped) note is tied otherwise for 90%
-    let beepduration = note.chord ? (nextPlayedNote && nextPlayedNote.tied ? ms : ms * 0.90) : Math.min(ms, 5)
+    let beepduration = Math.min(ms, 5)
+    let noteduration = nextPlayedNote && nextPlayedNote.tied ? ms : ms * 0.90
 
     // for rhythm type is always square and no distortion, for actual notes use the user-defined settings
     let type = note.chord ? this.type : 'square'
@@ -217,7 +225,9 @@ export class Player {
     // played chord
     if (note.chord) {
       // get frequencies for chord notes
-      freqs = this.chord2frequencies(note, this.capo)
+      let { chordFreqs, chordMutes } = this.chord2frequencies(note, this.capo)
+      freqs = chordFreqs
+      mutes = chordMutes
 
       // reverse string order if up stroke
       if (isUp) freqs = freqs.reverse()
@@ -241,8 +251,10 @@ export class Player {
     let fIndex = 0
     let delay = 0
     for (let frequency of freqs) {
+      let soundduration = mutes[fIndex] || palmMuted ? beepduration : noteduration - delay
+
       // handle next node when last note has done playing
-      this.sound(time + delay / 1000.0, (beepduration - delay) / 1000.0, frequency, volume, distortion, type, fIndex < freqs.length - 1 ? null : function () {
+      this.sound(time + delay / 1000.0, soundduration / 1000.0, frequency, mutes[fIndex] ? volume * 2 : volume, distortion, type, fIndex < freqs.length - 1 ? null : function () {
         // back on first note: stop and callback if not loop
         if (self.noteIndex === 0 && !self.loop) {
           self.stop()
@@ -250,9 +262,9 @@ export class Player {
         } else self.note_(time + ms / 1000.0)
       })
 
-      // simulate the fact that strings hit first will sound first (but they'll all stop at the same time, hence substrating delay from beepduration above)
+      // simulate the fact that strings hit first will sound first (but they'll all stop at the same time, hence substrating delay from noteduration above)
       // when a chord is arpeggiated, take 3/4 of available duration to hit strings the one after the other
-      delay += (isArpeggiated ? (beepduration * 0.75) / freqs.length : (note.tied ? 0 : 10))
+      delay += (isArpeggiated ? (noteduration * 0.75) / freqs.length : (note.tied ? 0 : 10))
 
       // simulate the fact that first hit strings will sound louder
       volume *= 0.95
