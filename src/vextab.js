@@ -44,7 +44,9 @@ export class VexTab {
 
     else {
       // note duration, slashed if no chord given
-      vextab += note.chord ? note.duration.code : note.duration.code.replace(/(:(?:w|h|q|8|16|32))(d?)/g, '$1S$2')
+      // UPDATE: not slashing notes with null chord (i.e. rhythm notes in mode r) since there is a bug in Vextab causing :8d and :16 not being correctly beamed if slashed
+      let slashed = !note.chord && false
+      vextab += slashed ? note.duration.code.replace(/(:(?:w|h|q|8|16|32))(d?)/g, '$1S$2') : note.duration.code
 
       // if tied note (Tsbhpt)
       if (note.tied) vextab += note.tied
