@@ -14,9 +14,9 @@ export class VexTabException {
 }
 
 export class VexTab {
-  static Units2VexTab (songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore) {
+  static Units2VexTab (songcheat, units, staveMode, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore) {
     console.log('[Units2VexTab] VexTabbing ' + units.length + ' units')
-    return VexTab._Units2VexTab(songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore)
+    return VexTab._Units2VexTab(staveMode || songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore)
   }
 
   static Rhythm2VexTab (songcheat, rhythm) {
