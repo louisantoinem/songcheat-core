@@ -1,0 +1,219 @@
+
+RHYTHM CAMPFIRE ":q ()d :8 ()d()u T() ()u()d()u"
+RHYTHM BALLAD ":q ()d :8d ()d :16 ()u()d()u :8 ()d :q ()d"
+
+RHYTHM HOTELCALIFORNIA ":8d ()d :16 ()u :8d ()d :16 ()u()d()u :8 ()d ()d :16 ()d()u"
+
+# Imagine
+
+RHYTHM PIANISTIC ":8 ()d (B)d ()d (B)d ()d (B)d ()d (B)d"
+
+# more powerful rhythm, alternative for R1 in parts B (pre-chorus) and C (chorus)
+RHYTHM R2 ":8 ()d ()d ()d :16 ()d ()u :16 ()d ()u :8 ()d ()d :16 ()d ()u"
+
+# Je t'ai manqué
+
+RHYTHM R1	":8 ()d ()u ()d ()u T() ()u ()d ()u"
+
+# Chanson pour Pierrot
+
+RHYTHM R1	":8 (B)p (3)i (12)ma (3)i"
+RHYTHM R2	":8 (B)p> :qd (#)"
+
+# California Dreamin'
+
+# 2 bars always together, accents on beats 1 and 3 (>, after d or u if any)
+RHYTHM R1	":q ()d> :8 ()d()u()d>()uT()()u :8 T()()u()d()u :q ()d :8 ()d()u"
+
+# Solitary man
+
+RHYTHM R1 ":q (B)d :8 ()d()u T() ()u()d()u"
+
+# La mémoire et la mer
+
+RHYTHM R1 ":8   (1)(2)(3)  (1)(2)(3)  (1)(2)(3)  (1)(2)(3)"
+RHYTHM R2	":8  (B1)(2)(3)  (1)(2)(3)  (1)(2)(3)  (1)(2)(3)"
+RHYTHM R3	":8  (B2)(3)(4)  (2)(3)(4)  (2)(3)(4)  (2)(3)(4)"
+
+# La nuit je mens
+
+RHYTHM R1	":8()d:16()d()u :8()d:16()d()u :8()d:16()d()u :16()d()u()d()u"
+RHYTHM R2	":8()d:16()d()u :8()d:16()d()u :16T():8()u:16()u :16()d()u()d()u"
+RHYTHM R3	":8()d:16()d()u :16()d()u:8()d :8()d:16()d()u :16()d()u:8()d"
+RHYTHM R1B	":q()d> :8()d:16()d()u :8()d:16()d()u :16()d()u()d()u"
+RHYTHM R2B	":q()d> :8()d:16()d()u :16T():8()u:16()u :16()d()u()d()u"
+
+# Who the cap fit
+
+RHYTHM R0	":8 (#) ()u (#) ()u (#) ()u (#) ()u :8 (#) ()u (#) ()u (#) ()u (#) ()u"
+RHYTHM R1	":8 (#) ()u (#) ()u (#) ()u (#) ()u"
+
+# Comme un boomerang
+
+RHYTHM R0	":q (B)d (4)d (3)d (2)u (4)d (3)d (2)d (1)u"
+RHYTHM R1	":8 (B1) (2) (3) (1) (2) (3) :q (1)"
+RHYTHM R2	":8 (2) (3) (4) (B) (4) (4) (4) (B) "
+
+# Tears in Heaven
+
+RHYTHM RV1 ":8(5)(3) :16(2)h{----3-} p(2)^3 :8(3) :q(B23) :8(B23)(B23)T(B23)(B)(23)(B)(23)(B)(23)(B)"
+RHYTHM RV2 ":8(B23)(B)(23)(B) :8(B23)(B)(23)(B)"
+RHYTHM RV3 ":8(23)(B)(23)(B) :8(23)(B){---43-} :16(B)h{2-----}"
+RHYTHM RV3' ":8(23)(B)(23)(B) :8(23)(B){---43-}(B)"
+
+# Le 5ème demi-tour
+
+TIME 6/8 2 :qd
+RHYTHM R1	":8 (B)p> (23)im(23)im(B)p> (23)im(23)im"
+
+# La brise
+
+TEMPO 80
+SHUFFLE ":8"
+RHYTHM R1 ":8 ()d ()u ()d ()u ()d ()u ()d ()u"
+RHYTHM R1 ":8 (B)p (3)i (12)ma (3)i (B)p (3)i (12)ma (3)i"
+
+# L'hippopodame
+
+TIME 4/4 4 :q
+TEMPO 120
+SHUFFLE ":8"
+RHYTHM R1 ":8
+()PM (321)u (321)d (321)u
+()PM (321)u (321)d (321)u"
+
+# This is not a Love Song
+
+TIME 4/4 4 :q
+TEMPO 125
+RHYTHM R1 ":8 ()d ()u ()d ()u
+           :8 ()d ()u T() ()u
+            T ()  ()u ()d ()u
+              ()d ()u ()d ()u"
+
+# La mélancolie
+
+TIME 4/4 4 :q
+TEMPO 161
+
+RHYTHM ARP ":q (B)p :8 (2)i (1)m T (1) (1)m :q (2)i"
+RHYTHM STRM ":q ()d :8 ()d ()u T() ()u ()d ()u"
+
+# Balade à Toronto
+
+TIME 4/4 4 :q
+TEMPO 100
+
+RHYTHM INTRO ":q ()d ()d :q ()d :8 {0-----} {3-----}"
+RHYTHM FOLK	":8 (B)d :16 ()d()u T() ()u()d()u
+             :8 (B)d :16 ()d()u T() ()u()d()u"
+# Salut Manouche
+
+TIME 4/4 4 :q
+TEMPO 160
+RHYTHM R1 ":q ()d :8 ()d()u T() ()u()d()u"
+
+# Your Song
+
+TIME 4/4 4 :q
+TEMPO 128
+RHYTHM FOLK	":8 (B)d :16 ()d()uT()()u()d()u
+             :8 (B)d :16 ()d()uT()()u()d()u"
+
+RHYTHM FOLK	":q (B)d :8 ()d()uT()()u()d()u"
+
+# Heureux qui comme Ulysse
+
+TIME 2/2 2 :q
+TEMPO 90
+SHUFFLE ":8"
+
+RHYTHM R1 ":8 (B) (4) (B) (4)"
+RHYTHM RA ":8 (B) (4) (B') (4)"
+
+RHYTHM R1 ":8 ()d ()u ()d ()u"
+RHYTHM RA ":8 ()d ()u ()d ()u"
+
+# La bohême
+
+TIME 3/4 3 :q
+TEMPO 120
+
+# Tant de nuits
+
+TIME 4/4 4 :q
+TEMPO 60
+
+RHYTHM FOLK1 ":16 ()d()u()d()u T()()u()d()u
+                 T()()u()d()u T()()u()d()u"
+
+RHYTHM FOLK2 ":16 ()d()u()d()u T()()u()d()u
+                  ()d()u()d()u T()()u()d()u"
+
+RHYTHM PWER	":8 (B)d :16 ()d()u T() ()u()d()u
+             :8 (B)d :16 ()d()u T() ()u()d()u"
+
+# Feuille au vent
+
+TIME 4/4 4 :q
+TEMPO 80
+RHYTHM R1 ":q ()d :8 ()d :16 ()d ()u :q ()d :8 ()d :16 ()d ()u"
+RHYTHM R2 ":q ()d :8 ()d :16 ()d ()u :16 T() :8 ()u :16 ()u ()d ()u ()d ()u"
+
+# Je t'ai toujours aimée
+
+TIME 4/4 4 :q
+TEMPO 82
+SHUFFLE ":16"
+
+RHYTHM R1 ":16 ()d :8 ()u :16 ()u ()d :8 ()u :16 ()u
+           :16 ()d :8 ()u :16 ()u ()d :8 ()u :16 ()u"
+
+RHYTHM R2 ":8 ()d :16 ()d ()u T() ()u ()d ()u
+           :8 ()d :16 ()d ()u T() ()u ()d ()u"
+
+RHYTHM R3 ":8 ()d :16 ()d ()u T() ()u ()d ()u
+             T() ()u ()d ()u T() ()u ()d ()u"
+
+# Divers
+TIME 4/4 4 :q
+
+# About A Girl
+TEMPO 130
+RHYTHM ABOUTAGIRL ":q ()d :8 ()d ()u (3456)d ()u ()d (234)u"
+SUB ABOUTAGIRL ABOUTAGIRL*Em::G % % % %
+
+# Passenger
+TEMPO 135
+SHUFFLE ":8"
+RHYTHM PASSENGER ":8 (x)u ()d ()u ()d (x)u ()d ()u ()d"
+SUB PASSENGER
+PASSENGER*xx7555::xx3211
+PASSENGER*xx2010::xx5433
+PASSENGER*xx7555::xx3211
+PASSENGER*xx2010::xx2100
+
+# Karma Police
+TEMPO 75
+RHYTHM KARMAPOLICE
+":q ()d :8 ()d :16 ()d ()u :8 ()d ()d ()d :16 ()d ()u
+ :q (23456)d :8 (23456)d (B)d :q (23456)d :16 ()d (23456)u ()d (23456)u"
+SUB KARMAPOLICE
+KARMAPOLICE*x0221x::2x021x|Em,,2xxxxx:G
+KARMAPOLICE*x02410::F|Em,,2xxxxx:G
+
+# Wonderwall
+TEMPO 90
+RHYTHM WONDERWALL
+":8 ()d (456)d :8d ()d :16 ()u ()d ()u :8 ()d ()d :16 ()d ()u
+ :16 ()d ()u :8 ()d ()d :16 ()d ()u T() :8 (2345)u :16 ()u ()d ()u ()d ()u"
+SUB WONDERWALL
+WONDERWALL*Em7,,,,322033|x00233::,x02233,,,,x00233 %
+
+# Rape me
+TEMPO 120
+RHYTHM RAPEME
+":q ()d :8d ()d :16 ()d (x)u (x)d :8 ()u :16 ()d ()u :8 ()d"
+SUB RAPEME
+RAPEME*x0222x,,xx222x,,,x3555x,,,xx000x
+RAPEME*022xxx,Em,xxx000,,,G,xxx003,,xx000x

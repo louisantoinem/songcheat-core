@@ -49,7 +49,7 @@ export class Player {
     this.setDisto(0)
     this.setVolume(50)
     this.setMode(this.MODE_CHORDS)
-    this.setType(config.type || 'Piano')
+    this.setType(config.type || 'GuitarFuzz')
 
     // add an offset property in each note, used to detect bars and beats but also for shuffling notes
     this.notes = []
