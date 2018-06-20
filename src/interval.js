@@ -25,6 +25,16 @@ export class Interval {
     return Utils.almostZero(this.units % base.units) || Utils.almostEqual(this.units % base.units, base.units)
   }
 
+  // Return rounded number of bars contained in this interval
+  bars () {
+    return Math.round(this.units / this.time.bar.units)
+  }
+
+  // Return rounded number of beats contained in this interval
+  beats () {
+    return Math.round(this.units / this.time.beat.units)
+  }
+
   // Return true iff the interval is a whole number of bars
   bar () {
     return this.multipleOf(this.time.bar)

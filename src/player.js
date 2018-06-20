@@ -53,6 +53,7 @@ export class Player {
 
     // add an offset property in each note, used to detect bars and beats but also for shuffling notes
     this.notes = []
+    this.length = score.length
     let offset = score.start()
     for (let note of score.notes) {
       let _note = note._copy()
@@ -324,6 +325,14 @@ export class Player {
       else setTimeout(recfun, 100)
     }
     recfun()
+  }
+
+  minutes () {
+    return Math.floor(((this.length.beats() * this.time.beat.units * this.msPerUnit) / 1000.0) / 60)
+  }
+
+  seconds () {
+    return Math.round(((this.length.beats() * this.time.beat.units * this.msPerUnit) / 1000.0) % 60)
   }
 
   getTempo () {
