@@ -14,15 +14,15 @@ export class VexTabException {
 }
 
 export class VexTab {
-  static Units2VexTab (songcheat, units, staveMode, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore) {
+  static Units2VexTab (songcheat, units, staveMode, barsPerLine, separateUnits, showLyrics, showStrokes, showAccents, maxStavesPerScore) {
     console.log('[Units2VexTab] VexTabbing ' + units.length + ' units')
-    return VexTab._Units2VexTab(staveMode || songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, maxStavesPerScore)
+    return VexTab._Units2VexTab(staveMode || songcheat.mode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, showAccents, maxStavesPerScore)
   }
 
   static Rhythm2VexTab (songcheat, rhythm) {
     // run Unit2VexTab on dummy rhythm unit
     let compiler = new Compiler()
-    return VexTab._Units2VexTab('r', songcheat, [compiler.getRhythmUnit(songcheat, rhythm)], 0, false, false, true)
+    return VexTab._Units2VexTab('r', songcheat, [compiler.getRhythmUnit(songcheat, rhythm)], 0, false, false, true, 'top')
   }
 
   // Private stuff
@@ -152,7 +152,7 @@ export class VexTab {
     return text
   }
 
-  static _Units2VexTab (staveMode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, splitAtMaxStaves) {
+  static _Units2VexTab (staveMode, songcheat, units, barsPerLine, separateUnits, showLyrics, showStrokes, showAccents, splitAtMaxStaves) {
     let stems = staveMode.indexOf('s') >= 0
     let stemsdown = staveMode.indexOf('sd') >= 0
     let stemsup = stems && !stemsdown
@@ -233,7 +233,7 @@ export class VexTab {
               if (rhythm) {
                 // stave with notes
                 vextab += 'options space=20\n'
-                vextab += VexTab.Notes2Stave(songcheat, offset, notesSlashed, showStrokes, 'top', true, false, true)
+                vextab += VexTab.Notes2Stave(songcheat, offset, notesSlashed, showStrokes, showAccents, true, false, true)
 
                 // unit names and chords
                 vextab += VexTab.Text2VexTab(subtitlesGroups, offset, staveLength, -1, 'Arial-10-bold')
@@ -265,7 +265,7 @@ export class VexTab {
                 // stave with notes
                 vextab += 'options space=20\n'
                 if (notation) vextab += 'options space=20\n'
-                vextab += VexTab.Notes2Stave(songcheat, offset, notes, showStrokes, false, notation, tablature)
+                vextab += VexTab.Notes2Stave(songcheat, offset, notes, showStrokes, showAccents, notation, tablature)
 
                 // unit names and chords
                 let topH = notation || stemsup ? -1 : 2
