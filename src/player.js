@@ -169,7 +169,12 @@ export class Player {
       let message = (isBar ? '\n|\t' : '\t') + ('[' + what + ']').padEnd(15, ' ') + note.offset + ' ' + note.duration + (note.tied ? ' [TIED:' + note.tied + ']' : '') + (isBar ? ' [BAR]' : (isBeat ? ' [BEAT]' : '')) + (note.flags.accent ? ' [ACCENT]' : '')
       setTimeout(function () { console.info(message) }, Math.max(0, time - audioCtx.currentTime) * 1000)
 
-      self.note_(time)
+      // back on first note: stop and callback if not loop
+      if (self.noteIndex === 0 && !self.loop) {
+        self.stop()
+        if (self.onDone) self.onDone()
+      } else self.note_(time)
+
       return
     }
 
