@@ -2,6 +2,9 @@ import { Utils } from './utils'
 import { Duration } from './duration'
 import { Time } from './time'
 import { Interval } from './interval'
+import { Pitch } from './pitch'
+import { Tuning } from './tuning'
+import { Fretboard } from './fretboard'
 import { Chord, ChordException } from './chord'
 import { ChordPix, ChordPixException } from './chordpix'
 import { Note } from './note'
@@ -22,6 +25,7 @@ import { Player } from './player'
 export {
   Utils,
   Duration, Time, Interval,
+  Pitch, Tuning, Fretboard,
   Chord, ChordException,
   ChordPix, ChordPixException,
   Note, Score, ScoreParser, Rhythm,

@@ -22,6 +22,10 @@ export class Utils {
     return Utils.almostEqual(actual, 0, epsilon)
   }
 
+  static round (actual, decimals) {
+    return Math.round(actual * Math.pow(10, decimals)) / Math.pow(10, decimals)
+  }
+
   /**
    * Array helper functions
    */

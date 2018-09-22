@@ -52,7 +52,7 @@ export class VexTab {
       if (note.tied) vextab += note.tied
 
       // chord or dummy note (for slash notation)
-      vextab += !note.chord ? '(4/3)' : VexTab.Chord2VexTab(note, 0) // do not transpose with capo: chords are tabbed exactly as their diagrm says (author chooses to use capo'd chords or not)
+      vextab += !note.chord ? '(4/3)' : VexTab.Chord2VexTab(note, 0) // do not transpose with capo: chords are supposed to be tabbed relative to the capo (capo is set as part of tuning)
 
       // stroke flag d or u (dd and uu are not built-in in vextab and are handled later through text2VexTab)
       if (strokes && note.flags.stroke && note.flags.stroke.length === 1) vextab += note.flags.stroke
@@ -73,7 +73,7 @@ export class VexTab {
 
     // start new stave with signature
     vextab += '\ntabstave notation=' + (notation ? 'true' : 'false') + ' tablature=' + (tablature ? 'true' : 'false') + ' time=' + songcheat.signature.time.symbol + '\n'
-    if (!slashed) vextab += 'tuning=' + songcheat.tuning + ' key=' + songcheat.signature.key + '\n'
+    if (!slashed) vextab += 'tuning=' + songcheat.tuning.transpose(songcheat.capo).vextab() + ' key=' + songcheat.signature.key + '\n'
     vextab += 'notes '
 
     // initial bar line if needed (double if first bar)

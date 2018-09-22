@@ -1,4 +1,4 @@
-import { Utils, Duration, Time, Rhythm, Score, Chord, GroupParser, GroupList } from './main'
+import { Utils, Duration, Time, Tuning, Fretboard, Rhythm, Score, Chord, GroupParser, GroupList } from './main'
 
 let MIN_LYRICS_BARLEN = 20 // minimum length of a bar lyrics (before reducing) - not really needed but produces a clearer view when maxConsecutiveSpaces set to 0 (and thus when displaying parts with partdisplay=full) since bars with no or little text will have the same length (unless there are really many chord changes...)
 
@@ -33,6 +33,11 @@ class Compiler_ {
 
     // make time signature a Time object
     songcheat.signature.time = new Time(new Duration(songcheat.signature.time.beat), parseInt(songcheat.signature.time.beatsPerBar, 10), songcheat.signature.time.symbol)
+
+    // make tuning a Tuning object and create Fretboard
+    songcheat.tuning = new Tuning(songcheat.tuning || 'standard')
+    songcheat.capo = songcheat.capo || 0
+    songcheat.fretboard = new Fretboard(songcheat.tuning, songcheat.capo)
 
     //
     // Chords: create Chord objects

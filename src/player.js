@@ -1,6 +1,7 @@
 import { Utils } from './utils'
 import { Duration } from './duration'
 import { Score } from './score'
+import { Fretboard } from './fretboard'
 import waveTables from '@mohayonao/wave-tables'
 
 export class Player {
@@ -26,19 +27,10 @@ export class Player {
     this.onNote = config.onNote || function () {}
     this.onCountdown = config.onCountdown || function () {}
 
-    // config: capo, tempo, shuffle
-    this.capo = config.capo || 0
+    // config: fretboard, tempo, shuffle
+    this.fretboard = config.fretboard || new Fretboard()
     this.tempo = config.signature.tempo || 100
     this.shuffle = Duration.valid(config.signature.shuffle) ? new Duration(config.signature.shuffle) : null
-
-    // tuning, defaults to standard tuning
-    this.tuning = config.tuning || [329.63, // E4
-      246.94, // B3
-      196.00, // G3
-      146.83, // D3
-      110.00, // A2
-      82.41
-    ] // E2
 
     // play control
     this.stopped = true
@@ -109,11 +101,11 @@ export class Player {
     oscillator.stop(time + duration)
   }
 
-  chord2frequencies (note, transpose) {
+  chord2frequencies (note) {
     let freqs = []
     let mutes = []
     for (let o of note.playedStrings()) {
-      freqs.push(this.tuning[o.string - 1] * Math.pow(Math.pow(2, 1 / 12), transpose + o.fret))
+      freqs.push(this.fretboard.pitch(o.string, o.fret).frequency)
       mutes.push(o.mute)
     }
     return { chordFreqs: freqs, chordMutes: mutes }
@@ -182,7 +174,7 @@ export class Player {
     let ms = this.ms_(note)
 
     // consume next ties note(s) as long as they are the same
-    let { chordFreqs, chordMutes } = note.chord && note.strings ? this.chord2frequencies(note, this.capo) : null
+    let { chordFreqs, chordMutes } = note.chord && note.strings ? this.chord2frequencies(note) : null
     let noteFreqs = chordFreqs
     let noteMutes = chordMutes
     for (let nextNoteIndex = this.noteIndex; nextNoteIndex < this.notes.length; nextNoteIndex++) {
@@ -190,7 +182,7 @@ export class Player {
       if (!nextNote.tied) break
 
       // get frequencies for chord notes
-      let { chordFreqs, chordMutes } = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote, this.capo) : null
+      let { chordFreqs, chordMutes } = nextNote.chord && nextNote.strings ? this.chord2frequencies(nextNote) : null
       if (!Utils.arraysEqual(noteFreqs, chordFreqs)) break
       if (!Utils.arraysEqual(noteMutes, chordMutes)) break
 
@@ -231,7 +223,7 @@ export class Player {
     // played chord
     if (note.chord) {
       // get frequencies for chord notes
-      let { chordFreqs, chordMutes } = this.chord2frequencies(note, this.capo)
+      let { chordFreqs, chordMutes } = this.chord2frequencies(note)
       freqs = chordFreqs
       mutes = chordMutes
 

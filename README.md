@@ -30,6 +30,26 @@ Methods in these classes are either read-only or return a new object. They all i
 
   The time signature is considered when displaying the interval (`codes`, `toString`), since we'll use the codes representing the beat and the bar (as defined the signature) to represent the interval; only if the interval is not a whole number of beats, other codes will be used to represent the remaining part of the interval. The time signature also allows implementing shortcut methods for `multipleOf` (`bar`, `beat`) and extendToMultipleOf (`extendToBar`, `extendToBeat`).
 
+* `Pitch`
+
+  Represents the pitch of a note such as A4, E2, C#5, Bb3, etc. Each code corresponds to a specific frequency in Hz.
+
+  Pitch.transpose(halfTones): transpose an existing Pitch by a given number of half tones (positive or negative), providing a new Pitch instance.
+
+* `Tuning`
+
+  Represents the tuning of a guitar, i.e. one pitch for each string (starting from 6th string), e.g. new Tuning('E2,A2,D3,G3,B3,E4'). The following predefined names can also be used to create a Tuning instance: 'standard', 'guitalele', 'dropdb', 'eb'. One can also add '+n' or '-n' to transpose the tuning by n halftones, e.g. 'standard+5' is equivalent to 'guitalele'.
+
+  Tuning.transpose(halfTones): transpose an existing Tuning by a given number of half tones (positive or negative), providing a new Tuning instance.
+
+* `Fretboard`
+
+  Represents a guitar fretboard, i.e. a tuning and a capo.
+
+  Fretboard.pitch(string, fret): get the pitch corresponding to any fret on any string.
+
+  Fretboard.chordPitches(chord): return the list of pitches used by the given Chord instance.
+
 * `Chord`
 
   A chord is made of a name and a tablature (mandatory) as well as of a fingering and comment (optional).

@@ -1,4 +1,4 @@
-let { Utils, Chord, Note, Duration, Time, Interval, Score, ScoreParser, Rhythm, Group, GroupParser } = require('..')
+let { Utils, Chord, Note, Duration, Time, Interval, Pitch, Tuning, Fretboard, Score, ScoreParser, Rhythm, Group, GroupParser } = require('..')
 
 function T (s) {
   console.log(Utils.title(s))
@@ -153,4 +153,92 @@ L({
   chordGroups,
   chordedScore
 })
+
+T('Pitch')
+let pitch1 = new Pitch('A2')
+let pitch2 = new Pitch('D3')
+let pitch3 = new Pitch('C4')
+let pitch4 = new Pitch('A5')
+let pitch5 = new Pitch('A#5')
+let pitch6 = new Pitch('Ab5')
+
+L({
+  pitch1: pitch1.toString(true),
+  pitch2: pitch2.toString(true),
+  pitch3: pitch3.toString(true),
+  pitch4: pitch4.toString(true),
+  pitch5: pitch5.toString(true),
+  pitch6: pitch6.toString(true)
+})
+
+T('Pitch (transpose)')
+let pitch1AddOctaveQuinte = pitch1.transpose(19)
+let pitch4SubOctaveQuarte = pitch4.transpose(-17)
+
+L({
+  pitch1AddOctaveQuinte,
+  pitch4SubOctaveQuarte,
+  'equal': pitch4SubOctaveQuarte.equals(pitch1AddOctaveQuinte)
+})
+
+T('Tuning')
+let tuningStandard = new Tuning('standard')
+let tuningGuitalele = new Tuning('guitalele')
+let tuningDropd = new Tuning('dropd')
+let tuningEb = new Tuning('eb')
+let tuningStandardAddQuarte = new Tuning('standard+5')
+let tuningStandardSubQuinte = new Tuning('standard-7')
+let tuningCustom = new Tuning('E3,A3,D4,G4,B4,E5')
+let tuningCustomSubHalftone = new Tuning('E3,A3,D4,G4,B4,E5-1')
+
+L({
+  tuningStandard,
+  tuningGuitalele,
+  tuningDropd,
+  tuningEb,
+  tuningStandardAddQuarte,
+  tuningStandardSubQuinte,
+  tuningCustom,
+  tuningCustomSubHalftone
+})
+
+T('Tuning (transpose)')
+tuningStandardAddQuarte = tuningStandard.transpose(5)
+tuningStandardSubQuinte = tuningStandard.transpose(-7)
+L({
+  tuningStandardAddQuarte,
+  'tuningStandardAddQuarte.equals(tuningGuitalele)': tuningStandardAddQuarte.equals(tuningGuitalele),
+  tuningStandardSubQuinte,
+  'tuningStandardSubQuinte.equals(tuningGuitalele)': tuningStandardSubQuinte.equals(tuningGuitalele)
+})
+
+T('Tuning (vextab)')
+L({
+  'tuningStandard': tuningStandard.vextab(),
+  'tuningGuitalele': tuningGuitalele.vextab(),
+  'tuningDropd': tuningDropd.vextab(),
+  'tuningEb': tuningEb.vextab()
+})
+
+T('Fretboard')
+let fretboardStandard = new Fretboard(tuningStandard, 0)
+let fretboardStandardCapo12 = new Fretboard(tuningStandard, 12)
+let fretboardGuitalele = new Fretboard(tuningGuitalele, 0)
+
+L({
+  fretboardStandard,
+  'Em pitches standard': fretboardStandard.chordPitches(new Chord('Em', '022000')),
+  'Am pitches standard': fretboardStandard.chordPitches(new Chord('Am', 'x02210')),
+  'Em pitches standard capo 12': fretboardStandardCapo12.chordPitches(new Chord('Em', '022000')),
+  fretboardGuitalele,
+  'Em pitches guitalele (Bm shape)': fretboardGuitalele.chordPitches(new Chord('Em', 'x24432')),
+  'Am pitches guitalele (Em shape)': fretboardGuitalele.chordPitches(new Chord('Am', '022000'))
+})
+
+for (let fret = 0; fret <= 3; fret++) {
+  console.log('---')
+  for (let string = 1; string <= 6; string++) {
+    console.log(`String ${string} fret ${fret} : ${fretboardStandard.pitch(string, fret)}`)
+  }
+}
 T('The End!')

@@ -64,12 +64,12 @@ export class Note {
       // x after string means muted (ghost) note
       // if a specific (not muted) string number is given, don't mute even if chord says it should (use default fret instead: barred fret if any or 0)
       if (strings.match(/^\*/) || strings.indexOf(string) !== -1) {
-        let fret = this.chord.tablature[i] === 'x' ? 0 : Chord.char2fret(this.chord.tablature[i])
+        let fret = this.chord.tablature[i] === 'x' ? this.chord.barredFret() : Chord.char2fret(this.chord.tablature[i])
         let xIndex = strings.match(/^\*/) ? 1 : strings.indexOf(string) + 1
         let mute = strings[xIndex] === 'x' || (this.chord.tablature[i] === 'x' && strings.indexOf(string) === -1)
         result.push({
           string: string,
-          fret: this.chord.tablature[i] === 'x' ? this.chord.barredFret() : fret,
+          fret: fret,
           mute: mute
         })
       }
