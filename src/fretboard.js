@@ -1,3 +1,4 @@
+import { Chord } from './chord'
 import { Tuning } from './tuning'
 
 export class Fretboard {
@@ -20,8 +21,15 @@ export class Fretboard {
     for (let i = 0; i < chord.tablature.length; i++) {
       // string will be between 6 and 1 since this.chord.tablature.length has been verified and is 6
       let string = 6 - i
-      let fret = chord.tablature[i]
-      if (fret !== 'x') pitches.push(this.pitch(string, parseInt(fret, 10)))
+
+      // string not played in this chord
+      if (chord.tablature[i] === 'x') continue
+
+      // get fret number
+      let fret = Chord.char2fret(chord.tablature[i])
+
+      // add pitch for this string and fret
+      pitches.push(this.pitch(string, fret))
     }
     return pitches
   }
