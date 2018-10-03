@@ -58,6 +58,19 @@ export class Scale {
   // Read-only API
   //
 
+  // Return chord for degree
+  chord (degree) {
+    if (!this.mode.chords) throw new Error(`Associated mode was not created with the 'chords' parameter`)
+    return this.notes[degree - 1] + this.mode.chords[degree - 1]
+  }
+
+  // Compute a chord progression
+  chords (degrees) {
+    let chords = []
+    for (let degree of degrees) chords.push(this.chord(degree))
+    return chords
+  }
+
   // If other is also a Scale, return true iff same mode and keynote.
   equals (other) {
     return other && this.mode.equals(other.mode) && this.keynote === other.keynote
