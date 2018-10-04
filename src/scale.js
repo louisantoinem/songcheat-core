@@ -1,3 +1,4 @@
+import { Utils } from './utils'
 import { Mode } from './mode'
 
 let NOTES = {
@@ -67,7 +68,7 @@ export class Scale {
   // Compute a chord progression
   chords (degrees) {
     let chords = []
-    for (let degree of degrees) chords.push(this.chord(degree))
+    for (let degree of (degrees || Utils.range(this.mode.intervals.length))) chords.push(this.chord(degree))
     return chords
   }
 

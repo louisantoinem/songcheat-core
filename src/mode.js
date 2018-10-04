@@ -24,7 +24,7 @@ export class Mode {
 
   degrees (degrees) {
     if (!this.chords) throw new Error(`This mode was not created with the 'chords' parameter`)
-    return degrees.map(degree => ROMAN[degree - 1] + this.chords[degree - 1])
+    return (degrees || Utils.range(this.intervals.length)).map(degree => ROMAN[degree - 1] + this.chords[degree - 1])
   }
 
   // If other is also a Mode, return true iff same intervals.

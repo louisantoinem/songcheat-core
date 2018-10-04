@@ -52,6 +52,13 @@ export class Utils {
     return a
   }
 
+  static range (len) {
+    let x = []
+    let i = 1
+    while (x.push(i++) < len) {}
+    return x
+  }
+
   /**
    * Math helper functions
    */
