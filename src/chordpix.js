@@ -61,8 +61,8 @@ export class ChordPix {
       let relTablature = ''
       for (let char of chord.tablature) relTablature += char === 'x' || char === '0' ? char : ChordPix.abs2rel(char, startingFret)
 
-      // use nice ♯ and ♭ in diagram (replace only last occurence)
-      let name = chord.inline ? ' ' : (chord.name ? chord.name.replace(/#([^#]*)$/, '♯$1').replace(/b([^b]*)$/, '♭$1') : chord.tablature)
+      // use nice ♯ and ♭ in diagram (replace only last occurence for the b)
+      let name = chord.inline ? ' ' : (chord.name ? chord.name.replace(/#/g, '♯').replace(/b([^b]*)$/, '♭$1') : chord.tablature)
 
       // build final url
       return 'http://chordpix.com/i/' + (chordWidth || 450) + '/6/' + nbFrets + '/' + startingFret + '/' + relTablature + '/' + fingering.join('/') + '/' + name + '.png'
