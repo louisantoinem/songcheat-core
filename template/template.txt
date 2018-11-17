@@ -27,7 +27,7 @@ COMMENT "My next killer SongCheat"
 # GUITAR SETUP #
 ################
 
-# Tuning: "standard", "dropd", "eb" or E/5,B/4,G/4,D/4,A/3,E/3
+# Tuning: "standard", "dropd", "eb", "guitalele" or custom value such as "E5,B4,G4,D4,A3,E3"
 # Capo: fret number or 0 if none
 # Both are optional: Tuning defaults to "standard" and Capo to "0"
 

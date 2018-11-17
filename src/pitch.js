@@ -56,7 +56,7 @@ export class Pitch {
   transpose (halfTones) {
     let pitch = new Pitch(this.code)
 
-    let target = NOTES[pitch.note] + parseInt(halfTones)
+    let target = NOTES[pitch.note] + (pitch.alter === 'b' ? -1 : (pitch.alter === '#' ? 1 : 0)) + parseInt(halfTones)
 
     while (target < -9) {
       pitch.octave--
