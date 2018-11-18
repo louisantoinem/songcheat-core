@@ -1,6 +1,6 @@
 import { Pitch } from './pitch'
 
-let SHORTCUTS = {
+let PRESETS = {
   'standard': 'E2,A2,D3,G3,B3,E4',
   'dropd': 'D2,A2,D3,G3,B3,E4',
   'guitalele': 'A2,D3,G3,C4,E4,A4',
@@ -8,34 +8,38 @@ let SHORTCUTS = {
 }
 
 export class Tuning {
-  constructor (str) {
+
+  constructor (str_) {
+    let str = str_
     let transpose = 0
 
-    // Detect +n at the end
+    // Detect +n at the end (transpose +)
     let parts = str.split('+')
     if (parts.length === 2) {
       str = parts[0]
       transpose = parseInt(parts[1])
     }
 
-    // Detect -n at the end
+    // Detect -n at the end (transpose -)
     parts = str.split('-')
     if (parts.length === 2) {
       str = parts[0]
       transpose = -1 * parseInt(parts[1])
     }
 
-    // Shortcut name was used
-    if (SHORTCUTS[str]) {
-      let tuning = new Tuning(SHORTCUTS[str] + (transpose > 0 ? '+' + transpose : (transpose < 0 ? transpose : '')))
-      tuning.name = str
-      return tuning
-    }
+    // Preset name was used
+    if (PRESETS[str]) return this.make_(str_, PRESETS[str], transpose)
+
+    return this.make_(null, str, transpose)
+  }
+
+  make_ (name, pitches, transpose) {
+    this.name = name
+    this.pitches = []
 
     // Parse tuning: comma-searated pitches for each string (6 to 1)
-    this.pitches = []
-    let pitches = str.split(',')
-    if (pitches.length !== 6) throw new Error('Invalid tuning "' + str + '"')
+    pitches = pitches.split(',')
+    if (pitches.length !== 6) throw new Error('Invalid tuning "' + pitches + '"')
     for (let pitch of pitches) this.pitches.push(new Pitch(pitch.trim()).transpose(transpose))
   }
 
@@ -55,7 +59,8 @@ export class Tuning {
 
   // Return string representation
   toString () {
-    return this.name || this.pitches.map(pitch => pitch.toString()).join(',')
+    let pitches = this.pitches.map(pitch => pitch.toString()).join(',')
+    return this.name ? this.name + (this.name === 'standard' ? '' : ' (' + pitches + ')') : pitches
   }
 
   // Return vextab representation
