@@ -28,6 +28,7 @@ COMMENT "My next killer SongCheat"
 ################
 
 # Tuning: "standard", "dropd", "eb", "guitalele" or custom value such as "E5,B4,G4,D4,A3,E3"
+# You can transpose a tuning by n halftones with +n or -n, e.g. "dropd-2" means a Drop C tuning
 # Capo: fret number or 0 if none
 # Both are optional: Tuning defaults to "standard" and Capo to "0"
 

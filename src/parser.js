@@ -77,7 +77,7 @@ class Parser_ {
 
   handleTime (line, keyword, params) {
     if (params.length !== 3) throw new ParserException(line, keyword.toUpperCase() + ' expected exactly 3 values, but found ' + params.length)
-    this.songcheat['signature'] = this.songcheat['signature'] || []
+    this.songcheat['signature'] = this.songcheat['signature'] || {}
     this.songcheat['signature']['time'] = { 'beatsPerBar': params[1].value, 'beat': params[2].value, 'symbol': params[0].value }
   }
 
