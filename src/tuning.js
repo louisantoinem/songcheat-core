@@ -8,7 +8,6 @@ let PRESETS = {
 }
 
 export class Tuning {
-
   constructor (str_) {
     let str = str_
     let transpose = 0
