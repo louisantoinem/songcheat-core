@@ -38,13 +38,13 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
-    "json-stringify-pretty-compact": "^1.1.0",
+    "babel-preset-env": "^1.7.0",
+    "json-stringify-pretty-compact": "^1.2.0",
     "npm-watch": "^0.3.0",
     "promisify": "0.0.3",
-    "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^8.4.1",
+    "rollup-plugin-json": "^2.3.1",
+    "rollup-plugin-node-resolve": "^3.4.0"
   }
 }
