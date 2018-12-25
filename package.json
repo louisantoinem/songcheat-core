@@ -1,6 +1,6 @@
 {
   "name": "songcheat-core",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Base classes for handling SongCheat files. Can be used both in Node and in browser.",
   "main": "dist/songcheat-core.cjs.js",
   "module": "dist/songcheat-core.esm.js",

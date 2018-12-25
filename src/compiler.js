@@ -117,6 +117,16 @@ class Compiler_ {
     unit.lyricsGroups = groupParser.parse(unit.lyrics)
     unit.lyricsWarnings = groupParser.warnings
 
+    // first lyrics group might start with < or >
+    let group = unit.lyricsGroups.groups[0]
+    if (group.text.match(/^</)) {
+      group.leftArrow = true
+      group.text = group.text.replace(/^</, '')
+    } else if (group.text.match(/^>/)) {
+      group.rightArrow = true
+      group.text = group.text.replace(/^>/, '')
+    }
+
     // on each lyrics group
     unit.pmax = 0
     for (let group of unit.lyricsGroups.groups) {
