@@ -201,7 +201,7 @@ export class Ascii {
 
   getUnitText (unit, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
     console.log(Utils.title(`GET UNIT TEXT ${unit.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.ascii_.getUnitsText([unit], maxConsecutiveSpaces, split, showDots, chordsWrapper)
+    return this.ascii_.getUnitsText([unit], maxConsecutiveSpaces, split, showDots, chordsWrapper)[0]
   }
 
   getPartsText (parts, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
@@ -214,6 +214,6 @@ export class Ascii {
 
   getPartText (part, maxConsecutiveSpaces, split, showDots, chordsWrapper) {
     console.log(Utils.title(`GET PART TEXT ${part.name} (maxConsecutiveSpaces = ${maxConsecutiveSpaces}, split = ${split}, showDots = ${showDots})`))
-    return this.ascii_.getUnitsText([new Compiler().getPartUnit(this.songcheat, part)], maxConsecutiveSpaces, split, showDots, chordsWrapper)
+    return this.ascii_.getUnitsText([new Compiler().getPartUnit(this.songcheat, part)], maxConsecutiveSpaces, split, showDots, chordsWrapper)[0]
   }
 }
