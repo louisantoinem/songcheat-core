@@ -119,12 +119,14 @@ class Compiler_ {
 
     // first lyrics group might start with < or >
     let group = unit.lyricsGroups.groups[0]
-    if (group.text.match(/^</)) {
-      group.leftArrow = true
-      group.text = group.text.replace(/^</, '')
-    } else if (group.text.match(/^>/)) {
-      group.rightArrow = true
-      group.text = group.text.replace(/^>/, '')
+    if (group) {
+      if (group.text.match(/^</)) {
+        group.leftArrow = true
+        group.text = group.text.replace(/^</, '')
+      } else if (group.text.match(/^>/)) {
+        group.rightArrow = true
+        group.text = group.text.replace(/^>/, '')
+      }
     }
 
     // on each lyrics group
