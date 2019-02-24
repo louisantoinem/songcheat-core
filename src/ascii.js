@@ -44,7 +44,7 @@ class Ascii_ {
           let splitPosition = [...unitText.replace(/\n?([^\n]*)$/, '').replace(/\n/g, '')].length
           // if there is no newline in previous unit, split position would be smaller than the last registered split position, which is not valid
           // in this case, register split position to be the same as the previous one, meaning that the whole previous unit will be sucked into this one
-          if (splitPositions.length == 0 || splitPositions[splitPositions.length - 1] < splitPosition) splitPositions.push(splitPosition)
+          if (splitPositions.length === 0 || splitPositions[splitPositions.length - 1] < splitPosition) splitPositions.push(splitPosition)
           else splitPositions.push(splitPositions[splitPositions.length - 1])
         } else splitPositions.push([...unitText.replace(/\n/g, '')].length)
       }
