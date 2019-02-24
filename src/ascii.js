@@ -39,8 +39,14 @@ class Ascii_ {
       if (unitIndex > 0) {
         let group = unit.lyricsGroups.groups[0]
         if (split === 0 && group.leftArrow) splitAtNextNewLine = true
-        else if (split === 0 && group.rightArrow) splitPositions.push([...unitText.replace(/\n?([^\n]*)$/, '').replace(/\n/g, '')].length)
-        else splitPositions.push([...unitText.replace(/\n/g, '')].length)
+        else if (split === 0 && group.rightArrow) {
+          // set split position at last newline of previous unit
+          let splitPosition = [...unitText.replace(/\n?([^\n]*)$/, '').replace(/\n/g, '')].length
+          // if there is no newline in previous unit, split position would be smaller than the last registered split position, which is not valid
+          // in this case, register split position to be the same as the previous one, meaning that the whole previous unit will be sucked into this one
+          if (splitPositions.length == 0 || splitPositions[splitPositions.length - 1] < splitPosition) splitPositions.push(splitPosition)
+          else splitPositions.push(splitPositions[splitPositions.length - 1])
+        } else splitPositions.push([...unitText.replace(/\n/g, '')].length)
       }
       unitIndex++
 
@@ -143,12 +149,16 @@ class Ascii_ {
 
     for (let char of unitText_) {
       if (splitPositions.length > nextSplitIndex && position === splitPositions[nextSplitIndex]) {
-        // interlace the two strings to get the current text
-        texts.push(Utils.interlace(chordText, unitText, null, KEEP_EMPTY_LINES))
-        // start next text
-        unitText = ''
-        chordText = ''
-        nextSplitIndex++
+        // use a while in case we have several identical split positions in a row
+        // this can happen when a ">" caused the whole previous unit to be sucked in
+        while (splitPositions.length > nextSplitIndex && position === splitPositions[nextSplitIndex]) {
+          // interlace the two strings to get the current text
+          texts.push(Utils.interlace(chordText, unitText, null, KEEP_EMPTY_LINES))
+          // start next text
+          unitText = ''
+          chordText = ''
+          nextSplitIndex++
+        }
       } else if (char === '\n') {
         unitText += '\n'
         chordText += '\n'
