@@ -25,6 +25,9 @@ export class Player {
     this.loop = config.loop || false
     this.onDone = config.onDone || null
     this.onNote = config.onNote || function () {}
+    this.onPlay = config.onPlay || function () {}
+    this.onPause = config.onPause || function () {}
+    this.onStop = config.onStop || function () {}
     this.onCountdown = config.onCountdown || function () {}
 
     // config: fretboard, tempo, shuffle
@@ -275,6 +278,7 @@ export class Player {
     console.log('Player stopped at ' + new Date())
     this.stopped = true
     this.paused = false
+    this.onStop()
     if (this.cd) {
       clearTimeout(this.cd)
       this.onCountdown()
@@ -284,6 +288,7 @@ export class Player {
   pause () {
     this.stopped = false
     this.paused = true
+    this.onPause(false)
     if (this.cd) {
       clearTimeout(this.cd)
       this.onCountdown()
@@ -293,8 +298,9 @@ export class Player {
   play (countdown) {
     let audioCtx = this.audioCtx
     let self = this
+    let wasPaused = this.paused
 
-    if (!this.paused) this.noteIndex = 0
+    if (!wasPaused) this.noteIndex = 0
     this.stopped = false
     this.paused = false
 
@@ -302,6 +308,8 @@ export class Player {
     if (countdown) this.cd = setTimeout(function () { self.play(countdown - 1) }, 1000)
     else {
       console.log('Player started or resumed at ' + new Date())
+      if (wasPaused) this.onPause(true)
+      else this.onPlay()
       this.note_(audioCtx.currentTime)
     }
   }

@@ -23,6 +23,7 @@ class Compiler_ {
 
     // default values for optional properties
     songcheat.mode = songcheat.mode || 'nt'
+    songcheat.offset = songcheat.offset || 0
 
     // default values for signature fields
     songcheat.signature = songcheat.signature || {}
