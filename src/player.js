@@ -252,7 +252,9 @@ export class Player {
     let fIndex = 0
     let delay = 0
     for (let frequency of freqs) {
-      let soundduration = mutes[fIndex] || palmMuted ? beepduration : noteduration - delay
+      let soundduration = noteduration - delay
+      if (mutes[fIndex]) soundduration = beepduration
+      else if (palmMuted) soundduration *= 0.66
 
       // handle next node when last note has done playing
       this.sound(time + delay / 1000.0, soundduration / 1000.0, frequency, mutes[fIndex] ? volume * 2 : volume, distortion, type, fIndex < freqs.length - 1 ? null : function () {
