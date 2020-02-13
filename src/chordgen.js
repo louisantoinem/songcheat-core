@@ -33,7 +33,7 @@ export class ChordGen {
       let name = chord.inline ? ' ' : (chord.name ? chord.name.replace(/#/g, '♯').replace(/b([^b]*)$/, '♭$1') : chord.tablature)
 
       // convert width to a size between 1 and 10
-      let size = Math.max(10, Math.ceil((chordWidth || 450) / 50))
+      let size = Math.min(10, Math.ceil((chordWidth || 450) / 50))
 
       // build final url
       return 'http://chordgenerator.net/' + name + '.png?p=' + positions + '&f=' + fingering + '&s=' + size
