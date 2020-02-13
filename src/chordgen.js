@@ -16,7 +16,7 @@ export class ChordGen {
 
       // convert fingering: remove barred fret and change 0 into -
       let fingering = chord.fingering.split('/')
-      fingering = fingering[0].replace(/0/g, '-')
+      fingering = fingering[0].replace(/0/g, '-').replace(/P/g, 'T')
 
       // get tablature of numerical fret positions ("0" and "x" kept as is)
       let positions = ''
