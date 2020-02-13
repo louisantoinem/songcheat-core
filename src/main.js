@@ -9,6 +9,7 @@ import { Mode } from './mode'
 import { Scale } from './scale'
 import { Chord, ChordException } from './chord'
 import { ChordPix, ChordPixException } from './chordpix'
+import { ChordGen, ChordGenException } from './chordgen'
 import { Note } from './note'
 import { Score } from './score'
 import { ScoreParser } from './score_parser'
@@ -31,6 +32,7 @@ export {
   Mode, Scale,
   Chord, ChordException,
   ChordPix, ChordPixException,
+  ChordGen, ChordGenException,
   Note, Score, ScoreParser, Rhythm,
   Group, GroupList, GroupParser,
   Tokenizer, TokenizerException,
