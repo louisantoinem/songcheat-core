@@ -10,7 +10,6 @@ export class ChordGenException extends Error {
 }
 
 export class ChordGen {
-
   static url (chord, chordWidth) {
     try {
       if (!(chord instanceof Chord)) throw new Error(`ChordGen.url: chord must be of type Chord (got ${typeof chord})`)
@@ -42,5 +41,4 @@ export class ChordGen {
       throw new ChordGenException('[Chord ' + (chord.name || JSON.stringify(chord)) + '] ' + e.message)
     }
   }
-
 }
