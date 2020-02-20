@@ -93,10 +93,13 @@ export class Rhythm {
 
     // search for chord by its name (if several, use last one)
     let chordNames = []
+    let foundChord = null
     for (let chord of chords) {
-      if (chord.name.trim() === chordName) return chord
+      if (chord.name.trim() === chordName) foundChord = chord
       chordNames.push(chord.name)
     }
+
+    if (foundChord) return foundChord
 
     // if no chord found with this name but this is a valid chord tablature (with an optional barred fret /[-0-9A-Z])
     if (chordName.match(/^[x0-9A-Z]{6}(\/[-0-9A-Z])?$/)) {
