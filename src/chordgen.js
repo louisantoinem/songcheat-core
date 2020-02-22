@@ -22,7 +22,7 @@ export class ChordGen {
       let positions = ''
       for (let char of chord.tablature) {
         let position = char === 'x' ? char : Chord.char2fret(char)
-        if (positions.length == 0) positions += position
+        if (positions.length === 0) positions += position
         else positions += '-' + position
       }
 
