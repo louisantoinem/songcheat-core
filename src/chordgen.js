@@ -21,12 +21,9 @@ export class ChordGen {
       // get tablature of numerical fret positions ("0" and "x" kept as is)
       let positions = ''
       for (let char of chord.tablature) {
-        if (char === 'x' || char === '0') positions += char
-        else {
-          let position = Chord.char2fret(char)
-          if (position >= 10 && positions.length > 0) positions = '-' + position
-          else positions += position
-        }
+        let position = char === 'x' ? char : Chord.char2fret(char)
+        if (positions.length == 0) positions += position
+        else positions += '-' + position
       }
 
       // use nice ♯ and ♭ in diagram (replace only last occurence for the b)
