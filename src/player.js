@@ -334,12 +334,16 @@ export class Player {
     recfun()
   }
 
+  duration () {
+    return Math.round(this.length.beats() * this.time.beat.units * this.msPerUnit / 1000.0)
+  }
+
   minutes () {
-    return Math.floor(((this.length.beats() * this.time.beat.units * this.msPerUnit) / 1000.0) / 60)
+    return Math.floor(this.duration() / 60)
   }
 
   seconds () {
-    return Math.round(((this.length.beats() * this.time.beat.units * this.msPerUnit) / 1000.0) % 60)
+    return Math.round(this.duration() % 60)
   }
 
   getTempo () {
