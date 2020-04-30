@@ -266,8 +266,8 @@ export class Player {
       })
 
       // simulate the fact that strings hit first will sound first (but they'll all stop at the same time, hence substrating delay from noteduration above)
-      // when a chord is arpeggiated, take 3/4 of available duration to hit strings the one after the other
-      delay += (isArpeggiated ? (noteduration * 0.75) / freqs.length : (note.tied ? 0 : 10))
+      // when a chord is arpeggiated, take 3/4 of available duration (limited to one beat) to hit strings the one after the other
+      delay += (isArpeggiated ? Math.min(this.time.beat.units * this.msPerUnit, noteduration) * 0.75 / freqs.length : (note.tied ? 0 : 10))
 
       // simulate the fact that first hit strings will sound louder
       volume *= 0.95
