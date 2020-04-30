@@ -33,7 +33,7 @@ export class ChordGen {
       let size = Math.min(10, Math.ceil((chordWidth || 450) / 50))
 
       // build final url
-      return 'http://chordgenerator.net/' + name + '.png?p=' + positions + '&f=' + fingering + '&s=' + size
+      return 'https://chordgenerator.net/' + name + '.png?p=' + positions + '&f=' + fingering + '&s=' + size
     } catch (e) {
       throw new ChordGenException('[Chord ' + (chord.name || JSON.stringify(chord)) + '] ' + e.message)
     }
