@@ -61,8 +61,8 @@ export class Scale {
 
   // Return chord for degree
   chord (degree) {
-    if (!this.mode.chords) throw new Error(`Associated mode was not created with the 'chords' parameter`)
-    return this.notes[degree - 1] + this.mode.chords[degree - 1]
+    if (!this.mode.chordQualities) throw new Error(`Associated mode was not created with the 'chordQualities' parameter`)
+    return this.notes[degree - 1] + this.mode.chordQualities[degree - 1]
   }
 
   // Compute a chord progression
