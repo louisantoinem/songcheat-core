@@ -5,8 +5,6 @@ import { Interval } from './interval'
 import { Pitch } from './pitch'
 import { Tuning } from './tuning'
 import { Fretboard } from './fretboard'
-import { Mode } from './mode'
-import { Scale } from './scale'
 import { Chord, ChordException } from './chord'
 import { ChordPix, ChordPixException } from './chordpix'
 import { ChordGen, ChordGenException } from './chordgen'
@@ -29,7 +27,6 @@ export {
   Utils,
   Duration, Time, Interval,
   Pitch, Tuning, Fretboard,
-  Mode, Scale,
   Chord, ChordException,
   ChordPix, ChordPixException,
   ChordGen, ChordGenException,
